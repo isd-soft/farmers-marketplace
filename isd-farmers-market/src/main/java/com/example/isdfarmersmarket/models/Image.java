@@ -25,7 +25,7 @@ public class Image {
 
     private String fileType;
     @Lob
-    @Column(name = "bytes", columnDefinition = "longblob")
+    @Column(name = "bytes")
     private byte[] bytes;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
