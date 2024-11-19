@@ -43,7 +43,6 @@
     <!-- Register Form -->
     <form v-if="!isLogin" @submit.prevent="handleRegisterSubmit">
       <div class="form-group">
-        <div class="form-group">
         <label>Register as: </label>
         <label>
           <input
@@ -63,6 +62,7 @@
           Farmer
         </label>
       </div>
+      <div class="form-group">
         <label for="register-username">Username</label>
         <input
           type="text"
@@ -74,7 +74,6 @@
         />
         <span v-if="errors.username" class="error">{{ errors.username }}</span>
       </div>
-
       <div class="form-group">
         <label for="register-password">Password</label>
         <input
@@ -85,21 +84,38 @@
           placeholder="Enter your password"
           required
         />
-        <span v-if="errors.password" class="error">{{ errors.password }}</span>
       </div>
-
       <div class="form-group">
-        <label for="register-confirm-password">Confirm Password</label>
+        <label for="register-firstname">First name</label>
         <input
-          type="password"
-          id="register-confirm-password"
-          v-model="confirmPassword"
-          :class="{'is-invalid': errors.confirmPassword}"
-          placeholder="Confirm your password"
+          type="text"
+          id="register-firstname"
+          v-model="firstName"
+          placeholder="Enter your first name"
           required
         />
-        <span v-if="errors.confirmPassword" class="error">{{ errors.confirmPassword }}</span>
       </div>
+      <div class="form-group">
+        <label for="register-lastname">Last name</label>
+        <input
+          type="text"
+          id="register-lastname"
+          v-model="lastName"
+          placeholder="Enter your last name"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="register-phone">Phone nr.</label>
+        <input
+          type="text"
+          id="register-phone"
+          v-model="phoneNumber"
+          placeholder="Enter your phone nr."
+          required
+        />
+      </div>
+
 
       <!-- Address field visible only if farmer is selected -->
       <div v-if="userType === 'farmer'" class="form-group">
@@ -130,8 +146,10 @@ export default {
   setup() {
     const username = ref("");
     const password = ref("");
-    const confirmPassword = ref("");
     const userType = ref("buyer");
+    const firstName = ref("");
+    const lastName = ref("");
+    const phoneNumber = ref("");
     const address = ref("");
     const errors = ref({
       username: "",
@@ -170,7 +188,12 @@ export default {
     };
 
     const validateRegisterForm = () => {
-      errors.value = { username: "", password: "", confirmPassword: "", address: "" };
+      errors.value = {
+        username: "",
+        password: "",
+        confirmPassword: "",
+        address: "",
+      };
       let isValid = true;
 
       if (!username.value) {
@@ -183,8 +206,18 @@ export default {
         isValid = false;
       }
 
-      if (password.value !== confirmPassword.value) {
-        errors.value.confirmPassword = "Passwords do not match";
+      if (!firstName.value) {
+        errors.value.firstName = "First name is required";
+        isValid = false;
+      }
+
+      if (!lastName.value) {
+        errors.value.lastName = "Last name is required";
+        isValid = false;
+      }
+
+      if (!phoneNumber.value) {
+        errors.value.phoneNumber = "Phone number is required";
         isValid = false;
       }
 
@@ -217,7 +250,6 @@ export default {
         loading.value = false;
       }
     };
-
     const handleRegisterSubmit = async () => {
       if (!validateRegisterForm()) return;
 
@@ -226,12 +258,18 @@ export default {
         const response = await axiosInstance.post("/auth/register", {
           username: username.value,
           password: password.value,
-          userType: userType.value,
+          firstName: firstName.value,
+          lastName: lastName.value,
+          phoneNumber: phoneNumber.value,
           address: userType.value === "farmer" ? address.value : null,
+          userType: userType.value,
         });
-        console.log(response);
-        alert("Registration successful");
+
+        console.log("Registration successful:", response.data);
+        alert("Registration successful! Please log in.");
+        showLoginForm(); // Switch back to the login form after successful registration
       } catch (error) {
+        console.error("Registration error:", error.response?.data || error.message);
         alert("Registration failed: " + (error.response?.data?.message || error.message));
       } finally {
         loading.value = false;
@@ -241,7 +279,9 @@ export default {
     return {
       username,
       password,
-      confirmPassword,
+      firstName,
+      lastName,
+      phoneNumber,
       userType,
       address,
       errors,
