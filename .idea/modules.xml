@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/farmers-marketplace.iml" filepath="$PROJECT_DIR$/.idea/farmers-marketplace.iml" />
+      <module fileurl="file://$PROJECT_DIR$/isd-farmers-market/isd-farmers-market.iml" filepath="$PROJECT_DIR$/isd-farmers-market/isd-farmers-market.iml" />
+    </modules>
+  </component>
+</project>
