@@ -1,4 +1,5 @@
 <template>
+  <img src="@/assets/farm.png" width="300px" height="300px">
   <div class="login-container">
     <div class="form-toggle">
       <button @click="showLoginForm" :class="{ active: isLogin }">Login</button>
