@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -42,8 +43,11 @@ public class Product {
     private float rating;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ProductReview> reviews = new HashSet<>();
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<Image> images = new HashSet<>();
 
-
+    @Column(name="created_date", columnDefinition = "TimeStamp")
+    private LocalDateTime createdDate = LocalDateTime.now();
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

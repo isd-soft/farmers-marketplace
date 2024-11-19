@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -27,7 +28,8 @@ public class FarmerReview {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "farmer_id")
     private User farmer;
-
+    @Column(name="created_date", columnDefinition = "TimeStamp")
+    private LocalDateTime createdDate = LocalDateTime.now();
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

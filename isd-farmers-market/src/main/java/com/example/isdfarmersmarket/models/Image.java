@@ -25,7 +25,11 @@ public class Image {
 
     private String fileType;
     @Lob
+    @Column(name = "bytes", columnDefinition = "longblob")
     private byte[] bytes;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
 
     @Override
     public boolean equals(Object o) {

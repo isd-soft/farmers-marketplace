@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.dialect.function.PostgreSQLTruncRoundFunction;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -29,7 +30,8 @@ public class ProductReview {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
-
+    @Column(name="created_date", columnDefinition = "TimeStamp")
+    private LocalDateTime createdDate = LocalDateTime.now();
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
