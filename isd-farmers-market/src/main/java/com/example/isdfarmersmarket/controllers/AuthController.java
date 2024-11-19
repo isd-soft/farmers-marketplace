@@ -5,14 +5,12 @@ import com.example.isdfarmersmarket.DTOs.LoginRequestDTO;
 import com.example.isdfarmersmarket.models.User;
 import com.example.isdfarmersmarket.services.AuthService;
 import com.example.isdfarmersmarket.services.JwtService;
-import com.example.isdfarmersmarket.services.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -22,7 +20,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/auth")
 public class AuthController {
-    private final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final AuthService authService;
     private final JwtService jwtService;
 
@@ -66,5 +63,14 @@ public class AuthController {
         response.put("accessToken", newAccessToken);
         return ResponseEntity.ok(response);
     }
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+            String refreshToken = jwtService.extractTokenFromHeader(authorizationHeader);
+            authService.deleteRefreshToken(refreshToken);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "User logged out successfully");
+            return ResponseEntity.ok(response);
+    }
+
 
 }

@@ -28,7 +28,12 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(username, password));
         return (User) authentication.getPrincipal();
     }
-
+    public void deleteRefreshToken(String refreshToken) {
+        String email = jwtService.extractUsername(refreshToken);
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new RuntimeException("User not found"));
+        tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
+    }
     public void registerUser(CustomerRegisterRequestDTO registerRequestDTO) {
         if (userRepository.existsByEmail(registerRequestDTO.email())) {
             throw new RuntimeException("Email already in use");
