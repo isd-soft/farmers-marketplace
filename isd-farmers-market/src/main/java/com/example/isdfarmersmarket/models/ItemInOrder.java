@@ -34,7 +34,7 @@ public class ItemInOrder {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof User)) return false;
+        if (!(o instanceof ItemInOrder)) return false;
         ItemInOrder product = (ItemInOrder) o;
         return Objects.equals(getId(), product.getId());
     }

@@ -30,7 +30,7 @@ public class ItemInCart {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof User)) return false;
+        if (!(o instanceof ItemInCart)) return false;
         ItemInCart product = (ItemInCart) o;
         return Objects.equals(getId(), product.getId());
     }

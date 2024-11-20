@@ -35,7 +35,7 @@ public class Order {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof User)) return false;
+        if (!(o instanceof Order)) return false;
         Order order = (Order) o;
         return Objects.equals(getId(), order.getId());
     }
