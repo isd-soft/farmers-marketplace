@@ -1,9 +1,8 @@
 package com.example.isdfarmersmarket.controllers;
 
-import com.example.isdfarmersmarket.DTOs.CustomerRegisterRequestDTO;
 import com.example.isdfarmersmarket.DTOs.CustomerUpgradeDTO;
-import com.example.isdfarmersmarket.DTOs.FarmerRegisterRequestDTO;
 import com.example.isdfarmersmarket.DTOs.LoginRequestDTO;
+import com.example.isdfarmersmarket.DTOs.UserRegisterRequestDTO;
 import com.example.isdfarmersmarket.models.User;
 import com.example.isdfarmersmarket.services.AuthService;
 import com.example.isdfarmersmarket.services.JwtService;
@@ -25,8 +24,8 @@ public class AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
 
-    @PostMapping("/customer/register")
-    public ResponseEntity<Map<String, String>> customerRegister(@RequestBody CustomerRegisterRequestDTO registerRequestDTO) {
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, String>> userRegister(@RequestBody UserRegisterRequestDTO registerRequestDTO) {
         authService.registerUser(registerRequestDTO);
 
         Map<String, String> response = new HashMap<>();
@@ -34,15 +33,7 @@ public class AuthController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-    @PostMapping("/farmer/register")
-    public ResponseEntity<Map<String, String>> farmerRegister(@RequestBody FarmerRegisterRequestDTO registerRequestDTO) {
-        authService.registerUser(registerRequestDTO);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "User registered successfully");
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/customer/upgrade")
     public ResponseEntity<Map<String, String>> upgradeCustomer(@RequestBody CustomerUpgradeDTO customerUpgradeDTO,
