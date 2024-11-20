@@ -9,16 +9,16 @@
     <!-- Login Form -->
     <form v-if="isLogin" @submit.prevent="handleLoginSubmit">
       <div class="form-group">
-        <label for="username">Username</label>
+        <label for="email">Email</label>
         <input
           type="text"
-          id="username"
-          v-model="username"
-          :class="{'is-invalid': errors.username}"
-          placeholder="Enter your username"
+          id="email"
+          v-model="email"
+          :class="{'is-invalid': errors.email}"
+          placeholder="Enter your email"
           required
         />
-        <span v-if="errors.username" class="error">{{ errors.username }}</span>
+        <span v-if="errors.email" class="error">{{ errors.email }}</span>
       </div>
 
       <div class="form-group">
@@ -63,16 +63,16 @@
         </label>
       </div>
       <div class="form-group">
-        <label for="register-username">Username</label>
+        <label for="register-email">Email</label>
         <input
           type="text"
-          id="register-username"
-          v-model="username"
-          :class="{'is-invalid': errors.username}"
-          placeholder="Enter your username"
+          id="register-email"
+          v-model="email"
+          :class="{'is-invalid': errors.email}"
+          placeholder="Enter your email"
           required
         />
-        <span v-if="errors.username" class="error">{{ errors.username }}</span>
+        <span v-if="errors.email" class="error">{{ errors.email }}</span>
       </div>
       <div class="form-group">
         <label for="register-password">Password</label>
@@ -139,12 +139,13 @@
 </template>
 <script>
 import { ref } from "vue";
+import { useRouter} from "vue-router";
 import axiosInstance from "@/utils/axiosInstance";
 
 export default {
   name: "LoginPage",
   setup() {
-    const username = ref("");
+    const email = ref("");
     const password = ref("");
     const userType = ref("buyer");
     const firstName = ref("");
@@ -152,30 +153,31 @@ export default {
     const phoneNumber = ref("");
     const address = ref("");
     const errors = ref({
-      username: "",
+      email: "",
       password: "",
       confirmPassword: "",
       address: "",
     });
     const loading = ref(false);
     const isLogin = ref(true);
+    const router = useRouter();
 
     const showLoginForm = () => {
       isLogin.value = true;
-      errors.value = { username: "", password: "", confirmPassword: "" };
+      errors.value = { email: "", password: "", confirmPassword: "" };
     };
 
     const showRegisterForm = () => {
       isLogin.value = false;
-      errors.value = { username: "", password: "", confirmPassword: "" };
+      errors.value = { email: "", password: "", confirmPassword: "" };
     };
 
     const validateLoginForm = () => {
-      errors.value = { username: "", password: "" };
+      errors.value = { email: "", password: "" };
       let isValid = true;
 
-      if (!username.value) {
-        errors.value.username = "Username is required";
+      if (!email.value) {
+        errors.value.email = "email is required";
         isValid = false;
       }
 
@@ -189,15 +191,15 @@ export default {
 
     const validateRegisterForm = () => {
       errors.value = {
-        username: "",
+        email: "",
         password: "",
         confirmPassword: "",
         address: "",
       };
       let isValid = true;
 
-      if (!username.value) {
-        errors.value.username = "Username is required";
+      if (!email.value) {
+        errors.value.email = "email is required";
         isValid = false;
       }
 
@@ -238,7 +240,7 @@ export default {
       loading.value = true;
       try {
         const response = await axiosInstance.post("/auth/login", {
-          username: username.value,
+          email: email.value,
           password: password.value,
         });
 
@@ -249,6 +251,7 @@ export default {
         console.log("Access Token:", localStorage.getItem("accessToken"));
         console.log("Refresh Token:", localStorage.getItem("refreshToken"));
         alert("Login successful");
+        router.push("/");
       } catch (error) {
         console.error("Login error:", error.response?.data || error.message);
         alert("Login failed: " + (error.response?.data?.message || error.message));
@@ -262,8 +265,8 @@ export default {
 
       loading.value = true;
       try {
-        const response = await axiosInstance.post("/auth/register", {
-          email: username.value,
+        const response = await axiosInstance.post("/auth/customer/register", {
+          email: email.value,
           password: password.value,
           firstName: firstName.value,
           lastName: lastName.value,
@@ -284,7 +287,7 @@ export default {
     };
 
     return {
-      username,
+      email,
       password,
       firstName,
       lastName,
