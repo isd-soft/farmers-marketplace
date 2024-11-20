@@ -1,16 +1,18 @@
 package com.example.isdfarmersmarket.controllers;
 
 import com.example.isdfarmersmarket.DTOs.CustomerRegisterRequestDTO;
+import com.example.isdfarmersmarket.DTOs.CustomerUpgradeDTO;
+import com.example.isdfarmersmarket.DTOs.FarmerRegisterRequestDTO;
 import com.example.isdfarmersmarket.DTOs.LoginRequestDTO;
 import com.example.isdfarmersmarket.models.User;
 import com.example.isdfarmersmarket.services.AuthService;
 import com.example.isdfarmersmarket.services.JwtService;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -23,16 +25,8 @@ public class AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
 
-
-
-    /**
-     * Endpoint for registering a new user.
-     *
-     * @param registerRequestDTO The registration request containing username and password.
-     * @return A response with a success message.
-     */
-    @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@RequestBody CustomerRegisterRequestDTO registerRequestDTO) {
+    @PostMapping("/customer/register")
+    public ResponseEntity<Map<String, String>> customerRegister(@RequestBody CustomerRegisterRequestDTO registerRequestDTO) {
         authService.registerUser(registerRequestDTO);
 
         Map<String, String> response = new HashMap<>();
@@ -40,7 +34,26 @@ public class AuthController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+    @PostMapping("/farmer/register")
+    public ResponseEntity<Map<String, String>> farmerRegister(@RequestBody FarmerRegisterRequestDTO registerRequestDTO) {
+        authService.registerUser(registerRequestDTO);
 
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "User registered successfully");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @PostMapping("/customer/upgrade")
+    public ResponseEntity<Map<String, String>> upgradeCustomer(@RequestBody CustomerUpgradeDTO customerUpgradeDTO,
+    Authentication authentication) {
+        authService.upgradeUser(authentication.getName(), customerUpgradeDTO);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Customer upgraded successfully");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequestDTO loginRequestDTO) {
