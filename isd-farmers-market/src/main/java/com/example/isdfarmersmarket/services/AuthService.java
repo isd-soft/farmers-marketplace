@@ -1,6 +1,7 @@
 package com.example.isdfarmersmarket.services;
 
-import com.example.isdfarmersmarket.DTOs.CustomerRegisterRequestDTO;
+import com.example.isdfarmersmarket.DTOs.CustomerUpgradeDTO;
+import com.example.isdfarmersmarket.DTOs.UserRegisterRequestDTO;
 import com.example.isdfarmersmarket.enums.Role;
 import com.example.isdfarmersmarket.models.RefreshToken;
 import com.example.isdfarmersmarket.models.User;
@@ -28,22 +29,40 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(username, password));
         return (User) authentication.getPrincipal();
     }
-
-    public void registerUser(CustomerRegisterRequestDTO registerRequestDTO) {
+    public void upgradeUser(String email, CustomerUpgradeDTO customerUpgradeDTO) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new RuntimeException("User not found."));
+        user.setRole(Role.FARMER);
+        user.setAddress(customerUpgradeDTO.address());
+        user.setDescription(customerUpgradeDTO.description());
+        userRepository.save(user);
+    }
+    public void deleteRefreshToken(String refreshToken) {
+        String email = jwtService.extractUsername(refreshToken);
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new RuntimeException("User not found"));
+        tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
+    }
+    public void registerUser(UserRegisterRequestDTO registerRequestDTO) {
         if (userRepository.existsByEmail(registerRequestDTO.email())) {
             throw new RuntimeException("Email already in use");
         }
 
         String encodedPassword = passwordEncoder.encode(registerRequestDTO.password());
-
         User newUser = new User();
         newUser.setEmail(registerRequestDTO.email());
         newUser.setFirstName(registerRequestDTO.firstName());
         newUser.setLastName(registerRequestDTO.lastName());
         newUser.setPhoneNumber(registerRequestDTO.phoneNumber());
         newUser.setPassword(encodedPassword);
-        newUser.setRole(Role.CUSTOMER);
-
+        if (registerRequestDTO.roleType().equals(Role.FARMER)) {
+            newUser.setRole(Role.FARMER);
+            newUser.setAddress(registerRequestDTO.address());
+            newUser.setDescription(registerRequestDTO.description());
+        }
+        else{
+            newUser.setRole(Role.CUSTOMER);
+        }
         userRepository.save(newUser);
     }
 

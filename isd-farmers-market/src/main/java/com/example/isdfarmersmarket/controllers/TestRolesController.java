@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestRolesController {
     private final Logger logger = LoggerFactory.getLogger(TestRolesController.class);
 
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('FARMER')")
     @GetMapping("/customer")
     public String testCustomer(Authentication authentication) {
         String username = authentication.getName();
@@ -33,11 +33,15 @@ public class TestRolesController {
     }
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin")
-    public String testAdmin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String testAdmin(Authentication authentication) {
         String username = authentication.getName();
-        logger.info("Admin username: {}", username);
-        return "ADMIN SUCCESS";
+        logger.info("Authenticated username: {}", username);
+
+        authentication.getAuthorities().forEach(authority ->
+                logger.info("Role: {}", authority.getAuthority())
+        );
+
+        return "SUCCESS";
     }
     @PreAuthorize("hasRole('FARMER')")
     @GetMapping("/farmer")
