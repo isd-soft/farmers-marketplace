@@ -1,4 +1,10 @@
 package com.example.isdfarmersmarket.DTOs;
 
-public record CustomerRegisterRequestDTO(String email, String password, String firstName, String lastName, String phoneNumber) {
+import com.example.isdfarmersmarket.DTOs.abstractions.UserRegisterRequestDTO;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class CustomerRegisterRequestDTO extends UserRegisterRequestDTO {
 }

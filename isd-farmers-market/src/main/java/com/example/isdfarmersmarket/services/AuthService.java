@@ -1,6 +1,8 @@
 package com.example.isdfarmersmarket.services;
 
-import com.example.isdfarmersmarket.DTOs.CustomerRegisterRequestDTO;
+import com.example.isdfarmersmarket.DTOs.CustomerUpgradeDTO;
+import com.example.isdfarmersmarket.DTOs.FarmerRegisterRequestDTO;
+import com.example.isdfarmersmarket.DTOs.abstractions.UserRegisterRequestDTO;
 import com.example.isdfarmersmarket.enums.Role;
 import com.example.isdfarmersmarket.models.RefreshToken;
 import com.example.isdfarmersmarket.models.User;
@@ -22,28 +24,48 @@ public class AuthService {
     private final RefreshTokenRepository tokenRepository;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
     public User authenticate(String username, String password) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password));
         return (User) authentication.getPrincipal();
     }
-
-    public void registerUser(CustomerRegisterRequestDTO registerRequestDTO) {
-        if (userRepository.existsByEmail(registerRequestDTO.email())) {
+    public void upgradeUser(String email, CustomerUpgradeDTO customerUpgradeDTO) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new RuntimeException("User not found."));
+        user.setRole(Role.FARMER);
+        user.setAddress(customerUpgradeDTO.address());
+        user.setDescription(customerUpgradeDTO.description());
+        userRepository.save(user);
+    }
+    public void deleteRefreshToken(String refreshToken) {
+        String email = jwtService.extractUsername(refreshToken);
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new RuntimeException("User not found"));
+        tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
+    }
+    public void registerUser(UserRegisterRequestDTO registerRequestDTO) {
+        if (userRepository.existsByEmail(registerRequestDTO.getEmail())) {
             throw new RuntimeException("Email already in use");
         }
 
-        String encodedPassword = passwordEncoder.encode(registerRequestDTO.password());
+        String encodedPassword = passwordEncoder.encode(registerRequestDTO.getPassword());
 
         User newUser = new User();
-        newUser.setEmail(registerRequestDTO.email());
-        newUser.setFirstName(registerRequestDTO.firstName());
-        newUser.setLastName(registerRequestDTO.lastName());
-        newUser.setPhoneNumber(registerRequestDTO.phoneNumber());
+        newUser.setEmail(registerRequestDTO.getEmail());
+        newUser.setFirstName(registerRequestDTO.getFirstName());
+        newUser.setLastName(registerRequestDTO.getLastName());
+        newUser.setPhoneNumber(registerRequestDTO.getPhoneNumber());
         newUser.setPassword(encodedPassword);
-        newUser.setRole(Role.CUSTOMER);
-
+        if (registerRequestDTO instanceof FarmerRegisterRequestDTO farmerDTO) {
+            newUser.setRole(Role.FARMER);
+            newUser.setAddress(farmerDTO.getAddress());
+            newUser.setDescription(farmerDTO.getDescription());
+        }
+        else{
+            newUser.setRole(Role.CUSTOMER);
+        }
         userRepository.save(newUser);
     }
 
