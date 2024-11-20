@@ -5,14 +5,12 @@ import com.example.isdfarmersmarket.DTOs.LoginRequestDTO;
 import com.example.isdfarmersmarket.models.User;
 import com.example.isdfarmersmarket.services.AuthService;
 import com.example.isdfarmersmarket.services.JwtService;
-import com.example.isdfarmersmarket.services.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;

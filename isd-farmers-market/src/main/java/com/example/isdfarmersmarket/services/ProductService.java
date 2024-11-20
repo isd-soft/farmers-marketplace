@@ -1,7 +1,7 @@
-package com.example.isdfarmersmarket.service;
+package com.example.isdfarmersmarket.services;
 
 import com.example.isdfarmersmarket.models.*;
-import com.example.isdfarmersmarket.repository.ProductRepository;
+import com.example.isdfarmersmarket.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
