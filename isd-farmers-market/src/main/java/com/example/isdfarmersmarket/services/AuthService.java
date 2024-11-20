@@ -44,9 +44,6 @@ public class AuthService {
         tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
     }
     public void registerUser(UserRegisterRequestDTO registerRequestDTO) {
-        if(!registerRequestDTO.password().equals(registerRequestDTO.passwordConfirmation())) {
-            throw new RuntimeException("Passwords do not match");
-        }
         if (userRepository.existsByEmail(registerRequestDTO.email())) {
             throw new RuntimeException("Email already in use");
         }
