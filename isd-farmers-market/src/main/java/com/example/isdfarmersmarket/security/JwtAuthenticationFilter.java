@@ -2,54 +2,57 @@ package com.example.isdfarmersmarket.security;
 
 
 import com.example.isdfarmersmarket.services.JwtService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+@AllArgsConstructor
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
+    private final ObjectMapper mapper;
     private final JwtService jwtService;
     private final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
-        this.jwtService = jwtService;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        logger.info("Starting JWT authentication filter");
-
+        try{
         final String authHeader = request.getHeader("Authorization");
-        logger.info("NO AUTHENTICATION BEARER PRESENT ABORT");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         final String token = authHeader.substring(7);
-        if (!jwtService.validateToken(token)) {
-            logger.warn("INVALID JWT TOKEN");
-            filterChain.doFilter(request, response);
-            return;
-        }
+        jwtService.validateToken(token);
 
         final String username = jwtService.extractUsername(token);
         final String role = jwtService.extractRole(token);
 
         if (role == null) {
-            logger.info("REFRESH TOKEN DETECTED. ABORTING JWT FILTER");
             filterChain.doFilter(request, response);
             return;
         }
@@ -62,7 +65,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
-        logger.info("Authentication is Set");
         filterChain.doFilter(request, response);
     }
+        catch (ExpiredJwtException ex) {
+            sendErrorResponse(response, "JWT token has expired");
+
+        } catch (UnsupportedJwtException ex) {
+            sendErrorResponse(response, "JWT token is unsupported");
+
+        } catch (MalformedJwtException ex) {
+            sendErrorResponse(response, "JWT token is malformed");
+
+        } catch (SignatureException ex) {
+            sendErrorResponse(response, "JWT token signature validation failed");
+
+        } catch (IllegalArgumentException ex) {
+            sendErrorResponse(response, "Illegal argument during JWT processing");
+        } catch (Exception ex) {
+            sendErrorResponse(response, "An unexpected error occurred during JWT validation");
+        }
+
+    }
+    private void sendErrorResponse(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType("application/json");
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, message);
+
+        response.getWriter().write(mapper.writeValueAsString(problemDetail));
+    }
+
 }

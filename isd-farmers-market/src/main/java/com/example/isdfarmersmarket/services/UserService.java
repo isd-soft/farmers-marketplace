@@ -21,7 +21,6 @@ public class UserService implements UserDetailsService {
     public boolean existsByEmail(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
-
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)

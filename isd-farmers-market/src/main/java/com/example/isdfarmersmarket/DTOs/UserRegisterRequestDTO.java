@@ -8,5 +8,6 @@ public record UserRegisterRequestDTO(String email, String password,
                                      Role roleType,
                                      String address,
                                      String description
-                                     ) {
+                                     )
+{
 }

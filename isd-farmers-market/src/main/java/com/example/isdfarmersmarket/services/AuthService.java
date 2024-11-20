@@ -3,16 +3,23 @@ package com.example.isdfarmersmarket.services;
 import com.example.isdfarmersmarket.DTOs.CustomerUpgradeDTO;
 import com.example.isdfarmersmarket.DTOs.UserRegisterRequestDTO;
 import com.example.isdfarmersmarket.enums.Role;
+import com.example.isdfarmersmarket.exceptions.EmailAlreadyExistsException;
+import com.example.isdfarmersmarket.exceptions.InvalidCredentialsException;
+import com.example.isdfarmersmarket.exceptions.RefreshTokenException;
 import com.example.isdfarmersmarket.models.RefreshToken;
 import com.example.isdfarmersmarket.models.User;
 import com.example.isdfarmersmarket.repositories.RefreshTokenRepository;
 import com.example.isdfarmersmarket.repositories.UserRepository;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,28 +31,39 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional(readOnly = true )
     public User authenticate(String username, String password) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password));
-        return (User) authentication.getPrincipal();
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, password));
+            return (User) authentication.getPrincipal();
+        } catch (AuthenticationException e) {
+            throw new InvalidCredentialsException("Invalid username or password");
+        }
     }
+
+    @Transactional
     public void upgradeUser(String email, CustomerUpgradeDTO customerUpgradeDTO) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(()->new RuntimeException("User not found."));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found."));
         user.setRole(Role.FARMER);
         user.setAddress(customerUpgradeDTO.address());
         user.setDescription(customerUpgradeDTO.description());
         userRepository.save(user);
     }
+
+    @Transactional
     public void deleteRefreshToken(String refreshToken) {
         String email = jwtService.extractUsername(refreshToken);
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("User not found"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found."));
         tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
     }
+
+    @Transactional
     public void registerUser(UserRegisterRequestDTO registerRequestDTO) {
         if (userRepository.existsByEmail(registerRequestDTO.email())) {
-            throw new RuntimeException("Email already in use");
+            throw new EmailAlreadyExistsException("Email already in use");
         }
 
         String encodedPassword = passwordEncoder.encode(registerRequestDTO.password());
@@ -55,20 +73,16 @@ public class AuthService {
         newUser.setLastName(registerRequestDTO.lastName());
         newUser.setPhoneNumber(registerRequestDTO.phoneNumber());
         newUser.setPassword(encodedPassword);
-        if (registerRequestDTO.roleType().equals(Role.FARMER)) {
-            newUser.setRole(Role.FARMER);
-            newUser.setAddress(registerRequestDTO.address());
-            newUser.setDescription(registerRequestDTO.description());
-        }
-        else{
-            newUser.setRole(Role.CUSTOMER);
-        }
+        newUser.setRole(registerRequestDTO.roleType());
+        newUser.setAddress(registerRequestDTO.address());
+        newUser.setDescription(registerRequestDTO.description());
         userRepository.save(newUser);
     }
 
+    @Transactional
     public String generateRefreshToken(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("User not found"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         String refreshToken = jwtService.generateRefreshToken(email);
 
@@ -87,19 +101,24 @@ public class AuthService {
         return refreshToken;
     }
 
+    @Transactional(readOnly = true)
     public String generateAccessToken(String refreshToken) {
         String username = jwtService.extractUsername(refreshToken);
 
-        User user = userRepository.findByEmail(username).orElseThrow(
-                () -> new RuntimeException("User not found"));
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new InvalidCredentialsException("User not found"));
 
         tokenRepository.findByUser(user).stream()
                 .filter(token -> token.getToken().equals(refreshToken))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+                .orElseThrow(() -> new RefreshTokenException("Refresh token doesn't exist"));
 
-        jwtService.validateToken(refreshToken);
-
+        try {
+            jwtService.validateToken(refreshToken);
+        }
+        catch (JwtException ex) {
+            throw new RefreshTokenException("Invalid refresh token");
+        }
         return jwtService.generateAccessToken(username, user.getRole());
     }
 }
