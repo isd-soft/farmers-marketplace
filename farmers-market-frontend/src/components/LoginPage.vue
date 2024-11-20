@@ -47,16 +47,16 @@
         <label>
           <input
             type="radio"
-            value="buyer"
-            v-model="userType"
+            value="CUSTOMER"
+            v-model="roleType"
           />
-          Buyer
+          Customer
         </label>
         <label>
           <input
             type="radio"
-            value="farmer"
-            v-model="userType"
+            value="FARMER"
+            v-model="roleType"
             required
           />
           Farmer
@@ -84,6 +84,18 @@
           placeholder="Enter your password"
           required
         />
+      </div>
+      <div class="form-group">
+        <label for="register-confirm-password">Confirm Password</label>
+        <input
+          type="password"
+          id="register-confirm-password"
+          v-model="confirmPassword"
+          :class="{'is-invalid': errors.confirmPassword}"
+          placeholder="Confirm your password"
+          required
+        />
+        <span v-if="errors.confirmPassword" class="error">{{ errors.confirmPassword }}</span>
       </div>
       <div class="form-group">
         <label for="register-firstname">First name</label>
@@ -118,7 +130,7 @@
 
 
       <!-- Address field visible only if farmer is selected -->
-      <div v-if="userType === 'farmer'" class="form-group">
+      <div v-if="roleType === 'FARMER'" class="form-group">
         <label for="register-address">Address</label>
         <input
           type="text"
@@ -128,6 +140,18 @@
           placeholder="Enter your address"
         />
         <span v-if="errors.address" class="error">{{ errors.address }}</span>
+      </div>
+
+      <div v-if="roleType === 'FARMER'" class="form-group">
+        <label for="register-description">Description</label>
+        <input
+          type="text"
+          id="register-description"
+          v-model="description"
+          :class="{'is-invalid': errors.description}"
+          placeholder="Enter your description"
+        />
+        <span v-if="errors.description" class="error">{{ errors.description }}</span>
       </div>
 
       <button type="submit" :disabled="loading" class="login-btn">
@@ -147,16 +171,19 @@ export default {
   setup() {
     const email = ref("");
     const password = ref("");
-    const userType = ref("buyer");
+    const confirmPassword = ref("");
+    const roleType = ref("CUSTOMER");
     const firstName = ref("");
     const lastName = ref("");
     const phoneNumber = ref("");
     const address = ref("");
+    const description = ref("");
     const errors = ref({
       email: "",
       password: "",
       confirmPassword: "",
       address: "",
+      description: "",
     });
     const loading = ref(false);
     const isLogin = ref(true);
@@ -195,6 +222,7 @@ export default {
         password: "",
         confirmPassword: "",
         address: "",
+        description: "",
       };
       let isValid = true;
 
@@ -205,6 +233,11 @@ export default {
 
       if (!password.value) {
         errors.value.password = "Password is required";
+        isValid = false;
+      }
+
+      if (password.value !== confirmPassword.value) {
+        errors.value.confirmPassword = "Passwords do not match";
         isValid = false;
       }
 
@@ -223,8 +256,13 @@ export default {
         isValid = false;
       }
 
-      if (userType.value === "farmer" && !address.value) {
+      if (roleType.value === "farmer" && !address.value) {
         errors.value.address = "Address is required for farmers";
+        isValid = false;
+      }
+
+      if (roleType.value === "farmer" && !description.value) {
+        errors.value.description = "Description is required for farmers";
         isValid = false;
       }
 
@@ -251,7 +289,7 @@ export default {
         console.log("Access Token:", localStorage.getItem("accessToken"));
         console.log("Refresh Token:", localStorage.getItem("refreshToken"));
         alert("Login successful");
-        router.push("/");
+        router.push("/" );
       } catch (error) {
         console.error("Login error:", error.response?.data || error.message);
         alert("Login failed: " + (error.response?.data?.message || error.message));
@@ -265,14 +303,15 @@ export default {
 
       loading.value = true;
       try {
-        const response = await axiosInstance.post("/auth/customer/register", {
+        const response = await axiosInstance.post("/auth/register", {
           email: email.value,
           password: password.value,
           firstName: firstName.value,
           lastName: lastName.value,
           phoneNumber: phoneNumber.value,
-          address: userType.value === "farmer" ? address.value : null,
-          userType: userType.value,
+          address: roleType.value === "FARMER" ? address.value : null,
+          description: roleType.value === "FARMER" ? description.value : null,
+          roleType: roleType.value,
         });
 
         console.log("Registration successful:", response.data);
@@ -289,11 +328,13 @@ export default {
     return {
       email,
       password,
+      confirmPassword,
       firstName,
       lastName,
       phoneNumber,
-      userType,
+      roleType,
       address,
+      description,
       errors,
       loading,
       isLogin,
