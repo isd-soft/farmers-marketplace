@@ -230,6 +230,9 @@ export default {
     };
 
     const handleLoginSubmit = async () => {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+
       if (!validateLoginForm()) return;
 
       loading.value = true;
@@ -239,9 +242,12 @@ export default {
           password: password.value,
         });
 
-        const { token } = response.data;
-        localStorage.setItem("jwt", token);
-        console.log(token);
+        const { accessToken, refreshToken } = response.data;
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+
+        console.log("Access Token:", localStorage.getItem("accessToken"));
+        console.log("Refresh Token:", localStorage.getItem("refreshToken"));
         alert("Login successful");
       } catch (error) {
         console.error("Login error:", error.response?.data || error.message);
@@ -250,13 +256,14 @@ export default {
         loading.value = false;
       }
     };
+
     const handleRegisterSubmit = async () => {
       if (!validateRegisterForm()) return;
 
       loading.value = true;
       try {
         const response = await axiosInstance.post("/auth/register", {
-          username: username.value,
+          email: username.value,
           password: password.value,
           firstName: firstName.value,
           lastName: lastName.value,
@@ -267,7 +274,7 @@ export default {
 
         console.log("Registration successful:", response.data);
         alert("Registration successful! Please log in.");
-        showLoginForm(); // Switch back to the login form after successful registration
+        showLoginForm();
       } catch (error) {
         console.error("Registration error:", error.response?.data || error.message);
         alert("Registration failed: " + (error.response?.data?.message || error.message));
