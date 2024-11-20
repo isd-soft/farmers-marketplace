@@ -1,8 +1,7 @@
 package com.example.isdfarmersmarket.services;
 
 import com.example.isdfarmersmarket.DTOs.CustomerUpgradeDTO;
-import com.example.isdfarmersmarket.DTOs.FarmerRegisterRequestDTO;
-import com.example.isdfarmersmarket.DTOs.abstractions.UserRegisterRequestDTO;
+import com.example.isdfarmersmarket.DTOs.UserRegisterRequestDTO;
 import com.example.isdfarmersmarket.enums.Role;
 import com.example.isdfarmersmarket.models.RefreshToken;
 import com.example.isdfarmersmarket.models.User;
@@ -24,7 +23,6 @@ public class AuthService {
     private final RefreshTokenRepository tokenRepository;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
-    private final UserService userService;
 
     public User authenticate(String username, String password) {
         Authentication authentication = authenticationManager.authenticate(
@@ -46,22 +44,24 @@ public class AuthService {
         tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
     }
     public void registerUser(UserRegisterRequestDTO registerRequestDTO) {
-        if (userRepository.existsByEmail(registerRequestDTO.getEmail())) {
+        if(!registerRequestDTO.password().equals(registerRequestDTO.passwordConfirmation())) {
+            throw new RuntimeException("Passwords do not match");
+        }
+        if (userRepository.existsByEmail(registerRequestDTO.email())) {
             throw new RuntimeException("Email already in use");
         }
 
-        String encodedPassword = passwordEncoder.encode(registerRequestDTO.getPassword());
-
+        String encodedPassword = passwordEncoder.encode(registerRequestDTO.password());
         User newUser = new User();
-        newUser.setEmail(registerRequestDTO.getEmail());
-        newUser.setFirstName(registerRequestDTO.getFirstName());
-        newUser.setLastName(registerRequestDTO.getLastName());
-        newUser.setPhoneNumber(registerRequestDTO.getPhoneNumber());
+        newUser.setEmail(registerRequestDTO.email());
+        newUser.setFirstName(registerRequestDTO.firstName());
+        newUser.setLastName(registerRequestDTO.lastName());
+        newUser.setPhoneNumber(registerRequestDTO.phoneNumber());
         newUser.setPassword(encodedPassword);
-        if (registerRequestDTO instanceof FarmerRegisterRequestDTO farmerDTO) {
+        if (registerRequestDTO.roleType().equals(Role.FARMER)) {
             newUser.setRole(Role.FARMER);
-            newUser.setAddress(farmerDTO.getAddress());
-            newUser.setDescription(farmerDTO.getDescription());
+            newUser.setAddress(registerRequestDTO.address());
+            newUser.setDescription(registerRequestDTO.description());
         }
         else{
             newUser.setRole(Role.CUSTOMER);
