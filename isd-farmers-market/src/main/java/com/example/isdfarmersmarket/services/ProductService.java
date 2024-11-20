@@ -1,34 +1,65 @@
 package com.example.isdfarmersmarket.services;
 
-import com.example.isdfarmersmarket.models.*;
+import com.example.isdfarmersmarket.DTOs.ProductDTO;
+import com.example.isdfarmersmarket.mappers.Mapper;
+import com.example.isdfarmersmarket.models.Image;
+import com.example.isdfarmersmarket.models.Product;
 import com.example.isdfarmersmarket.repositories.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
-    @Autowired
-    private ProductRepository repository;
 
-    public Product saveProduct(Product product) {
-        return repository.save(product);
+    private final ProductRepository repository;
+    private final Mapper<Product, ProductDTO> productMapper;
+
+    @Transactional
+    public Product saveProduct(ProductDTO productDTO, List<MultipartFile> files) {
+
+        Set<Image> images = files.stream()
+                .map(file -> {
+                    try {
+                        return toImageEntity(file);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toSet());
+        productDTO.setImages(images);
+        Product saved = repository.save(productMapper.toEntityNew(productDTO));
+        images.forEach(image -> image.setProduct(saved));
+        return saved;
     }
 
-    public List<Product> saveProducts(List<Product> products) {
-        return repository.saveAll(products);
+    @Transactional(readOnly = true)
+    public List<ProductDTO> getProducts() {
+        List<ProductDTO> productsDTO = repository.findAll().stream()
+                .map(entity -> productMapper.toDto(entity))
+                .collect(Collectors.toList());
+        return productsDTO;
     }
 
-    public List<Product> getProducts() {
-        return repository.findAll();
+    public ProductDTO getProductById(Long id) {
+        ProductDTO productDTO = productMapper.toDto(
+                repository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"))
+        );
+        return productDTO;
     }
 
-    public Product getProductById(Long id) {
-        return repository.findById(id).orElse(null);
-    }
-
-    public Product getProductByTitle(String title) {
-        return repository.findByTitle(title);
+    public ProductDTO getProductByTitle(String title) {
+        ProductDTO productDTO = productMapper.toDto(
+                repository.findByTitle(title).orElseThrow(() -> new RuntimeException("Product not found"))
+        );
+        return productDTO;
     }
 
     public String deleteProduct(Long id) {
@@ -36,21 +67,32 @@ public class ProductService {
         return "product removed!" + id;
     }
 
-    public Product updateProduct(Product product) {
-        Product existingProduct = repository.findById(product.getId()).orElse(null);
+    public ProductDTO updateProduct(ProductDTO productDTO) {
+
+        Product existingProduct = repository.findById(productDTO.getId()).orElse(null);
         assert existingProduct != null;
-        existingProduct.setTitle(product.getTitle());
-        existingProduct.setDescription(product.getDescription());
-        existingProduct.setUnitType(product.getUnitType());
-        existingProduct.setPricePerUnit(product.getPricePerUnit());
-        existingProduct.setDiscountPercents(product.getDiscountPercents());
-        existingProduct.setQuantity(product.getQuantity());
-        existingProduct.setCategory(product.getCategory());
-        existingProduct.setUser(product.getUser());
-        existingProduct.setInWishlists(product.getInWishlists());
-        existingProduct.setRating(product.getRating());
-        existingProduct.setImages(product.getImages());
-        existingProduct.setCreatedDate(product.getCreatedDate());
-        return repository.save(existingProduct);
+        existingProduct.setTitle(productDTO.getTitle());
+        existingProduct.setDescription(productDTO.getDescription());
+        existingProduct.setUnitType(productDTO.getUnitType());
+        existingProduct.setPricePerUnit(productDTO.getPricePerUnit());
+        existingProduct.setDiscountPercents(productDTO.getDiscountPercents());
+        existingProduct.setQuantity(productDTO.getQuantity());
+        existingProduct.setCategory(productDTO.getCategory());
+        existingProduct.setUser(productDTO.getUser());
+        existingProduct.setRating(productDTO.getRating());
+        existingProduct.setImages(productDTO.getImages());
+
+        return productMapper.toDto(repository.save(existingProduct));
+    }
+
+    private Image toImageEntity(MultipartFile file) throws IOException {
+
+        Image image = new Image();
+        image.setName(file.getName());
+        image.setOriginalFileName(file.getOriginalFilename());
+        image.setContentType(file.getContentType());
+        image.setSize(file.getSize());
+        image.setBytes(file.getBytes());
+        return image;
     }
 }
