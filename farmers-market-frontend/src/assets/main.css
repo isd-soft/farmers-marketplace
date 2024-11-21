@@ -11,6 +11,7 @@
 
 @media (min-width: 1024px) {
   body {
+    background-color:#2D3142;
     display: flex;
     justify-content: center;
     align-items: center;
