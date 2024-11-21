@@ -1,9 +1,9 @@
 package com.example.isdfarmersmarket.business.initializers;
 
-import com.example.isdfarmersmarket.business.security.AuthService;
+import com.example.isdfarmersmarket.business.services.AuthService;
 import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
-import com.example.isdfarmersmarket.web.dto.UserRegisterRequestDTO;
+import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -27,7 +27,7 @@ public class MainAdminInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (!userRepository.existsByEmail(adminEmail)) {
-            var adminData = new UserRegisterRequestDTO(
+            var adminData = new UserRegisterCommand(
                     adminEmail,adminPassword,
                     "Main","Admin",
                     "skip",
