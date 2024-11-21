@@ -20,10 +20,11 @@ public class Image {
     private Long id;
     @Column(name = "original_file_name")
     private String originalFileName;
+    private String name;
     private Long size;
     @Column(name = "file_type")
 
-    private String fileType;
+    private String contentType;
     @Lob
     @Column(name = "bytes")
     private byte[] bytes;

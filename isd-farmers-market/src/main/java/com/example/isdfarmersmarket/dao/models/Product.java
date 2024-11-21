@@ -16,11 +16,14 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
     private Long id;
+    @Column(length = 80)
     private String title;
+    @Column(length = 1000)
     private String description;
     @Column(name="unit_type")
     private UnitType unitType;
