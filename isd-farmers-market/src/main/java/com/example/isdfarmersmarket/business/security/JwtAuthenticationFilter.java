@@ -1,6 +1,7 @@
 package com.example.isdfarmersmarket.business.security;
 
 
+import com.example.isdfarmersmarket.dao.models.Role;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -24,6 +25,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 @AllArgsConstructor
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -45,9 +49,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             jwtService.validateToken(token);
 
             final String username = jwtService.extractUsername(token);
-            final String role = jwtService.extractRole(token);
+            final List<String> roles = jwtService.extractRoles(token);
 
-            if (role == null) {
+            if (roles.isEmpty()) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -55,7 +59,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     username,
                     null,
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
+                    roles.stream().map(roleName -> new SimpleGrantedAuthority("ROLE_" + roleName))
+                                    .toList()
             );
 
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

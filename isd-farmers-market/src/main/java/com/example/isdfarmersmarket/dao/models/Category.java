@@ -21,8 +21,7 @@ public class Category {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof User)) return false;
-        Category category = (Category) o;
+        if (!(o instanceof Category category)) return false;
         return Objects.equals(getId(), category.getId());
     }
 

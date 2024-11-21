@@ -34,8 +34,7 @@ public class ProductReview {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof User)) return false;
-        ProductReview review = (ProductReview) o;
+        if (!(o instanceof ProductReview review)) return false;
         return Objects.equals(getId(), review.getId());
     }
 
