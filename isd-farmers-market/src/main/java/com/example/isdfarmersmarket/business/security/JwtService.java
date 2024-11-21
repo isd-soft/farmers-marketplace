@@ -52,13 +52,8 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
-        try {
-            extractAllClaims(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
+    public void validateToken(String token) {
+        extractAllClaims(token);
     }
 
     public String extractUsername(String token) {
@@ -85,7 +80,7 @@ public class JwtService {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             return authorizationHeader.substring(7);
         } else {
-            throw new IllegalArgumentException("Invalid Authorization header format");
+            throw new MalformedJwtException("Invalid Authorization header format");
         }
     }
 }
