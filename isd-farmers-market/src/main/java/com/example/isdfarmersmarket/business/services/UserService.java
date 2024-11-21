@@ -1,4 +1,4 @@
-package com.example.isdfarmersmarket.business.security;
+package com.example.isdfarmersmarket.business.services;
 
 import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;

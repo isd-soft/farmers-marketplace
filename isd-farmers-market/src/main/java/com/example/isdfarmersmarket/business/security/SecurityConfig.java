@@ -1,5 +1,6 @@
 package com.example.isdfarmersmarket.business.security;
 
+import com.example.isdfarmersmarket.business.services.UserService;
 import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
