@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestRolesController {
     private final Logger logger = LoggerFactory.getLogger(TestRolesController.class);
 
-    @PreAuthorize("hasRole('CUSTOMER') or hasRole('FARMER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/customer")
     public String testCustomer(Authentication authentication) {
         String username = authentication.getName();

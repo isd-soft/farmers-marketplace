@@ -1,11 +1,12 @@
 package com.example.isdfarmersmarket.dao.models;
 
-import com.example.isdfarmersmarket.dao.enums.Role;
+import com.example.isdfarmersmarket.dao.enums.ERole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springdoc.core.providers.HateoasHalProvider;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -26,7 +27,6 @@ public class User implements UserDetails {
     private String firstName;
     @Column(name = "last_name")
     private String lastName;
-    private Role role;
     private String email;
     @Column(name = "phone_number")
     private String phoneNumber;
@@ -58,6 +58,13 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "farmer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<FarmerReview> reviews = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
+
     @Column(name="created_date", columnDefinition = "TimeStamp")
     private LocalDateTime createdDate = LocalDateTime.now();
 
@@ -65,8 +72,7 @@ public class User implements UserDetails {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof User)) return false;
-        User user = (User) o;
+        if (!(o instanceof User user)) return false;
         return Objects.equals(getId(), user.getId());
     }
 
@@ -76,9 +82,13 @@ public class User implements UserDetails {
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(()-> role.name());
+        return roles;
     }
-
+    public void addRole(Role role) {
+        if (role != null) {
+            this.roles.add(role);
+        }
+    }
     @Override
     public String getUsername() {
         return email;

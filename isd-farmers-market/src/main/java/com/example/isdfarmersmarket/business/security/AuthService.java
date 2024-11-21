@@ -1,12 +1,12 @@
 package com.example.isdfarmersmarket.business.security;
 
-import com.example.isdfarmersmarket.business.exception.custom_exceptions.EmailAlreadyExistsException;
-import com.example.isdfarmersmarket.business.exception.custom_exceptions.InvalidCredentialsException;
-import com.example.isdfarmersmarket.business.exception.custom_exceptions.RefreshTokenException;
-import com.example.isdfarmersmarket.dao.enums.Role;
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.*;
+import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.example.isdfarmersmarket.dao.models.RefreshToken;
+import com.example.isdfarmersmarket.dao.models.Role;
 import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.repositories.RefreshTokenRepository;
+import com.example.isdfarmersmarket.dao.repositories.RoleRepository;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
 import com.example.isdfarmersmarket.web.dto.CustomerUpgradeDTO;
 import com.example.isdfarmersmarket.web.dto.UserRegisterRequestDTO;
@@ -30,6 +30,7 @@ public class AuthService {
     private final RefreshTokenRepository tokenRepository;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     @Transactional(readOnly = true )
     public User authenticate(String username, String password) {
@@ -46,9 +47,16 @@ public class AuthService {
     public void upgradeUser(String email, CustomerUpgradeDTO customerUpgradeDTO) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found."));
-        user.setRole(Role.FARMER);
+        Role farmer = roleRepository.findByRole(ERole.FARMER).orElseThrow(
+                () -> new RuntimeException("ROLE DOESNT EXIST"));
+        if(user.getRoles().contains(farmer)) {
+            throw new RoleAlreadyExistsException("Role already exists");
+        }
         user.setAddress(customerUpgradeDTO.address());
         user.setDescription(customerUpgradeDTO.description());
+
+
+        user.addRole(farmer);
         userRepository.save(user);
     }
 
@@ -73,9 +81,28 @@ public class AuthService {
         newUser.setLastName(registerRequestDTO.lastName());
         newUser.setPhoneNumber(registerRequestDTO.phoneNumber());
         newUser.setPassword(encodedPassword);
-        newUser.setRole(registerRequestDTO.roleType());
         newUser.setAddress(registerRequestDTO.address());
         newUser.setDescription(registerRequestDTO.description());
+
+        Role customer = roleRepository.findByRole(ERole.CUSTOMER)
+                .orElseThrow(() -> new RoleDoesntExistException("ROLE CUSTOMER DOESN'T EXIST"));
+        newUser.addRole(customer);
+
+        switch (registerRequestDTO.roleType()) {
+            case FARMER:
+                Role farmer = roleRepository.findByRole(ERole.FARMER)
+                        .orElseThrow(() -> new RoleDoesntExistException("ROLE DOESN'T EXIST"));
+                newUser.addRole(farmer);
+                break;
+            case ADMIN:
+                Role admin = roleRepository.findByRole(ERole.ADMIN)
+                        .orElseThrow(() -> new RoleDoesntExistException("ROLE DOESN'T EXIST"));
+                newUser.addRole(admin);
+                break;
+            default:
+                break;
+        }
+
         userRepository.save(newUser);
     }
 
@@ -119,6 +146,6 @@ public class AuthService {
         catch (JwtException ex) {
             throw new RefreshTokenException("Invalid refresh token");
         }
-        return jwtService.generateAccessToken(username, user.getRole());
+        return jwtService.generateAccessToken(username, user.getRoles());
     }
 }
