@@ -29,8 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = Category.builder()
                 .title(title)
                 .build();
-        categoryRepository.save(category);
-        return daoMapper.map(category);
+        return daoMapper.map(categoryRepository.save(category));
     }
 
     @Override
