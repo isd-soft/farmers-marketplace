@@ -4,6 +4,7 @@ package com.example.isdfarmersmarket.business.security;
 import com.example.isdfarmersmarket.business.services.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
@@ -38,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try{
             final String authHeader = request.getHeader("Authorization");
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            if (authHeader == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -80,8 +81,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (IllegalArgumentException ex) {
             sendErrorResponse(response, "Illegal argument during JWT processing");
-        } catch (Exception ex) {
-            sendErrorResponse(response, "An unexpected error occurred during JWT validation");
+        }
+        catch (JwtException ex) {
+            sendErrorResponse(response, "Unknown JWT exception happened");
         }
 
     }
