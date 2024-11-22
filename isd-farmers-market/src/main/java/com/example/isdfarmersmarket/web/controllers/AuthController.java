@@ -43,7 +43,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody UserLoginCommand userLoginCommand) {
-        User user = authService.authenticate(userLoginCommand.email(), userLoginCommand.password());
+        User user = authService.authenticate(userLoginCommand.getEmail(), userLoginCommand.getPassword());
         String refreshToken = authService.generateRefreshToken(user.getUsername());
         String accessToken = authService.generateAccessToken(refreshToken);
 

@@ -28,7 +28,7 @@ public abstract class RegisterCommandMapper {
     @Mapping(target = "phoneNumber", source = "userRegisterCommand.phoneNumber")
     @Mapping(target = "address", source = "userRegisterCommand.address")
     @Mapping(target = "description", source = "userRegisterCommand.description")
-    @Mapping(target = "password", expression = "java(passwordEncoder.encode(userRegisterCommand.password()))") // Custom password encoding
+    @Mapping(target = "password", expression = "java(passwordEncoder.encode(userRegisterCommand.getPassword()))") // Custom password encoding
     public abstract User map(UserRegisterCommand userRegisterCommand);
 
     @AfterMapping
@@ -37,7 +37,7 @@ public abstract class RegisterCommandMapper {
                 .orElseThrow(() -> new RoleDoesntExistException("ROLE CUSTOMER DOESN'T EXIST"));
         user.addRole(customerRole);
 
-        switch (userRegisterCommand.roleType()) {
+        switch (userRegisterCommand.getRoleType()) {
             case FARMER:
                 Role farmerRole = roleRepository.findByRole(ERole.FARMER)
                         .orElseThrow(() -> new RoleDoesntExistException("ROLE FARMER DOESN'T EXIST"));
