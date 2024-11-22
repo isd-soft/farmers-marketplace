@@ -1,6 +1,6 @@
 package com.example.isdfarmersmarket.web.dto;
 
-import com.example.isdfarmersmarket.dao.enums.Role;
+import com.example.isdfarmersmarket.dao.enums.ERole;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +14,7 @@ public class UserDTO {
         private Long id;
         private String firstName;
         private String lastName;
-        private Role role;
+        private ERole role;
         private String email;
         private String phoneNumber;
         private String description;

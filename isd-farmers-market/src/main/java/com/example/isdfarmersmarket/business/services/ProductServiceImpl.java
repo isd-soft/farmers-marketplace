@@ -17,10 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,15 +36,17 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductDTO createProduct(CreateProductCommand createProductCommand, Set<MultipartFile> files) {
         Set<Image> images = new HashSet<>();
-        files.forEach(file -> {
-            Image image = null;
-            try {
-                image = toImageEntity(file);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            images.add(image);
-        });
+        if (files != null && !files.isEmpty()) {
+            files.forEach(file -> {
+                Image image = null;
+                try {
+                    image = toImageEntity(file);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                images.add(image);
+            });
+        }
 
         Category category = categoryRepository.getCategoryById(createProductCommand.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException(CATEGORY_FIND_FAILED_BY_ID));
@@ -57,7 +59,8 @@ public class ProductServiceImpl implements ProductService {
                 .quantity(createProductCommand.getQuantity())
                 .category(category)
                 .images(images).build();
-        return productMapper.map(productRepository.save(product));
+        ProductDTO savedProduct = productMapper.map(productRepository.save(product));
+        return savedProduct;
     }
 
     @Override
@@ -65,15 +68,17 @@ public class ProductServiceImpl implements ProductService {
     public ProductDTO updateProduct(Long id, UpdateProductCommand updateProductCommand,
                                     Set<MultipartFile> files, Set<Long> imagesToDeleteId) {
         Set<Image> images = new HashSet<>();
-        files.forEach(file -> {
-            Image image = null;
-            try {
-                image = toImageEntity(file);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            images.add(image);
-        });
+        if (files != null && !files.isEmpty()) {
+            files.forEach(file -> {
+                Image image = null;
+                try {
+                    image = toImageEntity(file);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                images.add(image);
+            });
+        }
         Product product = productRepository.getProductById(id)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
         Category category = categoryRepository.getCategoryById(updateProductCommand.getCategoryId())
@@ -86,7 +91,9 @@ public class ProductServiceImpl implements ProductService {
         product.setQuantity(updateProductCommand.getQuantity());
         product.setCategory(category);
         product.setImages(images);
-        imagesToDeleteId.forEach(imageId -> imageRepository.deleteById(imageId));
+        if (imagesToDeleteId != null && !imagesToDeleteId.isEmpty()) {
+            imagesToDeleteId.forEach(imageId -> imageRepository.deleteById(imageId));
+        }
         return productMapper.map(product);
     }
 

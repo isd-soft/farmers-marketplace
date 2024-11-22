@@ -5,16 +5,16 @@ import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateProductCommand;
 import com.example.isdfarmersmarket.web.dto.ProductDTO;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -26,25 +26,23 @@ public class ProductController {
     private final ProductService productService;
 
     @Operation(
-            responses = @ApiResponse(
-                    description = "Created",
-                    responseCode = "201"
-            ),
-            description = "This endpoint is used to create a product"
+            summary = "Create a product",
+            description = "This endpoint allows creating a product with images"
     )
-    @PostMapping()
-    public ResponseEntity<ProductDTO> createProduct(@RequestBody @Valid CreateProductCommand createProductCommand,
-    @RequestParam("files") Set<MultipartFile>files) {
-        return ResponseEntity.status(CREATED).body(productService.createProduct(createProductCommand, files));
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductDTO> createProduct(@RequestPart @Valid CreateProductCommand createProductCommand,
+    @RequestPart(value = "files", required = false) List<MultipartFile>files) {
+        return ResponseEntity.status(CREATED).body(productService.createProduct(createProductCommand,new HashSet<>(files)));
     }
 
     @Operation(
             description = "This endpoint is used to update a product"
     )
-    @PutMapping("/{id}")
-    public ResponseEntity<ProductDTO> updateCategory(@PathVariable Long id, @RequestBody @Valid UpdateProductCommand updateProductCommand,
-                                                     @RequestParam("files") Set<MultipartFile>files, @RequestParam("imagesToDeleteId") Set<Long>imagesToDeleteId) {
-        return ResponseEntity.status(OK).body(productService.updateProduct(id, updateProductCommand, files, imagesToDeleteId));
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductDTO> updateCategory(@PathVariable Long id, @RequestPart @Valid UpdateProductCommand updateProductCommand,
+                                                     @RequestPart(value = "files", required = false) List<MultipartFile>files,
+                                                     @RequestPart(value = "imagesToDeleteId", required = false) List<Long>imagesToDeleteId) {
+        return ResponseEntity.status(OK).body(productService.updateProduct(id, updateProductCommand,new HashSet<>(files), new HashSet<>(imagesToDeleteId)));
     }
 
     @Operation(

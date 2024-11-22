@@ -1,6 +1,6 @@
 package com.example.isdfarmersmarket.dao.enums;
 
-public enum Role {
+public enum ERole {
     CUSTOMER,
     FARMER,
     ADMIN;
