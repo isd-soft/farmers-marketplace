@@ -9,5 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ProductReviewRepository extends JpaRepository<ProductReview, Long> {
-    Page<ProductReview> findByCreator(User creator, Pageable pageable);
+    Page<ProductReview> findByCreatorOrderByCreatedDate(User creator, Pageable pageable);
+
 }
