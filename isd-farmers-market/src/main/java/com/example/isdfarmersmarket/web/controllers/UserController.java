@@ -30,9 +30,5 @@ public class UserController {
         return userService.searchUsersByFullName(fullName, page, pageSize);
     }
 
-    @PutMapping("/profile-picture")
-    @PreAuthorize("isAuthenticated()")
-    public void changeProfilePicture(@RequestParam String newPfp, Authentication authentication) {
-        userService.changePfp(authentication.getName(), newPfp);
-    }
+
 }
