@@ -1,5 +1,6 @@
 package com.example.isdfarmersmarket.business.security;
 
+import com.example.isdfarmersmarket.business.services.UserService;
 import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -56,7 +57,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/test/**").authenticated()
+                        .requestMatchers("/test/**").permitAll()
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

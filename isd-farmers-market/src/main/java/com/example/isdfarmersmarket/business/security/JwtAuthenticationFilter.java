@@ -1,9 +1,10 @@
 package com.example.isdfarmersmarket.business.security;
 
 
-import com.example.isdfarmersmarket.dao.models.Role;
+import com.example.isdfarmersmarket.business.services.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
@@ -24,9 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 @AllArgsConstructor
 @Component
@@ -40,21 +39,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try{
             final String authHeader = request.getHeader("Authorization");
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            if (authHeader == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
             final String token = authHeader.substring(7);
-            jwtService.validateToken(token);
 
             final String username = jwtService.extractUsername(token);
             final List<String> roles = jwtService.extractRoles(token);
 
-            if (roles.isEmpty()) {
+            if (roles == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
+
+            jwtService.validateToken(token);
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     username,
@@ -81,8 +81,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (IllegalArgumentException ex) {
             sendErrorResponse(response, "Illegal argument during JWT processing");
-        } catch (Exception ex) {
-            sendErrorResponse(response, "An unexpected error occurred during JWT validation");
+        }
+        catch (JwtException ex) {
+            sendErrorResponse(response, "Unknown JWT exception happened");
         }
 
     }

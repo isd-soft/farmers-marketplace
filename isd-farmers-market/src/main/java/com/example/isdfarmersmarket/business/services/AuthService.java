@@ -1,6 +1,7 @@
-package com.example.isdfarmersmarket.business.security;
+package com.example.isdfarmersmarket.business.services;
 
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.*;
+import com.example.isdfarmersmarket.business.mapper.RegisterCommandMapper;
 import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.example.isdfarmersmarket.dao.models.RefreshToken;
 import com.example.isdfarmersmarket.dao.models.Role;
@@ -8,10 +9,11 @@ import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.repositories.RefreshTokenRepository;
 import com.example.isdfarmersmarket.dao.repositories.RoleRepository;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
-import com.example.isdfarmersmarket.web.dto.CustomerUpgradeDTO;
-import com.example.isdfarmersmarket.web.dto.UserRegisterRequestDTO;
+import com.example.isdfarmersmarket.web.commands.UserUpgradeCommand;
+import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final JwtService jwtService;
@@ -31,6 +34,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final RegisterCommandMapper registerCommandMapper;
 
     @Transactional(readOnly = true )
     public User authenticate(String username, String password) {
@@ -44,7 +48,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void upgradeUser(String email, CustomerUpgradeDTO customerUpgradeDTO) {
+    public void upgradeUser(String email, UserUpgradeCommand customerUpgradeCommand) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found."));
         Role farmer = roleRepository.findByRole(ERole.FARMER).orElseThrow(
@@ -52,8 +56,8 @@ public class AuthService {
         if(user.getRoles().contains(farmer)) {
             throw new RoleAlreadyExistsException("Role already exists");
         }
-        user.setAddress(customerUpgradeDTO.address());
-        user.setDescription(customerUpgradeDTO.description());
+        user.setAddress(customerUpgradeCommand.getAddress());
+        user.setDescription(customerUpgradeCommand.getDescription());
 
 
         user.addRole(farmer);
@@ -69,40 +73,11 @@ public class AuthService {
     }
 
     @Transactional
-    public void registerUser(UserRegisterRequestDTO registerRequestDTO) {
-        if (userRepository.existsByEmail(registerRequestDTO.email())) {
+    public void registerUser(UserRegisterCommand registerRequestDTO) {
+        if (userRepository.existsByEmail(registerRequestDTO.getEmail())) {
             throw new EmailAlreadyExistsException("Email already in use");
         }
-
-        String encodedPassword = passwordEncoder.encode(registerRequestDTO.password());
-        User newUser = new User();
-        newUser.setEmail(registerRequestDTO.email());
-        newUser.setFirstName(registerRequestDTO.firstName());
-        newUser.setLastName(registerRequestDTO.lastName());
-        newUser.setPhoneNumber(registerRequestDTO.phoneNumber());
-        newUser.setPassword(encodedPassword);
-        newUser.setAddress(registerRequestDTO.address());
-        newUser.setDescription(registerRequestDTO.description());
-
-        Role customer = roleRepository.findByRole(ERole.CUSTOMER)
-                .orElseThrow(() -> new RoleDoesntExistException("ROLE CUSTOMER DOESN'T EXIST"));
-        newUser.addRole(customer);
-
-        switch (registerRequestDTO.roleType()) {
-            case FARMER:
-                Role farmer = roleRepository.findByRole(ERole.FARMER)
-                        .orElseThrow(() -> new RoleDoesntExistException("ROLE DOESN'T EXIST"));
-                newUser.addRole(farmer);
-                break;
-            case ADMIN:
-                Role admin = roleRepository.findByRole(ERole.ADMIN)
-                        .orElseThrow(() -> new RoleDoesntExistException("ROLE DOESN'T EXIST"));
-                newUser.addRole(admin);
-                break;
-            default:
-                break;
-        }
-
+        User newUser = registerCommandMapper.map(registerRequestDTO);
         userRepository.save(newUser);
     }
 

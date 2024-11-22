@@ -6,11 +6,10 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductReviewDTO {
+public class FarmerReviewDTO {
     Long id;
     float rating;
     String content;
-    Long productId;
-    String productName;
+    UserProfileDTO farmer;
     UserProfileDTO creator;
 }
