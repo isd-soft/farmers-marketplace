@@ -7,6 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FarmerReviewRepository extends JpaRepository<FarmerReview, Long> {
-    Page<FarmerReview> findByCreator(User creator, Pageable pageable);
+    Page<FarmerReview> findByCreatorOrderByCreatedDate(User creator, Pageable pageable);
 
 }
