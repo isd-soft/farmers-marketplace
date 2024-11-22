@@ -53,6 +53,8 @@ public class User implements UserDetails {
     private  int freeDeliveryFrom;
     @OneToMany(mappedBy = "farmer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<DeliveryTypeFarmer> deliveryTypes = new HashSet<>();
+    @Column(name = "profile_picture")
+    private String profilePicture;
 
     private float rating;
     @OneToMany(mappedBy = "farmer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

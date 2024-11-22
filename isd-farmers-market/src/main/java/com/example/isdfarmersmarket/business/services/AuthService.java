@@ -56,8 +56,8 @@ public class AuthService {
         if(user.getRoles().contains(farmer)) {
             throw new RoleAlreadyExistsException("Role already exists");
         }
-        user.setAddress(customerUpgradeCommand.address());
-        user.setDescription(customerUpgradeCommand.description());
+        user.setAddress(customerUpgradeCommand.getAddress());
+        user.setDescription(customerUpgradeCommand.getDescription());
 
 
         user.addRole(farmer);
@@ -74,7 +74,7 @@ public class AuthService {
 
     @Transactional
     public void registerUser(UserRegisterCommand registerRequestDTO) {
-        if (userRepository.existsByEmail(registerRequestDTO.email())) {
+        if (userRepository.existsByEmail(registerRequestDTO.getEmail())) {
             throw new EmailAlreadyExistsException("Email already in use");
         }
         User newUser = registerCommandMapper.map(registerRequestDTO);

@@ -1,4 +1,9 @@
 package com.example.isdfarmersmarket.web.commands;
 
-public record UserUpgradeCommand(String address, String description) {
+import lombok.Data;
+
+@Data
+public class UserUpgradeCommand {
+    private String address;
+    private String description;
 }

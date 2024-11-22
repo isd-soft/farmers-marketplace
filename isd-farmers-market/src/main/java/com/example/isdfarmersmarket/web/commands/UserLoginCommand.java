@@ -1,4 +1,9 @@
 package com.example.isdfarmersmarket.web.commands;
 
-public record UserLoginCommand(String email, String password) {
+import lombok.Data;
+
+@Data
+public class UserLoginCommand {
+    private String email;
+    private String password;
 }
