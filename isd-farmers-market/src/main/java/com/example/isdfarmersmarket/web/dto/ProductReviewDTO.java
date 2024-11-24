@@ -12,5 +12,6 @@ public class ProductReviewDTO  {
     float rating;
     String content;
     UserProfileDTO creator;
-    Product product;
+    String productTitle;
+    Long productId;
 }

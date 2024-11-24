@@ -28,6 +28,7 @@ public class CustomerService {
     FarmerReviewRepository farmerReviewRepository;
     RoleRepository roleRepository;
     ReviewMapper reviewMapper;
+    ProductService productService;
 
     public FarmerReviewDTO rateFarmer(FarmerReviewCommand farmerReviewCommand,
                                       String email) {
@@ -60,7 +61,8 @@ public class CustomerService {
         review.setCreator(creator);
         review.setProduct(product);
         ProductReview productReview = productReviewRepository.save(review);
-        return reviewMapper.map(productReview);
+        productService.updateProductReview(product);
+        return reviewMapper.mapWithProductDetails(productReview);
     }
 
     public List<ProductReviewDTO> fetchAllProductReviews(Long id, Integer page, Integer pageSize) {
@@ -70,7 +72,7 @@ public class CustomerService {
 
         return productReviewRepository.findByCreatorOrderByCreatedDate(customer, PageRequest.of(page, pageSize))
                 .stream()
-                .map(reviewMapper::map)
+                .map(reviewMapper::mapWithoutProductDetails)
                 .toList();
     }
 

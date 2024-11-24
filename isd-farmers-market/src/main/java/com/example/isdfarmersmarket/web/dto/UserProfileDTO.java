@@ -13,5 +13,4 @@ public class UserProfileDTO {
     String lastName;
     Boolean isFarmer;
     String email;
-    String profilePicture;
 }

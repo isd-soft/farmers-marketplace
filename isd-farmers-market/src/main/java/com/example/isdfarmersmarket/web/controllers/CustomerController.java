@@ -32,13 +32,13 @@ public class CustomerController {
     }
     @PreAuthorize("hasRole('CUSTOMER') and not hasRole('FARMER') ")
     @PostMapping("/review/product")
-    public ResponseEntity<ProductReviewDTO> rateProduct(@RequestBody ProductReviewCommand productReviewDTO,
+    public ResponseEntity<ProductReviewDTO> rateProduct(@RequestBody ProductReviewCommand productReviewCommand,
                                                         Authentication authentication)
     {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(customerService.rateProduct(productReviewDTO,authentication.getName()));
+                .body(customerService.rateProduct(productReviewCommand,authentication.getName()));
     }
     @GetMapping("/{userId}/reviews/farmer")
     public ResponseEntity<List<FarmerReviewDTO>> getAllFarmerReviews(@PathVariable Long userId,

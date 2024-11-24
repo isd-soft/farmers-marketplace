@@ -25,6 +25,7 @@ public class ProductDTO {
     private CategoryDTO category;
     private UserDTO user;
     private Float rating;
+    private Integer reviewCount;
     private Set<ProductReviewDTO> reviews = new HashSet<>();
     private Set<ImageDTO> images = new HashSet<>();
 }

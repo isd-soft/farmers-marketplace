@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.webjars.NotFoundException;
 
 import java.util.List;
 
@@ -37,15 +38,20 @@ public class UserService implements UserDetailsService {
     public List<UserProfileDTO> getAllUsers(Integer page, Integer pageSize) {
         return userRepository.findAll(PageRequest.of(page, pageSize))
                 .stream()
-                .map(userProfileMapper::toDto)
+                .map(userProfileMapper::map)
                 .toList();
     }
 
     public List<UserProfileDTO> searchUsersByFullName(String fullName, Integer page, Integer pageSize) {
         return userRepository.findByFullNameContaining(fullName, PageRequest.of(page, pageSize))
                 .stream()
-                .map(userProfileMapper::toDto)
+                .map(userProfileMapper::map)
                 .toList();
+    }
+
+    public UserProfileDTO getUserById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
+        return userProfileMapper.map(user);
     }
 
 

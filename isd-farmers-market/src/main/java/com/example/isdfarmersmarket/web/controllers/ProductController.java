@@ -4,6 +4,7 @@ import com.example.isdfarmersmarket.business.services.ProductService;
 import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateProductCommand;
 import com.example.isdfarmersmarket.web.dto.ProductDTO;
+import com.example.isdfarmersmarket.web.dto.ProductReviewDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -67,6 +68,12 @@ public class ProductController {
     public ResponseEntity<ProductDTO> getProduct(@PathVariable Long id) {
         return ResponseEntity.status(OK).body(productService.getProductById(id));
     }
-
+    @Operation(
+            description = "This endpoint is used to get product reviews by id"
+    )
+    @GetMapping("/{id}/reviews")
+    public ResponseEntity<List<ProductReviewDTO>> getProductReviews(@PathVariable Long id) {
+        return ResponseEntity.status(OK).body(productService.getProductReviews(id));
+    }
 
 }
