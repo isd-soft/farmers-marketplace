@@ -37,5 +37,5 @@ public class CreateProductCommand {
     private Integer quantity;
     @NotNull(message = "Product category cannot be blank")
     private Long categoryId;
-    List<String> imagesBase64 = new ArrayList<>();
+    List<String> w = new ArrayList<>();
 }

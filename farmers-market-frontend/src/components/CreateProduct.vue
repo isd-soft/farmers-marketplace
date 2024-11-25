@@ -48,12 +48,12 @@
       </FloatLabel>
 
       <FloatLabel variant="on">
-      <InputNumber
-        id="product-price"
-        v-model="price"
-        required
-        class="create-product-input"
-      />
+        <InputNumber
+          id="product-price"
+          v-model="price"
+          required
+          class="create-product-input"
+        />
         <label for="product-price">Price</label>
       </FloatLabel>
 
@@ -91,30 +91,34 @@
         </label>
 
         <div class="image-preview-container">
-          <div v-for="(file, index) in selectedFiles" :key="index" class="image-preview">
+          <div
+            v-for="(file, index) in selectedFiles"
+            :key="index"
+            class="image-preview"
+          >
             <img :src="file.preview" :alt="file.name" />
             <button type="button" @click="removeFile(index)">Remove</button>
           </div>
         </div>
-
       </div>
 
       <ThemedButton
         class="create-product-button"
         type="submit"
-        label="Create product"/>
+        label="Create product"
+      />
     </form>
   </div>
 </template>
+
 <script>
-import { ref, onMounted  } from "vue";
-import axios from 'axios';
+import { ref, onMounted } from "vue";
+import axios from "axios";
 import axiosInstance from "@/utils/axiosInstance";
 import InputText from "primevue/inputtext";
 import FloatLabel from "primevue/floatlabel";
-import InputNumber from 'primevue/inputnumber';
-import Select from 'primevue/select';
-import FileUpload from 'primevue/fileupload';
+import InputNumber from "primevue/inputnumber";
+import Select from "primevue/select";
 
 export default {
   name: "CreateProduct",
@@ -123,7 +127,6 @@ export default {
     FloatLabel,
     InputNumber,
     Select,
-    FileUpload
   },
   setup() {
     const title = ref("");
@@ -136,62 +139,87 @@ export default {
     const category = ref();
     const categories = ref([]);
     const selectedFiles = ref([]);
-    const handleFileChange = (event) => {
+
+    const handleFileChange = async (event) => {
       const files = event.target.files;
-      if (files) {
-        const filesArray = Array.from(files);
-        if (selectedFiles.value.length + filesArray.length > 5) {
-          alert("Maximum of 5 images allowed.");
-          return;
+      if (!files) return;
+
+      const filesArray = Array.from(files);
+      if (selectedFiles.value.length + filesArray.length > 5) {
+        alert("Maximum of 5 images allowed.");
+        return;
+      }
+
+      for (const file of filesArray) {
+        try {
+          const base64 = await convertFileToBase64(file);
+          selectedFiles.value.push({
+            file,
+            name: file.name,
+            preview: base64, // Base64 preview
+            base64, // Base64 data for backend
+          });
+          console.log(`File ${file.name} converted to Base64 successfully.`);
+        } catch (error) {
+          console.error(`Error converting file ${file.name} to Base64:`, error);
         }
-        filesArray.forEach((file) => {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            selectedFiles.value.push({
-              file,
-              name: file.name,
-              preview: e.target.result,
-            });
-          };
-          reader.readAsDataURL(file);
-        });
       }
     };
-        const removeFile = (index) => {
-          selectedFiles.value.splice(index, 1);
-        };
 
+    const removeFile = (index) => {
+      console.log(`Removing file at index ${index}`);
+      selectedFiles.value.splice(index, 1);
+    };
+
+    const convertFileToBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (e) => reject(e);
+        reader.readAsDataURL(file); // Convert file to Base64
+      });
+    };
 
     onMounted(async () => {
       try {
-        const response = await axios.get('http://localhost:8080/unit-types');
+        console.log("Fetching unit types...");
+        const response = await axios.get("http://localhost:8080/unit-types");
         if (Array.isArray(response.data)) {
-          unitTypes.value = response.data.map(type => ({ label: type, value: type }));
+          unitTypes.value = response.data.map((type) => ({
+            label: type,
+            value: type,
+          }));
+          console.log("Unit types loaded:", unitTypes.value);
         } else {
-          console.error('Unexpected response format: expected an array', response.data);
+          console.error("Unexpected unit types format:", response.data);
         }
-        const categoriesResponse = await axios.get('http://localhost:8080/category');
+
+        console.log("Fetching categories...");
+        const categoriesResponse = await axios.get(
+          "http://localhost:8080/category"
+        );
         if (categoriesResponse.data && categoriesResponse.data.length > 0) {
-          categories.value = categoriesResponse.data.map(category => ({
+          categories.value = categoriesResponse.data.map((category) => ({
             label: category.title,
             value: category.id,
           }));
+          console.log("Categories loaded:", categories.value);
         } else {
-          console.error('Unexpected response format for categories: expected an array', categoriesResponse.data);
+          console.error("Unexpected categories format:", categoriesResponse.data);
         }
       } catch (error) {
-        console.error('Error loading unit types:', error);
+        console.error("Error loading unit types or categories:", error);
       }
-
     });
 
-    const handleNewProduct = async () => {
+    const handleNewProduct = async (event) => {
+      event.preventDefault();
       try {
-        const imagesBase64 = await Promise.all(
-          selectedFiles.value.map(file => convertFileToBase64(file))
-        );
-        console.log("Base64 images:", imagesBase64);
-        debugger;
+        console.log("Preparing images for submission...");
+        const imagesBase64 = selectedFiles.value.map((file) => file.base64);
+        console.log("Images Base64:", imagesBase64);
+
+        console.log("Submitting product data...");
         const response = await axiosInstance.post("/product/create", {
           title: title.value,
           description: description.value,
@@ -200,16 +228,20 @@ export default {
           discountPercents: discount.value,
           quantity: quantity.value,
           categoryId: category.value,
-          images: imagesBase64,
+          imagesBase64: imagesBase64,
         });
 
-        console.log("Created product:", response.data);
+        console.log("Product created successfully:", response.data);
+        // Optionally reset the form or provide feedback to the user
       } catch (error) {
-        console.error("Creating new product error:", error.response?.data || error.message);
-        alert("Creating new product failed: " + (error.response?.data?.message || error.message));
+        console.error("Error creating product:", error.response?.data || error.message);
+        alert(
+          "Creating new product failed: " +
+          (error.response?.data?.message || error.message)
+        );
       }
-
     };
+
     return {
       title,
       description,
@@ -226,22 +258,9 @@ export default {
       handleNewProduct,
     };
   },
-}
-function convertFileToBase64(file) {
-    const reader = new FileReader();
-    const blob = new Blob([file], {type: file.type});
-
-    reader.onload = function () {
-      console.log(reader.result);
-    };
-
-    reader.onerror = function (error) {
-      console.log('Error: ', error);
-    };
-
-    reader.readAsDataURL(blob);
-}
+};
 </script>
+
 <style scoped>
 .create-product-container {
   margin-left: 20px;
