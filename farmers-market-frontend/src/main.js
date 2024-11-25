@@ -1,5 +1,3 @@
-import './assets/main.css'
-
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
@@ -9,8 +7,12 @@ import Aura from '@primevue/themes/aura'
 import Button from 'primevue/button'
 import SelectButton from 'primevue/selectbutton';
 import InputText from 'primevue/inputtext'
-import FloatLabel from 'primevue/floatlabel';
+import FloatLabel from 'primevue/floatlabel'; 
 
+
+import 'primeicons/primeicons.css';
+import './assets/main.css'
+import './assets/overrides.css';
 
 const app = createApp(App)
 
@@ -23,7 +25,10 @@ app.use(PrimeVue, {
       }
   }
 })
+
 app.use(router)
+
+
 
 app.component('ThemedButton', Button)
 app.component('SelectButton', SelectButton)
