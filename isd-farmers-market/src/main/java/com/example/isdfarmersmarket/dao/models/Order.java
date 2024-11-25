@@ -16,26 +16,33 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
     private Long id;
-    @Column(name = "order_status")
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_status", nullable = false)
     private OrderStatus orderStatus;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    @Column(name="total_price")
+
+    @Column(name="total_price", nullable = false)
     private BigDecimal totalPrice;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ItemInOrder> products = new HashSet<>();
+
     @Column(name="created_date", columnDefinition = "TimeStamp")
     private LocalDateTime createdDate = LocalDateTime.now();
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof User)) return false;
+        if (!(o instanceof Order)) return false;
         Order order = (Order) o;
         return Objects.equals(getId(), order.getId());
     }

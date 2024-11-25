@@ -14,7 +14,6 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 public class ProductDTO {
-
     private Long id;
     private String title;
     private String description;
