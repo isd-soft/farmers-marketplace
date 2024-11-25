@@ -178,7 +178,7 @@
 import { ref } from "vue";
 import { useRouter} from "vue-router";
 import axiosInstance from "@/utils/axiosInstance";
-
+import { isLoggedIn } from '@/shared/authState';
 
 import Password from 'primevue/password';
 import Tabs from 'primevue/tabs';
@@ -190,6 +190,9 @@ import TabPanel from 'primevue/tabpanel';
 
 export default {
   name: "LoginPage",
+  created() {
+    document.body.style.backgroundColor = '#2D3142';
+  },
   components: {
     Tabs,
     Tab,
@@ -221,7 +224,7 @@ export default {
     });
     const loading = ref(false);
     const router = useRouter();
-
+    
     const validateLoginForm = () => {
       errors.value = { email: "", password: "" };
       let isValid = true;
@@ -308,11 +311,10 @@ export default {
         const { accessToken, refreshToken } = response.data;
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
-
         console.log("Access Token:", localStorage.getItem("accessToken"));
         console.log("Refresh Token:", localStorage.getItem("refreshToken"));
-        alert("Login successful");
-        router.push("/" );
+        document.body.style.backgroundColor = 'white'; 
+        window.location.href = "/";
       } catch (error) {
         console.error("Login error:", error.response?.data || error.message);
         alert("Login failed: " + (error.response?.data?.message || error.message));

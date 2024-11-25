@@ -115,12 +115,6 @@ public class AuthService {
                 .findFirst()
                 .orElseThrow(() -> new RefreshTokenException("Refresh token doesn't exist"));
 
-        try {
-            jwtService.validateToken(refreshToken);
-        }
-        catch (JwtException ex) {
-            throw new RefreshTokenException("Invalid refresh token");
-        }
         return jwtService.generateAccessToken(username, user.getRoles());
     }
 }

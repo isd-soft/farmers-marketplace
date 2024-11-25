@@ -49,12 +49,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final String username = jwtService.extractUsername(token);
             final List<String> roles = jwtService.extractRoles(token);
 
+            jwtService.validateToken(token);
+
             if (roles == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
-
-            jwtService.validateToken(token);
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     username,
@@ -81,9 +81,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (IllegalArgumentException ex) {
             sendErrorResponse(response, "Illegal argument during JWT processing");
-        }
-        catch (JwtException ex) {
-            sendErrorResponse(response, "Unknown JWT exception happened");
         }
 
     }
