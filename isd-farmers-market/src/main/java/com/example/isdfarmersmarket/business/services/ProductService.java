@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface ProductService {
-    ProductDTO createProduct(CreateProductCommand createProductCommand, Set<MultipartFile> files);
+    ProductDTO createProduct(CreateProductCommand createProductCommand);
 
     ProductDTO updateProduct(Long id, UpdateProductCommand updateProductCommand, Set<MultipartFile> files, Set<Long> imagesToDeleteId);
 

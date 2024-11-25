@@ -29,10 +29,9 @@ public class ProductController {
             summary = "Create a product",
             description = "This endpoint allows creating a product with images"
     )
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ProductDTO> createProduct(@RequestPart @Valid CreateProductCommand createProductCommand,
-    @RequestPart(value = "files", required = false) List<MultipartFile>files) {
-        return ResponseEntity.status(CREATED).body(productService.createProduct(createProductCommand,new HashSet<>(files)));
+    @PostMapping(value = "/create")
+    public ResponseEntity<ProductDTO> createProduct(@RequestBody CreateProductCommand createProductCommand) {
+        return ResponseEntity.status(CREATED).body(productService.createProduct(createProductCommand));
     }
 
     @Operation(

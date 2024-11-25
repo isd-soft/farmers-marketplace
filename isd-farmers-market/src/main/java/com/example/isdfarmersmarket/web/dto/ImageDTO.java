@@ -6,8 +6,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ImageDTO {
     private Long id;
-    private String originalFileName;
-    private Long size;
-    private String fileType;
     private byte[] bytes;
 }
