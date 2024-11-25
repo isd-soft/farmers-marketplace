@@ -1,11 +1,12 @@
 <template>
+  <Header class="navbar"></Header>
   <div class="wishlist-container">
-    <Card class="wishlist-card" style="margin: 20px auto; max-width: 100%;">
+    <Card class="wishlist-card" style="margin: 20px auto; max-width: 100%">
       <template #content>
         <h2 class="wishlist-header">My Wishlist</h2>
         <div v-if="isLoading" class="loading-container">
           <ProgressSpinner
-            style="width: 50px; height: 50px;"
+            style="width: 50px; height: 50px"
             strokeWidth="3"
             animationDuration="0.8s"
           />
@@ -18,25 +19,38 @@
           <div v-for="product in wishlist" :key="product.id" class="wishlist-item">
             <Card class="product-card">
               <template #header>
-                <h3 class="product-title">{{ product.title }}</h3>
+                <router-link
+                  :to="`/product/${product.id}`"
+                  style="text-decoration: none; color: #3eb489"
+                >
+                  <h3 class="product-title">{{ product.title }}</h3>
+                </router-link>
               </template>
               <template #content>
                 <div class="product-info">
                   <p class="product-price">
                     <span v-if="product.discountPercents && product.discountPercents > 0">
-                  <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px;">
-                    ${{ product.pricePerUnit }}
-                  </s>
-                  <span style="color: #007bff; font-size: 1.5rem;">
-                    ${{ (product.pricePerUnit)*(((100-product.discountPercents) / 100)).toFixed(2) }}
-                  </span>
-                </span>
-                    <span v-else><span style="color: #007bff; font-size: 1.5rem;">
-                    ${{ product.pricePerUnit }}
-                  </span>
-                </span>
+                      <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
+                        ${{ product.pricePerUnit }}
+                      </s>
+                      <span style="color: #007bff; font-size: 1.5rem">
+                        ${{
+                          product.pricePerUnit * ((100 - product.discountPercents) / 100).toFixed(2)
+                        }}
+                      </span>
+                    </span>
+                    <span v-else
+                      ><span style="color: #007bff; font-size: 1.5rem">
+                        ${{ product.pricePerUnit }}
+                      </span>
+                    </span>
                   </p>
-                  <Rating v-model="product.rating" :stars="5" readonly style="margin-bottom: 10px;" />
+                  <Rating
+                    v-model="product.rating"
+                    :stars="5"
+                    readonly
+                    style="margin-bottom: 10px"
+                  />
                 </div>
               </template>
               <template #footer>
@@ -54,59 +68,56 @@
     </Card>
   </div>
 </template>
-
 <script>
-import { ref, onMounted } from "vue";
-import axiosInstance from "@/utils/axiosInstance.js";
-import Galleria from "primevue/galleria";
-import TabView from "primevue/tabview";
-import TabPanel from "primevue/tabpanel";
-import Rating from "primevue/rating";
-import Card from "primevue/card";
-import Button from "primevue/button";
-import ProgressSpinner from "primevue/progressspinner";
+import { ref, onMounted } from 'vue'
+import axiosInstance from '@/utils/axiosInstance.js'
+import Rating from 'primevue/rating'
+import Card from 'primevue/card'
+import Button from 'primevue/button'
+import ProgressSpinner from 'primevue/progressspinner'
+import Header from '@/components/Header.vue'
 
 export default {
-  name: "WishlistPage",
-  components: { Button, Rating, Card, ProgressSpinner },
+  name: 'WishlistPage',
+  components: { Header, Button, Rating, Card, ProgressSpinner },
   setup() {
-    const isLoading = ref(true);
-    const wishlist = ref([]);
+    const isLoading = ref(true)
+    const wishlist = ref([])
 
     const fetchWishlist = async () => {
       try {
-        const response = await axiosInstance.get("customer/wishlist");
-        wishlist.value = response.data; // Replace this with your API response structure
+        const response = await axiosInstance.get('customer/wishlist')
+        wishlist.value = response.data // Replace this with your API response structure
       } catch (error) {
-        console.error("Error fetching wishlist:", error);
+        console.error('Error fetching wishlist:', error)
       } finally {
-        isLoading.value = false;
+        isLoading.value = false
       }
-    };
+    }
 
-    const discountedPrice = (price, discount) => price * ((100 - discount) / 100);
+    const discountedPrice = (price, discount) => price * ((100 - discount) / 100)
 
     const removeFromWishlist = async (id) => {
       try {
-        await axiosInstance.delete(`customer/wishlist/${id}`);
-        wishlist.value = wishlist.value.filter((product) => product.id !== id);
+        await axiosInstance.delete(`customer/wishlist/${id}`)
+        wishlist.value = wishlist.value.filter((product) => product.id !== id)
       } catch (error) {
-        console.error("Error removing item from wishlist:", error);
+        console.error('Error removing item from wishlist:', error)
       }
-    };
+    }
 
     onMounted(() => {
-      fetchWishlist();
-    });
+      fetchWishlist()
+    })
 
     return {
       isLoading,
       wishlist,
       discountedPrice,
       removeFromWishlist,
-    };
+    }
   },
-};
+}
 </script>
 
 <style scoped>

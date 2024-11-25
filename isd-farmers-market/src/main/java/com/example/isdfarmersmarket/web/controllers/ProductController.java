@@ -78,21 +78,21 @@ public class ProductController {
     @Operation(
             description = "This endpoint is used to get product reviews by id"
     )
-    @GetMapping("/{id}/reviews")
+    @GetMapping("/{productId}/reviews")
     public ResponseEntity<PageResponseDTO<ProductReviewDTO>> getProductReviews(
-            @PathVariable Long id,
+            @PathVariable Long productId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int pageSize) {
-        return ResponseEntity.status(OK).body(productService.getProductReviews(id, page, pageSize));
+        return ResponseEntity.status(OK).body(productService.getProductReviews(productId, page, pageSize));
     }
     @Operation(
             description = "This endpoint is used to get a detailed product page by ID"
     )
-    @GetMapping("/{id}/page")
-    public ResponseEntity<ProductPageDTO> getProductPage(@PathVariable Long id, @AuthenticationPrincipal JwtPrincipal principal) {
+    @GetMapping("/{productId}/page")
+    public ResponseEntity<ProductPageDTO> getProductPage(@PathVariable Long productId, @AuthenticationPrincipal JwtPrincipal principal) {
         Long principalId = null;
         if(principal != null) principalId = principal.getId();
-        return ResponseEntity.status(OK).body(productService.getProductPageById(id, principal));
+        return ResponseEntity.status(OK).body(productService.getProductPageById(productId, principal));
     }
 
 }

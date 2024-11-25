@@ -1,28 +1,31 @@
 <template>
+  <Header class="navbar"></Header>
   <Card :style="{ position: 'absolute', top: '10vh' }">
     <template #content>
       <div v-if="isLoading" class="loading-container">
-        <div class="loading-content" style="text-align: center; padding: 20px;">
+        <div class="loading-content" style="text-align: center; padding: 20px">
           <ProgressSpinner
-            style="width: 80px; height: 80px;"
+            style="width: 80px; height: 80px"
             strokeWidth="5"
             animationDuration="1s"
           />
-          <p style="margin-top: 20px; font-size: 1.3rem; font-weight: bold; color: #555;">Loading, please wait...</p>
+          <p style="margin-top: 20px; font-size: 1.3rem; font-weight: bold; color: #555">
+            Loading, please wait...
+          </p>
         </div>
       </div>
 
       <div v-else-if="hasError" class="error-message">
-        <div class="error-content" style="text-align: center; padding: 20px;">
-          <i class="pi pi-exclamation-circle" style="font-size: 3rem; color: #d9534f;"></i>
-          <p style="margin-top: 15px; font-size: 1.3rem; font-weight: bold; color: #d9534f;">
+        <div class="error-content" style="text-align: center; padding: 20px">
+          <i class="pi pi-exclamation-circle" style="font-size: 3rem; color: #d9534f"></i>
+          <p style="margin-top: 15px; font-size: 1.3rem; font-weight: bold; color: #d9534f">
             Oops! Something went wrong. Please try again later.
           </p>
           <Button
             label="Go Back"
             class="p-button-secondary"
             icon="pi pi-arrow-left"
-            style="margin-top: 15px;"
+            style="margin-top: 15px"
             @click="$router.go(-1)"
           />
         </div>
@@ -34,12 +37,26 @@
           <div class="product-content">
             <!-- Galleria Component -->
             <div class="product-gallery">
-              <Galleria :value="images" :responsiveOptions="responsiveOptions" :numVisible="5" containerStyle="max-height: auto; margin:0%;" :showItemNavigators="true">
+              <Galleria
+                :value="images"
+                :responsiveOptions="responsiveOptions"
+                :numVisible="5"
+                containerStyle="max-height: auto; margin:0%;"
+                :showItemNavigators="true"
+              >
                 <template #item="slotProps">
-                  <img :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt" class="gallery-image" />
+                  <img
+                    :src="slotProps.item.itemImageSrc"
+                    :alt="slotProps.item.alt"
+                    class="gallery-image"
+                  />
                 </template>
                 <template #thumbnail="slotProps">
-                  <img :src="slotProps.item.thumbnailImageSrc" :alt="slotProps.item.alt" class="thumbnail-image" />
+                  <img
+                    :src="slotProps.item.thumbnailImageSrc"
+                    :alt="slotProps.item.alt"
+                    class="thumbnail-image"
+                  />
                 </template>
               </Galleria>
             </div>
@@ -49,14 +66,17 @@
               <div class="product-name">{{ product.title || 'Product Name' }}</div>
               <div class="product-cost">
                 <span v-if="product.discountPercents && product.discountPercents > 0">
-                  <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px;">
+                  <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
                     ${{ product.pricePerUnit }}
                   </s>
-                  <span style="color: #007bff; font-size: 1.5rem;">
-                    ${{ (product.pricePerUnit)*(((100-product.discountPercents) / 100)).toFixed(2) }}
+                  <span style="color: #007bff; font-size: 1.5rem">
+                    ${{
+                      product.pricePerUnit * ((100 - product.discountPercents) / 100).toFixed(2)
+                    }}
                   </span>
                 </span>
-                  <span v-else><span style="color: #007bff; font-size: 1.5rem;">
+                <span v-else
+                  ><span style="color: #007bff; font-size: 1.5rem">
                     ${{ product.pricePerUnit }}
                   </span>
                 </span>
@@ -69,7 +89,14 @@
               <div class="product-quantity">Quantity:</div>
               <p>Currently available {{ product.quantity }}</p>
               <div class="quantity-selector">
-                <InputNumber v-model="quantity" showButtons buttonLayout="horizontal" :inputStyle="{ width: '5em' }" :min="1" :max="product.quantity">
+                <InputNumber
+                  v-model="quantity"
+                  showButtons
+                  buttonLayout="horizontal"
+                  :inputStyle="{ width: '5em' }"
+                  :min="1"
+                  :max="product.quantity"
+                >
                   <template #incrementbuttonicon>
                     <span class="pi pi-plus" />
                   </template>
@@ -79,14 +106,22 @@
                 </InputNumber>
                 <span class="unit-type">{{ product.unitType }}</span>
               </div>
-              <Button class="add-to-cart-button" @click="addToCart" style="width: 12em; background-color: green; color: white; border: none;">
-                Add to Cart
-              </Button>
-              <i
-                :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
-                style="font-size: 2.5rem; cursor: pointer; color: red;"
-                @click="toggleWishlist"
-              />
+              <div class="button-with-heart">
+                <Button
+                  class="add-to-cart-button"
+                  @click="addToCart"
+                  style="width: 12em; background-color: green; color: white; border: none; display: inline-flex; align-items: center; justify-content: center;"
+                >
+                  Add to Cart
+                </Button>
+
+                <i
+                  :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
+                  style="font-size: 2.5rem; cursor: pointer; color: red; margin-left: 10px; vertical-align: middle;"
+                  @click="toggleWishlist"
+                  :title="product.isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -105,8 +140,15 @@
               <div class="add-review">
                 <h3>Leave a Review</h3>
                 <Rating v-model="newReview.rating" :stars="5" />
-                <textarea v-model="newReview.content" rows="6" placeholder="Write your review..." style="margin-top: 1em"></textarea>
-                <Button @click="submitReview" style="background-color: green; width: 12em">Submit Review</Button>
+                <textarea
+                  v-model="newReview.content"
+                  rows="6"
+                  placeholder="Write your review..."
+                  style="margin-top: 1em"
+                ></textarea>
+                <Button @click="submitReview" style="background-color: green; width: 12em"
+                  >Submit Review</Button
+                >
               </div>
 
               <!-- Reviews Section -->
@@ -118,7 +160,9 @@
                       <Card>
                         <template #content>
                           <Rating v-model="review.rating" :readOnly="true" :stars="5" />
-                          <strong>{{ review.creator.firstName }} {{ review.creator.lastName }}</strong>
+                          <strong
+                            >{{ review.creator.firstName }} {{ review.creator.lastName }}</strong
+                          >
                           <p>{{ review.content }}</p>
                         </template>
                       </Card>
@@ -129,7 +173,7 @@
                     v-if="!isAllReviewsLoaded"
                     label="Load More Reviews"
                     class="p-button-text"
-                    style="margin-top: 20px;"
+                    style="margin-top: 20px"
                     @click="loadMoreReviews"
                   />
                 </div>
@@ -152,127 +196,141 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
-import axiosInstance from "@/utils/axiosInstance.js";
-import bootsImg from "@/assets/boots.png";
-import whatImg from "@/assets/what.jpg";
-import Galleria from "primevue/galleria";
-import TabView from "primevue/tabview";
-import TabPanel from "primevue/tabpanel";
-import Rating from "primevue/rating";
-import Card from "primevue/card";
-import Button from "primevue/button";
-import InputNumber from "primevue/inputnumber";
-import ProgressSpinner from "primevue/progressspinner";
+import { ref, onMounted } from 'vue'
+import axiosInstance from '@/utils/axiosInstance.js'
+import bootsImg from '@/assets/boots.png'
+import whatImg from '@/assets/what.jpg'
+import Galleria from 'primevue/galleria'
+import TabView from 'primevue/tabview'
+import TabPanel from 'primevue/tabpanel'
+import Rating from 'primevue/rating'
+import Card from 'primevue/card'
+import Button from 'primevue/button'
+import InputNumber from 'primevue/inputnumber'
+import ProgressSpinner from 'primevue/progressspinner'
+import Header from '@/components/Header.vue'
 
 export default {
-  name: "ProductPage",
-  components: { Galleria, Button, TabView, TabPanel, Rating, Card, InputNumber, ProgressSpinner },
-  props: ["id"],
+  name: 'ProductPage',
+  components: {
+    Header,
+    Galleria,
+    Button,
+    TabView,
+    TabPanel,
+    Rating,
+    Card,
+    InputNumber,
+    ProgressSpinner,
+  },
+  props: ['id'],
   setup(props) {
-    const product = ref({});
-    const reviews = ref([]);
-    const newReview = ref({ productId: props.id, rating: 0, content: "" });
-    const quantity = ref(1);
-    const currentPage = ref(0); // Pagination state
-    const pageSize = ref(5); // Page size
-    const isAllReviewsLoaded = ref(false);
+    const product = ref({})
+    const reviews = ref([])
+    const newReview = ref({ productId: props.id, rating: 0, content: '' })
+    const quantity = ref(1)
+    const currentPage = ref(0) // Pagination state
+    const pageSize = ref(5) // Page size
+    const isAllReviewsLoaded = ref(false)
 
     const images = ref([
-      { itemImageSrc: bootsImg, thumbnailImageSrc: bootsImg, alt: "Boots Image" },
-      { itemImageSrc: whatImg, thumbnailImageSrc: whatImg, alt: "Farm Image" },
-      { itemImageSrc: bootsImg, thumbnailImageSrc: bootsImg, alt: "Boots Image" },
-      { itemImageSrc: whatImg, thumbnailImageSrc: whatImg, alt: "Farm Image" },
-      { itemImageSrc: bootsImg, thumbnailImageSrc: bootsImg, alt: "Boots Image" },
-      { itemImageSrc: whatImg, thumbnailImageSrc: whatImg, alt: "Farm Image" },
-      { itemImageSrc: bootsImg, thumbnailImageSrc: bootsImg, alt: "Boots Image" },
-      { itemImageSrc: whatImg, thumbnailImageSrc: whatImg, alt: "Farm Image" },
-    ]);
+      { itemImageSrc: bootsImg, thumbnailImageSrc: bootsImg, alt: 'Boots Image' },
+      { itemImageSrc: whatImg, thumbnailImageSrc: whatImg, alt: 'Farm Image' },
+      { itemImageSrc: bootsImg, thumbnailImageSrc: bootsImg, alt: 'Boots Image' },
+      { itemImageSrc: whatImg, thumbnailImageSrc: whatImg, alt: 'Farm Image' },
+      { itemImageSrc: bootsImg, thumbnailImageSrc: bootsImg, alt: 'Boots Image' },
+      { itemImageSrc: whatImg, thumbnailImageSrc: whatImg, alt: 'Farm Image' },
+      { itemImageSrc: bootsImg, thumbnailImageSrc: bootsImg, alt: 'Boots Image' },
+      { itemImageSrc: whatImg, thumbnailImageSrc: whatImg, alt: 'Farm Image' },
+    ])
 
     const responsiveOptions = ref([
-      { breakpoint: "1024px", numVisible: 3 },
-      { breakpoint: "600px", numVisible: 1 },
-    ]);
+      { breakpoint: '1024px', numVisible: 3 },
+      { breakpoint: '600px', numVisible: 1 },
+    ])
 
-    const isLoading = ref(true);
-    const hasError = ref(false);
+    const isLoading = ref(true)
+    const hasError = ref(false)
 
     const fetchProduct = async () => {
       try {
-        const response = await axiosInstance.get(`/product/${props.id}/page`);
-        console.log(response);
-        product.value = response.data;
-        isLoading.value = false;
+        const response = await axiosInstance.get(`/product/${props.id}/page`)
+        console.log(response)
+        product.value = response.data
+        isLoading.value = false
       } catch (error) {
-        console.error("Failed to load product:", error.message);
-        hasError.value = true;
-        isLoading.value = false;
+        console.error('Failed to load product:', error.message)
+        hasError.value = true
+        isLoading.value = false
       }
-    };
+    }
     const toggleWishlist = async () => {
-      if (!product.value.id) return;
+      if (!product.value.id) return
 
       try {
         if (product.value.isInWishlist) {
-          await axiosInstance.delete(`/customer/wishlist/${props.id}`);
+          await axiosInstance.delete(`/customer/wishlist/${props.id}`)
         } else {
-          await axiosInstance.post(`/customer/wishlist/${props.id}`);
+          await axiosInstance.post(`/customer/wishlist/${props.id}`)
         }
-        product.value.isInWishlist = !product.value.isInWishlist;
+        product.value.isInWishlist = !product.value.isInWishlist
       } catch (error) {
         console.error(
-          `Failed to ${
-            product.value.isInWishlist ? 'remove' : 'add'
-          } product to/from wishlist:`,
-          error.message
-        );
+          `Failed to ${product.value.isInWishlist ? 'remove' : 'add'} product to/from wishlist:`,
+          error.message,
+        )
       }
-    };
+    }
     const fetchReviews = async () => {
       try {
         const response = await axiosInstance.get(`/product/${props.id}/reviews`, {
           params: { page: currentPage.value, pageSize: pageSize.value },
-        });
-        console.log(response.data);
-        console.log((currentPage.value)*pageSize.value+response.data.content.length);
+        })
+        console.log(response.data)
+        console.log(currentPage.value * pageSize.value + response.data.content.length)
 
-          reviews.value.push(...response.data.content);
-        if ((currentPage.value)*pageSize.value+response.data.content.length === response.data.totalElements) {
-          isAllReviewsLoaded.value = true;
+        reviews.value.push(...response.data.content)
+        if (
+          currentPage.value * pageSize.value + response.data.content.length ===
+          response.data.totalElements
+        ) {
+          isAllReviewsLoaded.value = true
         }
-        isLoading.value = false;
+        isLoading.value = false
       } catch (error) {
-        console.error("Failed to load reviews:", error.message);
-        hasError.value = true;
-        isLoading.value = false;
+        console.error('Failed to load reviews:', error.message)
+        hasError.value = true
+        isLoading.value = false
       }
-    };
+    }
     const loadMoreReviews = () => {
-      currentPage.value += 1;
-      fetchReviews();
-    };
+      currentPage.value += 1
+      fetchReviews()
+    }
     const submitReview = async () => {
       if (!newReview.value.rating || !newReview.value.content.trim()) {
-        console.error("Rating and content are required.");
-        return;
+        console.error('Rating and content are required.')
+        return
       }
       try {
-        const response = await axiosInstance.post(`/customer/review/product`, newReview.value);
-        reviews.value.unshift(response.data);
-        newReview.value = { productId: props.id, rating: 0, content: "" };
+        const response = await axiosInstance.post(`/customer/review/product`, newReview.value)
+        reviews.value.unshift(response.data)
+        newReview.value = { productId: props.id, rating: 0, content: '' }
       } catch (error) {
-        console.error("Failed to submit review:", error.message);
+        console.error('Failed to submit review:', error.message)
       }
-    };
+    }
 
     const addToCart = () => {
-      console.log(`Added ${quantity.value} ${product.value.unitType} of ${product.value.name} to the cart.`);
-    };
+      console.log(
+        `Added ${quantity.value} ${product.value.unitType} of ${product.value.name} to the cart.`,
+      )
+    }
 
     onMounted(() => {
-      fetchProduct();
-      fetchReviews();
-    });
+      fetchProduct()
+      fetchReviews()
+    })
 
     return {
       product,
@@ -289,12 +347,11 @@ export default {
       loadMoreReviews,
       addToCart,
       submitReview,
-      toggleWishlist
-    };
+      toggleWishlist,
+    }
   },
-};
+}
 </script>
-
 
 <style scoped>
 .product-page {

@@ -170,9 +170,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductPageDTO getProductPageById(Long id, @AuthenticationPrincipal JwtPrincipal principal) {
+    public ProductPageDTO getProductPageById(Long productId, @AuthenticationPrincipal JwtPrincipal principal) {
         var product = productRepository
-                .getProductById(id)
+                .getProductById(productId)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
         User user = userRepository.findById(principal.getId()).orElseThrow();
         ProductPageDTO productPageDTO = productMapper.mapToProductPage(product);
