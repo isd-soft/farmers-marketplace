@@ -2,6 +2,7 @@ package com.example.isdfarmersmarket.business.services;
 
 import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.example.isdfarmersmarket.dao.models.Role;
+import com.example.isdfarmersmarket.dao.models.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -41,49 +42,34 @@ public class JwtService {
         this.signingKey = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateAccessToken(String username, Set<Role> roles) {
-        List<String> roleNames = roles.stream()
+    public String generateAccessToken(User user) {
+        List<String> roleNames = user.getRoles().stream()
                 .map(Role::getAuthority)
                 .toList();
-        return createToken(username, Map.of("roles", roleNames), expiration);
+        return createToken(user.getId(),
+                Map.of("roles", roleNames,
+                        "email", user.getEmail()),
+                expiration);
     }
 
-    public String generateRefreshToken(String username) {
-        return createToken(username, Map.of(), refreshExpiration);
+    public String generateRefreshToken(User user) {
+        return createToken(user.getId(),
+                Map.of(),
+                refreshExpiration);
     }
 
-    private String createToken(String username, Map<String, Object> claims, long expirationTime) {
+    private String createToken(Long userId, Map<String, Object> claims, long expirationTime) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(username)
+                .setSubject(String.valueOf(userId))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public void validateToken(String token) {
-        extractAllClaims(token);
-    }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
-
-    public List<String> extractRoles(String token) {
-        List<String> list = extractClaim(token, claims -> claims.get("roles", List.class));
-        return list;
-    }
-
-    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
-    }
-    public boolean hasRole(String token, ERole requiredRole) {
-        return extractRoles(token).stream()
-                .anyMatch(role -> role.equals(requiredRole.name()));
-    }
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(signingKey)
                 .build()

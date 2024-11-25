@@ -5,16 +5,13 @@ import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
 import com.example.isdfarmersmarket.dao.models.Category;
 import com.example.isdfarmersmarket.dao.models.Image;
 import com.example.isdfarmersmarket.dao.models.Product;
-import com.example.isdfarmersmarket.dao.models.ProductReview;
 import com.example.isdfarmersmarket.dao.repositories.CategoryRepository;
 import com.example.isdfarmersmarket.dao.repositories.ImageRepository;
 import com.example.isdfarmersmarket.dao.repositories.ProductRepository;
 import com.example.isdfarmersmarket.dao.repositories.ProductReviewRepository;
 import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateProductCommand;
-import com.example.isdfarmersmarket.web.dto.ProductDTO;
-import com.example.isdfarmersmarket.web.dto.ProductReviewDTO;
-import com.example.isdfarmersmarket.web.dto.ProductReviewStats;
+import com.example.isdfarmersmarket.web.dto.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,11 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-@Slf4j
+
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
@@ -57,7 +53,6 @@ public class ProductServiceImpl implements ProductService {
                 images.add(image);
             });
         }
-        log.error(String.valueOf(createProductCommand.getCategoryId()));
         Category category = categoryRepository.getCategoryById(createProductCommand.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException(CATEGORY_FIND_FAILED_BY_ID));
         Product product = Product.builder()
@@ -140,22 +135,45 @@ public class ProductServiceImpl implements ProductService {
     }
     @Override
     @Transactional(readOnly = true)
-    public List<ProductReviewDTO> getProductReviews(Long productId) {
+    public PageResponseDTO<ProductReviewDTO> getProductReviews(Long productId, int page, int pageSize) {
         Product product = productRepository
                 .getProductById(productId)
                 .orElseThrow(()->new EntityNotFoundException("Product not found"));
-        return productReviewRepository
-                .findAllByProduct(product, PageRequest.of(0,10))
+
+        var reviewsPage = productReviewRepository
+                .findAllByProductOrderByCreatedDateDesc(product, PageRequest.of(page,pageSize));
+        var totalReviews = reviewsPage.getTotalElements();
+        var content = reviewsPage
+                .getContent()
+                .stream()
                 .map(reviewMapper::mapWithoutProductDetails)
                 .toList();
+
+        return new PageResponseDTO<>(content,totalReviews,page,pageSize);
     }
 
     @Override
     @Transactional
     public void updateProductReview(Product product) {
-        ProductReviewStats productReviewStats = productReviewRepository.findReviewStatsByProduct(product);
-        product.setRating((float) productReviewStats.getAverageRating());
-        product.setReviewCount((int) productReviewStats.getReviewCount());
+        ProductReviewStatsDTO productReviewStatsDTO = productReviewRepository
+                .findReviewStatsByProduct(product);
+
+        product.setRating(productReviewStatsDTO
+                .getAverageRating()
+                .floatValue());
+        product.setReviewCount(productReviewStatsDTO
+                .getReviewCount()
+                .intValue());
+
         productRepository.save(product);
+    }
+
+    @Override
+    public ProductPageDTO getProductPageById(Long id) {
+        var product = productRepository
+                .getProductById(id)
+                .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
+
+        return productMapper.mapToProductPage(product);
     }
 }

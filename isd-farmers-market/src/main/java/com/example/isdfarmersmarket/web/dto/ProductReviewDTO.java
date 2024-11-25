@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductReviewDTO  {
     Long id;
-    float rating;
+    Float rating;
     String content;
     UserProfileDTO creator;
     String productTitle;

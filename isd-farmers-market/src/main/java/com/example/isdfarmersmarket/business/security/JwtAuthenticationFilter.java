@@ -2,11 +2,10 @@ package com.example.isdfarmersmarket.business.security;
 
 
 import com.example.isdfarmersmarket.business.services.JwtService;
+import com.example.isdfarmersmarket.dao.enums.ERole;
+import com.example.isdfarmersmarket.dao.models.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -36,7 +35,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
         try{
             final String authHeader = request.getHeader("Authorization");
             if (authHeader == null) {
@@ -46,18 +48,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             final String token = authHeader.substring(7);
 
-            final String username = jwtService.extractUsername(token);
-            final List<String> roles = jwtService.extractRoles(token);
-
-            jwtService.validateToken(token);
+            Claims claims = jwtService.extractAllClaims(token);
+            final Long id = Long.valueOf(claims.getSubject());
+            final String email = claims.get("email", String.class);
+            final List<String> roles = claims.get("roles", List.class);
 
             if (roles == null) {
+                // Empty token. Means it's a refresh token.
                 filterChain.doFilter(request, response);
                 return;
             }
+            var principal = new JwtPrincipal(
+                    id,
+                    email,
+                    roles.stream()
+                            .map(ERole::valueOf)
+                            .toList());
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    username,
+                    principal,
                     null,
                     roles.stream().map(roleName -> new SimpleGrantedAuthority("ROLE_" + roleName))
                                     .toList()
@@ -81,6 +90,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (IllegalArgumentException ex) {
             sendErrorResponse(response, "Illegal argument during JWT processing");
+        }
+        catch (JwtException ex) {
+            sendErrorResponse(response, "Unexpected JWT exception");
         }
 
     }
