@@ -38,7 +38,7 @@ public class User implements UserDetails {
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
             name = "wishlist",
-            joinColumns = { @JoinColumn(name = "user_id") },
+            joinColumns =    { @JoinColumn(name = "user_id") },
             inverseJoinColumns = { @JoinColumn(name = "product_id") }
     )
     private Set<Product> wishlist = new HashSet<>();

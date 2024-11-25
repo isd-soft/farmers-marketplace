@@ -54,7 +54,7 @@ const accountMenu = ref([
     icon: 'pi pi-user',
     items: [
       { label: 'Orders', icon: 'pi pi-shopping-cart', command: () => goToOrders() },
-      { label: 'Favorites', icon: 'pi pi-heart', command: () => goToFavorites() },
+      { label: 'Wishlist', icon: 'pi pi-heart', command: () => goToFavorites() },
       { label: 'Settings', icon: 'pi pi-cog', command: () => goToSettings() },
       { label: 'Logout', icon: 'pi pi-sign-out', command: () => logout() },
     ],
@@ -97,7 +97,7 @@ const goToOrders = () => {
 };
 
 const goToFavorites = () => {
-  window.location.href = '/favorites';
+  window.location.href = '/wishlist';
 };
 
 const goToSettings = () => {

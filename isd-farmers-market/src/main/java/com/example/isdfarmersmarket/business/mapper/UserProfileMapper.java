@@ -11,7 +11,7 @@ import org.mapstruct.Mapping;
 public interface UserProfileMapper {
 
     @Mapping(target = "isFarmer", expression = "java(isFarmer(user))")
-    UserProfileDTO toDto(User user);
+    UserProfileDTO map(User user);
 
     default boolean isFarmer(User user) {
         return user.getRoles().stream()
