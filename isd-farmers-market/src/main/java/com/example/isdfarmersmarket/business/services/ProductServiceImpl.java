@@ -46,7 +46,7 @@ public class ProductServiceImpl implements ProductService {
             images.add(image);
         });
 
-        Category category = categoryRepository.getCategoryById(createProductCommand.getCategoryId())
+        Category category = categoryRepository.findById(createProductCommand.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException(CATEGORY_FIND_FAILED_BY_ID));
         Product product = Product.builder()
                 .title(createProductCommand.getTitle())
@@ -74,9 +74,9 @@ public class ProductServiceImpl implements ProductService {
             }
             images.add(image);
         });
-        Product product = productRepository.getProductById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
-        Category category = categoryRepository.getCategoryById(updateProductCommand.getCategoryId())
+        Category category = categoryRepository.findById(updateProductCommand.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException(CATEGORY_FIND_FAILED_BY_ID));
         product.setTitle(updateProductCommand.getTitle());
         product.setDescription(updateProductCommand.getDescription());
@@ -93,7 +93,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductDTO deleteProduct(Long id) {
-        Product product = productRepository.getProductById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
         productRepository.delete(product);
         return productMapper.map(product);
@@ -108,7 +108,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO getProductById(Long id) {
-        Product product = productRepository.getProductById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
         return productMapper.map(product);
     }

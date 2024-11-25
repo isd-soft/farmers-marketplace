@@ -8,8 +8,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jdk.jshell.Snippet;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,11 +18,15 @@ import java.util.Set;
 
 @Data
 @NoArgsConstructor
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
 public class OrderDTO {
     private Long id;
-    private OrderStatus orderStatus;
-//    private UserDTO user;
+    private String orderStatus;
+    private Long userId;
     private BigDecimal totalPrice;
-//    private Set<productsDTO> products = new HashSet<>();
+    private Set<ItemInOrderDTO> products = new HashSet<>();
     private LocalDateTime createdDate = LocalDateTime.now();
 }

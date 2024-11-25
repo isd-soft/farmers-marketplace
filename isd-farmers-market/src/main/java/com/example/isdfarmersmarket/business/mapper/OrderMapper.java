@@ -6,12 +6,9 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
+
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
     OrderDTO map(Order order);
-
     List<OrderDTO> mapOrders(List<Order> orders);
-
 }
-
-

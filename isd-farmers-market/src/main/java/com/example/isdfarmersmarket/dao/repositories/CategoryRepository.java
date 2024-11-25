@@ -7,8 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Integer> {
-    Optional<Category> getCategoryById(Long id);
-
-    Boolean existsByTitle(String title);
+public interface CategoryRepository extends JpaRepository<Category, Long> {
+    boolean existsByTitle(String title);
 }

@@ -35,7 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDTO updateCategory(Long id, UpdateCategoryCommand updateCategoryCommand) {
-        Category category = categoryRepository.getCategoryById(id)
+        Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category with the specified id not found")
                 );
         String title = updateCategoryCommand.getTitle();
@@ -49,7 +49,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDTO deleteCategory(Long id) {
-        Category category = categoryRepository.getCategoryById(id)
+        Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category with the specified id not found")
                 );
         categoryRepository.delete(category);
