@@ -2,13 +2,12 @@ package com.example.isdfarmersmarket.business.services;
 
 import com.example.isdfarmersmarket.business.mapper.ProductMapper;
 import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
+import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.dao.models.Category;
 import com.example.isdfarmersmarket.dao.models.Image;
 import com.example.isdfarmersmarket.dao.models.Product;
-import com.example.isdfarmersmarket.dao.repositories.CategoryRepository;
-import com.example.isdfarmersmarket.dao.repositories.ImageRepository;
-import com.example.isdfarmersmarket.dao.repositories.ProductRepository;
-import com.example.isdfarmersmarket.dao.repositories.ProductReviewRepository;
+import com.example.isdfarmersmarket.dao.models.User;
+import com.example.isdfarmersmarket.dao.repositories.*;
 import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateProductCommand;
 import com.example.isdfarmersmarket.web.dto.*;
@@ -16,7 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,7 +24,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
@@ -37,6 +36,7 @@ public class ProductServiceImpl implements ProductService {
     private final ReviewMapper reviewMapper;
     private static final String PRODUCT_FIND_FAILED_BY_ID = "Product with the specified id not found";
     private static final String CATEGORY_FIND_FAILED_BY_ID = "Category with the specified id not found";
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -169,11 +169,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductPageDTO getProductPageById(Long id) {
+    @Transactional
+    public ProductPageDTO getProductPageById(Long id, @AuthenticationPrincipal JwtPrincipal principal) {
         var product = productRepository
                 .getProductById(id)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
-
-        return productMapper.mapToProductPage(product);
+        User user = userRepository.findById(principal.getId()).orElseThrow();
+        ProductPageDTO productPageDTO = productMapper.mapToProductPage(product);
+        if(user.getWishlist().contains(product)) productPageDTO.setIsInWishlist(true);
+        return productPageDTO;
     }
 }

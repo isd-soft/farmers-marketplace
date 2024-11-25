@@ -82,6 +82,11 @@
               <Button class="add-to-cart-button" @click="addToCart" style="width: 12em; background-color: green; color: white; border: none;">
                 Add to Cart
               </Button>
+              <i
+                :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
+                style="font-size: 2.5rem; cursor: pointer; color: red;"
+                @click="toggleWishlist"
+              />
             </div>
           </div>
         </div>
@@ -204,7 +209,25 @@ export default {
         isLoading.value = false;
       }
     };
+    const toggleWishlist = async () => {
+      if (!product.value.id) return;
 
+      try {
+        if (product.value.isInWishlist) {
+          await axiosInstance.delete(`/customer/wishlist/${props.id}`);
+        } else {
+          await axiosInstance.post(`/customer/wishlist/${props.id}`);
+        }
+        product.value.isInWishlist = !product.value.isInWishlist;
+      } catch (error) {
+        console.error(
+          `Failed to ${
+            product.value.isInWishlist ? 'remove' : 'add'
+          } product to/from wishlist:`,
+          error.message
+        );
+      }
+    };
     const fetchReviews = async () => {
       try {
         const response = await axiosInstance.get(`/product/${props.id}/reviews`, {
@@ -266,6 +289,7 @@ export default {
       loadMoreReviews,
       addToCart,
       submitReview,
+      toggleWishlist
     };
   },
 };

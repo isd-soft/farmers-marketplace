@@ -2,7 +2,6 @@ package com.example.isdfarmersmarket.web.dto;
 
 import com.example.isdfarmersmarket.dao.enums.UnitType;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
@@ -24,5 +23,6 @@ public class ProductPageDTO {
     Float rating;
     Integer reviewCount;
     Boolean canReview;
+    Boolean isInWishlist;
     List<ImageDTO> images = new ArrayList<>();
 }

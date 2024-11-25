@@ -19,6 +19,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -94,7 +95,7 @@ public class CustomerService {
                 .map(reviewMapper::map)
                 .toList();
     }
-
+    @Transactional(readOnly = true)
     public List<ProductInWishlistDTO> getWishlistProducts(JwtPrincipal jwtPrincipal) {
         User user = userRepository.findById(jwtPrincipal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
@@ -102,7 +103,7 @@ public class CustomerService {
                 .map(productMapper::mapToProductInWishlistDTO)
                 .toList();
     }
-
+    @Transactional
     public ProductInWishlistDTO addProductToWishlist(Long productId, JwtPrincipal principal) {
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
@@ -112,6 +113,20 @@ public class CustomerService {
             throw new EntityExistsException("Product already in wishlist");
         }
         user.getWishlist().add(product);
+        userRepository.save(user);
+        return productMapper.mapToProductInWishlistDTO(product);
+    }
+    @Transactional
+    public ProductInWishlistDTO deleteProductFromWishlist(Long productId, JwtPrincipal principal) {
+        User user = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new EntityNotFoundException("No such user found"));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+        if(!user.getWishlist().contains(product)) {
+            throw new EntityExistsException("Product doesnt exist in the wishlist");
+        }
+        user.getWishlist().remove(product);
+        userRepository.save(user);
         return productMapper.mapToProductInWishlistDTO(product);
     }
 }

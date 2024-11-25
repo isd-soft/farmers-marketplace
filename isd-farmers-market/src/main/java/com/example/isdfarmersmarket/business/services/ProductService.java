@@ -1,6 +1,7 @@
 package com.example.isdfarmersmarket.business.services;
 
 
+import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.dao.models.Product;
 import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateProductCommand;
@@ -25,5 +26,5 @@ public interface ProductService {
     PageResponseDTO<ProductReviewDTO> getProductReviews(Long id, int page, int pageSize);
     void updateProductReview(Product product);
 
-    ProductPageDTO getProductPageById(Long id);
+    ProductPageDTO getProductPageById(Long id, JwtPrincipal principal);
 }

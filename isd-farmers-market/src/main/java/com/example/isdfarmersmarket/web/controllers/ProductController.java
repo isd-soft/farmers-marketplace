@@ -92,8 +92,7 @@ public class ProductController {
     public ResponseEntity<ProductPageDTO> getProductPage(@PathVariable Long id, @AuthenticationPrincipal JwtPrincipal principal) {
         Long principalId = null;
         if(principal != null) principalId = principal.getId();
-
-        return ResponseEntity.status(OK).body(productService.getProductPageById(id));
+        return ResponseEntity.status(OK).body(productService.getProductPageById(id, principal));
     }
 
 }

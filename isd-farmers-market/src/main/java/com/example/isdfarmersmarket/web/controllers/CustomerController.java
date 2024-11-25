@@ -63,8 +63,15 @@ public class CustomerController {
     }
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/wishlist/{id}")
-    public ResponseEntity<ProductInWishlistDTO> addToWishList(Long id, @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
+    public ResponseEntity<ProductInWishlistDTO> addToWishList(@PathVariable Long id,
+                                                              @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
         return ResponseEntity.status(HttpStatus.CREATED).body(customerService.addProductToWishlist(id, jwtPrincipal));
+    }
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @DeleteMapping("/wishlist/{id}")
+    public ResponseEntity<ProductInWishlistDTO> deleteFromWishlist(@PathVariable Long id,
+                                                              @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.deleteProductFromWishlist(id, jwtPrincipal));
     }
 
 }
