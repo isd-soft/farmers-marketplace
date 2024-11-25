@@ -48,10 +48,5 @@ public class UserService implements UserDetailsService {
                 .toList();
     }
 
-    public void changePfp(String email, String newPfp) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("No such user found"));
-        user.setProfilePicture(newPfp);
-        userRepository.save(user);
-    }
+
 }
