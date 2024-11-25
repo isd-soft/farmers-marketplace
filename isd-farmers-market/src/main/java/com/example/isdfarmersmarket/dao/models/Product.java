@@ -41,7 +41,9 @@ public class Product {
     @ManyToMany(mappedBy = "wishlist")
     private Set<User> inWishlists = new HashSet<>();
 
-    private float rating;
+    private Float rating;
+    private Integer reviewCount;
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ProductReview> reviews = new HashSet<>();
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)

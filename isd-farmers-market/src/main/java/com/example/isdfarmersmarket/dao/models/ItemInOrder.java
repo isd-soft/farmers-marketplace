@@ -1,5 +1,6 @@
 package com.example.isdfarmersmarket.dao.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,15 +26,17 @@ public class ItemInOrder {
     @Column(name = "price_per_unit")
     private BigDecimal pricePerUnit;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", nullable = false)
+    @JsonBackReference
     private Order order;
 
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof User)) return false;
+        if (!(o instanceof ItemInOrder)) return false;
         ItemInOrder product = (ItemInOrder) o;
         return Objects.equals(getId(), product.getId());
     }

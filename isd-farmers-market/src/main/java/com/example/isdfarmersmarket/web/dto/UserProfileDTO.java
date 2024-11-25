@@ -12,6 +12,6 @@ public class UserProfileDTO {
     String firstName;
     String lastName;
     Boolean isFarmer;
+    Boolean isCurrentUser;
     String email;
-    String profilePicture;
 }

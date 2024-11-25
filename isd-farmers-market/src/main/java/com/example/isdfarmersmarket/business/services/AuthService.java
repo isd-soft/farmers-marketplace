@@ -66,8 +66,12 @@ public class AuthService {
 
     @Transactional
     public void deleteRefreshToken(String refreshToken) {
-        String email = jwtService.extractUsername(refreshToken);
-        User user = userRepository.findByEmail(email)
+        Long id = Long.valueOf(jwtService
+                .extractAllClaims(refreshToken)
+                        .getSubject());
+        log.error(jwtService
+                .extractAllClaims(refreshToken).getId());
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found."));
         tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
     }
@@ -86,7 +90,7 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        String refreshToken = jwtService.generateRefreshToken(email);
+        String refreshToken = jwtService.generateRefreshToken(user);
 
         tokenRepository.findByUser(user).ifPresentOrElse(
                 existingToken -> {
@@ -105,9 +109,11 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public String generateAccessToken(String refreshToken) {
-        String username = jwtService.extractUsername(refreshToken);
+        Long id = Long.valueOf(jwtService
+                .extractAllClaims(refreshToken)
+                .getSubject());
 
-        User user = userRepository.findByEmail(username)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new InvalidCredentialsException("User not found"));
 
         tokenRepository.findByUser(user).stream()
@@ -115,12 +121,6 @@ public class AuthService {
                 .findFirst()
                 .orElseThrow(() -> new RefreshTokenException("Refresh token doesn't exist"));
 
-        try {
-            jwtService.validateToken(refreshToken);
-        }
-        catch (JwtException ex) {
-            throw new RefreshTokenException("Invalid refresh token");
-        }
-        return jwtService.generateAccessToken(username, user.getRoles());
+        return jwtService.generateAccessToken(user);
     }
 }

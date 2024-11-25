@@ -1,21 +1,25 @@
 @import './base.css';
+@import 'primeicons/primeicons.css';
 
 #app {
-  max-width: 1280px;
+  max-width: 2560px;
   margin: 0 auto;
   font-weight: normal;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 @media (min-width: 1024px) {
   body {
-    background-color:#2D3142;
+    background-color:white!;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
   }
+  
+  
 }

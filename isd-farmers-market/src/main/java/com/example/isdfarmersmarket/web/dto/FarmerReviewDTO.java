@@ -10,6 +10,6 @@ public class FarmerReviewDTO {
     Long id;
     float rating;
     String content;
-    UserProfileDTO farmer;
     UserProfileDTO creator;
+    UserProfileDTO farmer;
 }

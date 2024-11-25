@@ -38,7 +38,7 @@ public class User implements UserDetails {
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
             name = "wishlist",
-            joinColumns = { @JoinColumn(name = "user_id") },
+            joinColumns =    { @JoinColumn(name = "user_id") },
             inverseJoinColumns = { @JoinColumn(name = "product_id") }
     )
     private Set<Product> wishlist = new HashSet<>();
@@ -53,8 +53,6 @@ public class User implements UserDetails {
     private  int freeDeliveryFrom;
     @OneToMany(mappedBy = "farmer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<DeliveryTypeFarmer> deliveryTypes = new HashSet<>();
-    @Column(name = "profile_picture")
-    private String profilePicture;
 
     private float rating;
     @OneToMany(mappedBy = "farmer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

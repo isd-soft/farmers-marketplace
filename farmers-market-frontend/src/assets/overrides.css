@@ -1,0 +1,30 @@
+:root {
+  --p-carousel-indicator-background: #cccccc !important;
+  --p-carousel-indicator-hover-background: #334155 !important; 
+  --p-carousel-indicator-active-background: #179739 !important;
+
+  --p-menubar-item-color: #334155 !important;
+  --p-menubar-item-active-color: #179739  !important;
+  --p-menubar-item-focus-color: #179739 !important;
+  --p-menubar-item-icon-color: #334155 !important;
+  --p-menubar-item-icon-focus-color: #179739  !important;
+  --p-menubar-item-icon-active-color: #179739 !important;
+  --p-menubar-item-icon-hover-color: #179739  !important;
+  --p-menubar-background: #ffffff !important;
+
+  --p-menubar-submenu-icon-color: #334155 !important;
+  --p-menubar-submenu-icon-focus-color: #179739  !important;
+  --p-menubar-submenu-icon-active-color: #179739  !important;
+  --p-menubar-submenu-icon-hover-color: #179739  !important;
+
+  --p-menubar-item-hover-background: transparent !important;
+  --p-menubar-item-focus-background: transparent !important;
+  --p-menubar-item-active-background: transparent !important;
+
+  --p-inputtext-color: #334155 !important;
+  --p-inputtext-border-color: #334155 !important;
+  --p-inputtext-hover-border-color: #334155 !important;
+  --p-inputtext-focus-border-color: #334155 !important;
+}
+
+
