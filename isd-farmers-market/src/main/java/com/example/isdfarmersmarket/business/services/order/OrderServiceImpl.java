@@ -62,6 +62,7 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal totalPrice = items.stream()
                 .map(item -> item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         order.setTotalPrice(totalPrice);
 
         return orderMapper.map(orderRepository.save(order));
