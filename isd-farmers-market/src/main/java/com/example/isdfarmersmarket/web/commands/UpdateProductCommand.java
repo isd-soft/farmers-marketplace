@@ -10,7 +10,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -34,4 +36,5 @@ public class UpdateProductCommand {
     private Integer quantity;
     @NotNull(message = "Product category cannot be blank")
     private Long categoryId;
+    List<String> imagesBase64 = new ArrayList<>();
 }
