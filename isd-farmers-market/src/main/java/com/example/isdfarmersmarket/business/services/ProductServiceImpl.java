@@ -174,9 +174,12 @@ public class ProductServiceImpl implements ProductService {
         var product = productRepository
                 .getProductById(productId)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
-        User user = userRepository.findById(principal.getId()).orElseThrow();
         ProductPageDTO productPageDTO = productMapper.mapToProductPage(product);
-        if(user.getWishlist().contains(product)) productPageDTO.setIsInWishlist(true);
+        if(principal!=null)
+        {
+            User user = userRepository.findById(principal.getId()).orElseThrow();
+            if(user.getWishlist().contains(product)) productPageDTO.setIsInWishlist(true);
+        }
         return productPageDTO;
     }
 }
