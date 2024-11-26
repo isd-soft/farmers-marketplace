@@ -33,8 +33,7 @@ public class FarmerReview {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof FarmerReview)) return false;
-        FarmerReview review = (FarmerReview) o;
+        if (!(o instanceof FarmerReview review)) return false;
         return Objects.equals(getId(), review.getId());
     }
 

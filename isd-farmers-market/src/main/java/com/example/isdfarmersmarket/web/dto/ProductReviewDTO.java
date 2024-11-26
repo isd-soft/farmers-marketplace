@@ -1,13 +1,17 @@
 package com.example.isdfarmersmarket.web.dto;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-@Data
-@NoArgsConstructor
-public class ProductReviewDTO {
-    private Long id;
-    private String content;
-    private float rating;
-    private UserDTO creator;
-    private ProductDTO product;
-}
 
+import com.example.isdfarmersmarket.dao.models.Product;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class ProductReviewDTO  {
+    Long id;
+    Float rating;
+    String content;
+    UserProfileDTO creator;
+    String productTitle;
+    Long productId;
+}

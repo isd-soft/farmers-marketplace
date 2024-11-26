@@ -11,5 +11,4 @@ import java.util.Set;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-//    Optional<Product> findById(@NotEmpty(message = "Products cannot be empty") Set<ItemInOrder> productId);
 }

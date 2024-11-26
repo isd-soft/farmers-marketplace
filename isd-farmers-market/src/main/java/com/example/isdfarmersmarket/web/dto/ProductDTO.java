@@ -6,7 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -22,6 +24,7 @@ public class ProductDTO {
     private CategoryDTO category;
     private UserDTO user;
     private Float rating;
+    private Integer reviewCount;
     private Set<ProductReviewDTO> reviews = new HashSet<>();
     private Set<ImageDTO> images = new HashSet<>();
 }

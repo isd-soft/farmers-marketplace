@@ -18,13 +18,6 @@ public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
     private Long id;
-    @Column(name = "original_file_name")
-    private String originalFileName;
-    private String name;
-    private Long size;
-    @Column(name = "file_type")
-
-    private String contentType;
     @Lob
     @Column(name = "bytes")
     private byte[] bytes;
@@ -35,8 +28,7 @@ public class Image {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Image)) return false;
-        Image image = (Image) o;
+        if (!(o instanceof Image image)) return false;
         return Objects.equals(getId(), image.getId());
     }
 

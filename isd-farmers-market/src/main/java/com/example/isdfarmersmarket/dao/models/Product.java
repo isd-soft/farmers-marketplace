@@ -6,9 +6,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name="products")
@@ -43,10 +41,12 @@ public class Product {
     @ManyToMany(mappedBy = "wishlist")
     private Set<User> inWishlists = new HashSet<>();
 
-    private float rating;
+    private Float rating;
+    private Integer reviewCount;
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ProductReview> reviews = new HashSet<>();
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Image> images = new HashSet<>();
 
     @Column(name="created_date", columnDefinition = "TimeStamp")
@@ -54,8 +54,7 @@ public class Product {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Product)) return false;
-        Product product = (Product) o;
+        if (!(o instanceof Product product)) return false;
         return Objects.equals(getId(), product.getId());
     }
 

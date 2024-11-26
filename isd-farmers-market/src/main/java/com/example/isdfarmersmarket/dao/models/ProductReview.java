@@ -20,7 +20,7 @@ public class ProductReview {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
     private Long id;
     private String content;
-    private float rating;
+    private Integer rating;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id")
@@ -34,8 +34,7 @@ public class ProductReview {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ProductReview)) return false;
-        ProductReview review = (ProductReview) o;
+        if (!(o instanceof ProductReview review)) return false;
         return Objects.equals(getId(), review.getId());
     }
 

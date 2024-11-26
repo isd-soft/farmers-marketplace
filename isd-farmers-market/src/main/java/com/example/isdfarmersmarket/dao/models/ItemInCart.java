@@ -11,7 +11,7 @@ import java.util.Objects;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class    ItemInCart {
+public class ItemInCart {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
     private Long id;
@@ -29,9 +29,8 @@ public class    ItemInCart {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ItemInCart)) return false;
-        ItemInCart product = (ItemInCart) o;
-        return Objects.equals(getId(), product.getId());
+        if (!(o instanceof ItemInCart itemInCart)) return false;
+        return Objects.equals(getId(), itemInCart.getId());
     }
 
     @Override

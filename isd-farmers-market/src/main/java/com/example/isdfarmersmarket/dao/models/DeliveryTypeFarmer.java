@@ -29,8 +29,7 @@ public class DeliveryTypeFarmer {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DeliveryTypeFarmer)) return false;
-        DeliveryTypeFarmer deliveryType = (DeliveryTypeFarmer) o;
+        if (!(o instanceof DeliveryTypeFarmer deliveryType)) return false;
         return Objects.equals(getId(), deliveryType.getId());
     }
 
