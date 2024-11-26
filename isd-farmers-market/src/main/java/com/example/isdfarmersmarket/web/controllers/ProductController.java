@@ -64,8 +64,10 @@ public class ProductController {
             description = "This endpoint is used to get all products"
     )
     @GetMapping()
-    public ResponseEntity<List<ProductDTO>> getAllProducts() {
-        return ResponseEntity.status(OK).body(productService.getAllProducts());
+    public ResponseEntity<List<ProductDTO>> getAllProducts(
+            @RequestParam(required = false) Long category,
+            @RequestParam(required = false) String search) {
+        return ResponseEntity.status(OK).body(productService.getAllProducts(category, search));
     }
     @Operation(
             description = "This endpoint is used to get a product by id"

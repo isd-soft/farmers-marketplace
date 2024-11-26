@@ -9,6 +9,7 @@ import com.example.isdfarmersmarket.web.dto.PageResponseDTO;
 import com.example.isdfarmersmarket.web.dto.ProductDTO;
 import com.example.isdfarmersmarket.web.dto.ProductPageDTO;
 import com.example.isdfarmersmarket.web.dto.ProductReviewDTO;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -20,8 +21,7 @@ public interface ProductService {
     ProductDTO updateProduct(Long id, UpdateProductCommand updateProductCommand, Set<MultipartFile> files, Set<Long> imagesToDeleteId);
 
     ProductDTO deleteProduct(Long id);
-
-    List<ProductDTO> getAllProducts();
+    List<ProductDTO> getAllProducts(Long category,String search);
     ProductDTO getProductById(Long id);
     PageResponseDTO<ProductReviewDTO> getProductReviews(Long id, int page, int pageSize);
     void updateProductReview(Product product);
