@@ -37,10 +37,9 @@ public class ProductController {
             summary = "Create a product",
             description = "This endpoint allows creating a product with images"
     )
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ProductDTO> createProduct(@RequestPart @Valid CreateProductCommand createProductCommand,
-    @RequestPart(value = "files", required = false) List<MultipartFile>files) {
-        return ResponseEntity.status(CREATED).body(productService.createProduct(createProductCommand,new HashSet<>(files)));
+    @PostMapping(value = "/create")
+    public ResponseEntity<ProductDTO> createProduct(@RequestBody CreateProductCommand createProductCommand) {
+        return ResponseEntity.status(CREATED).body(productService.createProduct(createProductCommand));
     }
 
     @Operation(
@@ -65,8 +64,10 @@ public class ProductController {
             description = "This endpoint is used to get all products"
     )
     @GetMapping()
-    public ResponseEntity<List<ProductDTO>> getAllProducts() {
-        return ResponseEntity.status(OK).body(productService.getAllProducts());
+    public ResponseEntity<List<ProductDTO>> getAllProducts(
+            @RequestParam(required = false) Long category,
+            @RequestParam(required = false) String search) {
+        return ResponseEntity.status(OK).body(productService.getAllProducts(category, search));
     }
     @Operation(
             description = "This endpoint is used to get a product by id"

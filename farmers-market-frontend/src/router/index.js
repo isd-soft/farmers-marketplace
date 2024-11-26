@@ -1,10 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginPage from '@/components/LoginPage.vue'
 import HomePage from '@/components/HomePage.vue'
+<<<<<<< HEAD
 import ProductPage from '@/components/ProductPage.vue'
 import UserPage from '@/components/UserPage.vue'
 import Wishlist from '@/components/WishlistPage.vue'
 import OrderPage from '@/components/OrderPage.vue'
+=======
+import ProductPage from "@/components/ProductPage.vue";
+import WishlistPage from "@/components/WishlistPage.vue";
+import CreateProduct from "@/components/CreateProduct.vue";
+import UserPage from "@/components/UserPage.vue";
+import SearchProductsPage from "@/components/SearchProductsPage.vue";
+>>>>>>> dev
 
 const routes = [
   {
@@ -21,7 +29,7 @@ const routes = [
   {
     path: '/wishlist',
     name: 'Wishlist',
-    component: Wishlist,
+    component: WishlistPage,
   },
   {
     path: '/id:id',
@@ -35,9 +43,21 @@ const routes = [
     component: HomePage,
   },
   {
+<<<<<<< HEAD
     path: '/orders',
     name: 'Orders',
     component: OrderPage,
+=======
+    path: '/product/create',
+    name: 'CreateProduct',
+    component: CreateProduct,
+  },
+  {
+    path: '/product',
+    name: 'SearchProducts',
+    component: SearchProductsPage,
+
+>>>>>>> dev
   },
 ]
 
