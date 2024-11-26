@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 
 @Data
 public class UpdateDeliveryTypeCommand {
+    private Long id;
     private BigDecimal price;
     private DeliveryTypes types;
 }

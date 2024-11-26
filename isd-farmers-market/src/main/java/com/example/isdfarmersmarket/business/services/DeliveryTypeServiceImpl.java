@@ -13,6 +13,7 @@ import com.example.isdfarmersmarket.web.commands.UpdateDeliveryTypeCommand;
 import com.example.isdfarmersmarket.web.dto.DeliveryTypeDTO;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +29,11 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
 
     @Override
     @Transactional
-    public DeliveryTypeDTO createDeliveryType(JwtPrincipal jwtPrincipal, CreateDeliveryTypeCommand createDeliveryTypeCommand) {
+    public DeliveryTypeDTO createDeliveryType(CreateDeliveryTypeCommand createDeliveryTypeCommand) {
         BigDecimal price = createDeliveryTypeCommand.getPrice();
         DeliveryTypes deliveryTypes = createDeliveryTypeCommand.getTypes();
-        User farmer = userRepository.findByEmail(jwtPrincipal.getEmail())
+        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User farmer = userRepository.findByEmail(principal.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Farmer with this email doesn't exist"));
 
         DeliveryTypeFarmer deliveryTypeFarmer = DeliveryTypeFarmer.builder()
@@ -43,16 +45,19 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
 
     @Override
     @Transactional
-    public DeliveryTypeDTO updateDeliveryType(JwtPrincipal jwtPrincipal, Long id, UpdateDeliveryTypeCommand updateDeliveryTypeCommand) {
-        DeliveryTypeFarmer existingDeliveryType = deliveryTypeRepository.getDeliveryTypeFarmerById(id)
+    public DeliveryTypeDTO updateDeliveryType(UpdateDeliveryTypeCommand updateDeliveryTypeCommand) {
+        DeliveryTypeFarmer existingDeliveryType =
+                deliveryTypeRepository.getDeliveryTypeFarmerById(updateDeliveryTypeCommand.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Delivery type with the specified id not found")
                 );
+        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long id = updateDeliveryTypeCommand.getId();
         BigDecimal price = updateDeliveryTypeCommand.getPrice();
         DeliveryTypes deliveryTypes = updateDeliveryTypeCommand.getTypes();
         DeliveryTypeFarmer deliveryTypeFarmer = DeliveryTypeFarmer.builder()
-                .price(price).type(deliveryTypes).farmer(existingDeliveryType.getFarmer())
+                .id(id).price(price).type(deliveryTypes).farmer(existingDeliveryType.getFarmer())
                 .build();
-        if (!existingDeliveryType.getFarmer().getEmail().equals(jwtPrincipal.getEmail())) {
+        if (!existingDeliveryType.getFarmer().getEmail().equals(principal.getEmail())) {
             throw new IllegalArgumentException("You can't update other people's delivery types");
         }
         deliveryTypeRepository.save(deliveryTypeFarmer);
@@ -61,11 +66,12 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
 
     @Override
     @Transactional
-    public DeliveryTypeDTO deleteDeliveryType(JwtPrincipal jwtPrincipal, Long id) {
+    public DeliveryTypeDTO deleteDeliveryType(Long id) {
         DeliveryTypeFarmer deliveryTypeFarmer = deliveryTypeRepository.getDeliveryTypeFarmerById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Delivery type with the specified id not found")
                 );
-        if (!deliveryTypeFarmer.getFarmer().getEmail().equals(jwtPrincipal.getEmail())) {
+        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!deliveryTypeFarmer.getFarmer().getEmail().equals(principal.getEmail())) {
             throw new IllegalArgumentException("You can't delete other people's delivery types");
         }
         deliveryTypeRepository.delete(deliveryTypeFarmer);
@@ -73,7 +79,7 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<DeliveryTypeDTO> getAllDeliveryType() {
         List<DeliveryTypeFarmer> deliveryTypeFarmerList = deliveryTypeRepository.findAll();
         return daoMapper.mapDeliveryTypes(deliveryTypeFarmerList);
