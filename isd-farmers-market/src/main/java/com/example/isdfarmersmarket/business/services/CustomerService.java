@@ -8,16 +8,15 @@ import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
 import com.example.isdfarmersmarket.web.commands.FarmerReviewCommand;
 import com.example.isdfarmersmarket.web.commands.ProductReviewCommand;
-import com.example.isdfarmersmarket.web.dto.FarmerReviewDTO;
-import com.example.isdfarmersmarket.web.dto.ProductInWishlistDTO;
-import com.example.isdfarmersmarket.web.dto.ProductReviewDTO;
+import com.example.isdfarmersmarket.web.dto.*;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,15 +35,25 @@ public class CustomerService {
     ReviewMapper reviewMapper;
     ProductService productService;
     private final ProductMapper productMapper;
+    private final FarmerService farmerService;
 
-    public FarmerReviewDTO rateFarmer(FarmerReviewCommand farmerReviewCommand,
-                                      Long id) {
-        User creator = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("No such customer found"));
-        User farmer = userRepository.findById(farmerReviewCommand.getFarmerId())
+    private JwtPrincipal getPrincipal() {
+        return (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    @Transactional
+    public FarmerReviewDTO rateFarmer(FarmerReviewCommand farmerReviewCommand) {
+        JwtPrincipal principal = getPrincipal();
+
+        User creator = userRepository
+                .findById(principal.getId())
+                .orElseThrow(EntityNotFoundException::new);
+        User farmer = userRepository
+                .findById(farmerReviewCommand.getFarmerId())
                 .orElseThrow(() -> new EntityNotFoundException("No such farmer found"));
 
-        Role farmerRole = roleRepository.findByRole(ERole.FARMER).orElseThrow(() ->
+        Role farmerRole = roleRepository
+                .findByRole(ERole.FARMER).orElseThrow(() ->
                 new EntityNotFoundException("Role doesn't exist"));
 
         if (farmer.getRoles().contains(farmerRole)) {
@@ -52,15 +61,18 @@ public class CustomerService {
             review.setCreator(creator);
             review.setFarmer(farmer);
             FarmerReview farmerReview = farmerReviewRepository.save(review);
+            farmerService.updateFarmerRating(farmer);
             return reviewMapper.map(farmerReview);
         } else {
             throw new IllegalArgumentException("The email provided is not a farmer.");
         }
     }
 
-    public ProductReviewDTO rateProduct(ProductReviewCommand productReviewCommand, Long id) {
+    @Transactional
+    public ProductReviewDTO rateProduct(ProductReviewCommand productReviewCommand) {
+        JwtPrincipal principal = getPrincipal();
         User creator = userRepository
-                .findById(id)
+                .findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such customer found"));
         Product product = productRepository
                 .findById(productReviewCommand.getProductId())
@@ -70,41 +82,47 @@ public class CustomerService {
         review.setCreator(creator);
         review.setProduct(product);
         ProductReview productReview = productReviewRepository.save(review);
-        productService.updateProductReview(product);
+        productService.updateProductRating(product);
         return reviewMapper.mapWithProductDetails(productReview);
     }
 
-    public List<ProductReviewDTO> fetchAllProductReviews(Long id, Integer page, Integer pageSize) {
+    @Transactional(readOnly = true)
+    public List<CustomerProductReviewDTO> fetchAllProductReviews(Long id, Integer page, Integer pageSize) {
         User customer = userRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
 
         return productReviewRepository.findByCreatorOrderByCreatedDate(customer, PageRequest.of(page, pageSize))
                 .stream()
-                .map(reviewMapper::mapWithoutProductDetails)
+                .map(reviewMapper::mapToCustomerProductReview)
                 .toList();
     }
 
-    public List<FarmerReviewDTO> fetchAllFarmerReviews(Long id, Integer page, Integer pageSize) {
+    @Transactional(readOnly = true)
+    public List<CustomerFarmerReviewDTO> fetchAllFarmerReviews(Long id, Integer page, Integer pageSize) {
         User farmer = userRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
 
         return farmerReviewRepository.findByCreatorOrderByCreatedDate(farmer, PageRequest.of(page, pageSize))
                 .stream()
-                .map(reviewMapper::map)
+                .map(reviewMapper::mapToCustomerFarmerReview)
                 .toList();
     }
+
     @Transactional(readOnly = true)
-    public List<ProductInWishlistDTO> getWishlistProducts(JwtPrincipal jwtPrincipal) {
-        User user = userRepository.findById(jwtPrincipal.getId())
+    public List<CompactProductDTO> getWishlistProducts() {
+        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
         return user.getWishlist().stream()
                 .map(productMapper::mapToProductInWishlistDTO)
                 .toList();
     }
+
     @Transactional
-    public ProductInWishlistDTO addProductToWishlist(Long productId, JwtPrincipal principal) {
+    public CompactProductDTO addProductToWishlist(Long productId) {
+        JwtPrincipal principal = getPrincipal();
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
         Product product = productRepository.findById(productId)
@@ -117,7 +135,8 @@ public class CustomerService {
         return productMapper.mapToProductInWishlistDTO(product);
     }
     @Transactional
-    public ProductInWishlistDTO deleteProductFromWishlist(Long productId, JwtPrincipal principal) {
+    public CompactProductDTO deleteProductFromWishlist(Long productId) {
+        JwtPrincipal principal = getPrincipal();
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
         Product product = productRepository.findById(productId)
