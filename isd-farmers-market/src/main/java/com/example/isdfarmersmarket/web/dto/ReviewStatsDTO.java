@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductReviewStatsDTO {
+public class ReviewStatsDTO {
     Double averageRating;
     Long reviewCount;
 }

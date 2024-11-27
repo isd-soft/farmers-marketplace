@@ -1,10 +1,12 @@
 package com.example.isdfarmersmarket.web.controllers;
 
+import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.UserService;
 import com.example.isdfarmersmarket.web.dto.UserProfileDTO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

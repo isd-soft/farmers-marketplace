@@ -17,7 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -41,7 +40,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductDTO createProduct(CreateProductCommand createProductCommand) {
-        Set<Image> images = new HashSet<>();
+        List<Image> images = new ArrayList<>();
         if (createProductCommand.getImagesBase64() != null && !createProductCommand.getImagesBase64().isEmpty()) {
             createProductCommand.getImagesBase64().forEach(file -> {
                 Image image = null;
@@ -53,6 +52,7 @@ public class ProductServiceImpl implements ProductService {
                 images.add(image);
             });
         }
+        images.forEach(image -> {imageRepository.save(image);});
         Category category = categoryRepository.getCategoryById(createProductCommand.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException(CATEGORY_FIND_FAILED_BY_ID));
         Product product = Product.builder()
@@ -60,10 +60,12 @@ public class ProductServiceImpl implements ProductService {
                 .description(createProductCommand.getDescription())
                 .unitType(createProductCommand.getUnitType())
                 .pricePerUnit(createProductCommand.getPricePerUnit())
-                .discountPercents(createProductCommand.getDiscountPercents())
                 .quantity(createProductCommand.getQuantity())
                 .category(category)
-                .images(images).build();
+                .images(new HashSet<>(images)).build();
+        if(createProductCommand.getDiscountPercents()!=null){
+            product.setDiscountPercents(createProductCommand.getDiscountPercents());
+        }
         Product savedProduct = productRepository.save(product);
         images.forEach(image -> {image.setProduct(savedProduct);});
         return productMapper.map(savedProduct);
@@ -156,14 +158,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void updateProductReview(Product product) {
-        ProductReviewStatsDTO productReviewStatsDTO = productReviewRepository
+    public void updateProductRating(Product product) {
+        ReviewStatsDTO reviewStatsDTO = productReviewRepository
                 .findReviewStatsByProduct(product);
 
-        product.setRating(productReviewStatsDTO
+        product.setRating(reviewStatsDTO
                 .getAverageRating()
                 .floatValue());
-        product.setReviewCount(productReviewStatsDTO
+        product.setReviewCount(reviewStatsDTO
                 .getReviewCount()
                 .intValue());
 
@@ -176,9 +178,12 @@ public class ProductServiceImpl implements ProductService {
         var product = productRepository
                 .findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
-        User user = userRepository.findById(principal.getId()).orElseThrow();
         ProductPageDTO productPageDTO = productMapper.mapToProductPage(product);
-        if(user.getWishlist().contains(product)) productPageDTO.setIsInWishlist(true);
+        if(principal!=null)
+        {
+            User user = userRepository.findById(principal.getId()).orElseThrow();
+            if(user.getWishlist().contains(product)) productPageDTO.setIsInWishlist(true);
+        }
         return productPageDTO;
     }
 
