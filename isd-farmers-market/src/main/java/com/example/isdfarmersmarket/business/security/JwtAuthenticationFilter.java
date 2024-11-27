@@ -1,6 +1,7 @@
 package com.example.isdfarmersmarket.business.security;
 
 import com.example.isdfarmersmarket.business.services.JwtService;
+import com.example.isdfarmersmarket.dao.enums.AuthError;
 import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
@@ -110,8 +111,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Map<String, Object> properties = Map.of();
 
         if (ex instanceof ExpiredJwtException) {
-            message = "JWT token has expired";
-            properties = Map.of("expired", true);
+            message = AuthError.TOKEN_EXPIRED.name();
         } else if (ex instanceof UnsupportedJwtException) {
             message = "JWT token is unsupported";
         } else if (ex instanceof MalformedJwtException) {
