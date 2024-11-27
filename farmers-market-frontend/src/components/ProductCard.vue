@@ -2,8 +2,8 @@
   <div class="product-card" @click="goToProductPage">
 
     <img
-      v-if="product.images && product.images.length > 0"
-      :src="getFirstImage(product.images)"
+      v-if="product.image"
+      :src="getFirstImage(product.image)"
       alt="Product image"
       class="product-image"
     />
@@ -79,9 +79,9 @@ export default {
     goToProductPage() {
       this.$router.push(`/product/${this.product.id}`);
     },
-    getFirstImage(images) {
-      if (images.length > 0) {
-        const firstImage = images[0];
+    getFirstImage(image) {
+      if (image) {
+        const firstImage = image;
         return `data:image/jpeg;base64,${firstImage.bytes}`;
       }
       return "";

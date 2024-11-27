@@ -8,8 +8,12 @@ import org.springframework.data.jpa.domain.Specification;
 public class ProductSpecification {
     public static Specification<Product> titleOrDescLike(String titleOrDescLike) {
         return (root, query, builder) -> builder.or(
-                builder.like(root.get("title"), "%" + titleOrDescLike + "%"),
-                builder.like(root.get("description"), "%" + titleOrDescLike + "%"));
+                builder.like(builder.lower(root.get("title")), "%" + titleOrDescLike.toLowerCase() + "%"),
+                builder.like(builder.lower(root.get("description")), "%" + titleOrDescLike.toLowerCase() + "%"));
+    }
+    public static Specification<Product> categoryIs(Long categoryId) {
+        return (root, query, builder) ->
+            builder.equal(root.get("category").get("id"), categoryId);
     }
 
 }
