@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 public class CompactProductDTO {
     Long id;
     private String title;
+    private String description;
     private BigDecimal pricePerUnit;
     private int discountPercents;
     private Float rating;

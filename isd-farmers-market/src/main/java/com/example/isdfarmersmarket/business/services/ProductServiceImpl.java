@@ -8,12 +8,16 @@ import com.example.isdfarmersmarket.dao.models.Image;
 import com.example.isdfarmersmarket.dao.models.Product;
 import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.repositories.*;
+import com.example.isdfarmersmarket.dao.specifications.ProductSpecification;
 import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateProductCommand;
 import com.example.isdfarmersmarket.web.dto.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -64,9 +68,6 @@ public class ProductServiceImpl implements ProductService {
                 .quantity(createProductCommand.getQuantity())
                 .category(category)
                 .images(new HashSet<>(images)).build();
-        if(createProductCommand.getDiscountPercents()!=null){
-            product.setDiscountPercents(createProductCommand.getDiscountPercents());
-        }
         Product savedProduct = productRepository.save(product);
         images.forEach(image -> {image.setProduct(savedProduct);});
         return productMapper.map(savedProduct);
@@ -116,18 +117,14 @@ public class ProductServiceImpl implements ProductService {
     }
     @Override
     @Transactional
-    public List<ProductDTO> getAllProducts(Long category,String search) {
-        if (category == null && (search == null || search.isBlank())) {
-            return productMapper.mapProducts(productRepository.findAll());
-        }
-        List<Product> filteredProducts = productRepository.findAll().stream()
-                .filter(product -> (category == null || product.getCategory().getId().equals(category)))
-                .filter(product -> (search == null || search.isBlank()
-                        || product.getTitle().toLowerCase().contains(search.toLowerCase())
-                        || product.getDescription().toLowerCase().contains(search.toLowerCase())))
-                .collect(Collectors.toList());
-
-        return productMapper.mapProducts(filteredProducts);
+    public Map<String, Object> getAllProducts(Long category, String search, Pageable pageable) {
+        Specification<Product> filters = Specification.
+                where(StringUtils.isBlank(search) ? null : ProductSpecification.titleOrDescLike(search))
+                .and((category == null || category == 0L) ? null : ProductSpecification.categoryIs(category));
+        Map<String, Object> response = new HashMap<>();
+        response.put("content",productMapper.mapToCompactProductsDTO(productRepository.findAll(filters, pageable).stream().toList()));
+        response.put("totalElements", productRepository.count(filters));
+        return response;
     }
 
     @Override
