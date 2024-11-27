@@ -26,6 +26,7 @@ public class FarmerController {
             @PathVariable Long farmerId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int pageSize) {
-        return ResponseEntity.status(OK).body(farmerService.getFarmerReviews(farmerId,page,pageSize));
+        return ResponseEntity.status(OK)
+                .body(farmerService.getFarmerReviews(farmerId,page,pageSize));
     }
 }
