@@ -22,20 +22,24 @@ axiosInstance.interceptors.request.use(
 );
 
 const refreshTokens = async () => {
+  console.log("refreshing tokens");
   try {
     const refreshToken = localStorage.getItem("refreshToken");
     if (!refreshToken) {
       throw new Error("No refresh token available");
     }
 
-    const response = await axios.post("http://localhost:8080/auth/refresh", {
-      refreshToken,
-    });
+    const response = await axios.post("http://localhost:8080/auth/refresh", {},
+      {
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+        }
+      }
+    );
 
-    const { accessToken, refreshToken: newRefreshToken } = response.data;
+    const { accessToken } = response.data;
 
     localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("refreshToken", newRefreshToken);
 
     return accessToken;
   } catch (error) {
@@ -52,7 +56,9 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 &&
+      error.response?.data.detail === "TOKEN_EXPIRED" &&
+      !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {

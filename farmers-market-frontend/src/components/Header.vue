@@ -113,6 +113,7 @@ const goToCategory = (categoryId) => {
 const logout = () => {
   console.log('Logging out...');
   localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
   window.location.href = '/login';
 };
 

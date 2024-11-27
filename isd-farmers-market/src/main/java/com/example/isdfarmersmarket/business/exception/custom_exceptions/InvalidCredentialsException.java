@@ -1,7 +1,11 @@
-package com.example.isdfarmersmarket.business.exception.custom_exceptions;
+    package com.example.isdfarmersmarket.business.exception.custom_exceptions;
 
-public class InvalidCredentialsException extends RuntimeException {
-    public InvalidCredentialsException(String message) {
-        super(message);
+    import com.example.isdfarmersmarket.dao.enums.AuthError;
+
+    public class InvalidCredentialsException extends RuntimeException {
+        AuthError error;
+        public InvalidCredentialsException(AuthError error) {
+            super(error.name());
+            this.error = error;
+        }
     }
-}

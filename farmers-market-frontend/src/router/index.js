@@ -6,6 +6,7 @@ import WishlistPage from "@/components/WishlistPage.vue";
 import CreateProduct from "@/components/CreateProduct.vue";
 import UserPage from "@/components/UserPage.vue";
 import SearchProductsPage from "@/components/SearchProductsPage.vue";
+import OrderManagementPage from '@/components/OrderManagementPage.vue';
 
 const routes = [
   {
@@ -44,6 +45,12 @@ const routes = [
     path: '/product',
     name: 'SearchProducts',
     component: SearchProductsPage,
+
+  },
+  {
+    path: '/ordermanagement',
+    name: 'Order Management',
+    component: OrderManagementPage,
 
   },
 ]
