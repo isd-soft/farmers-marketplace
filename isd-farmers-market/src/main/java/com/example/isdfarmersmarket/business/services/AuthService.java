@@ -2,6 +2,7 @@ package com.example.isdfarmersmarket.business.services;
 
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.*;
 import com.example.isdfarmersmarket.business.mapper.RegisterCommandMapper;
+import com.example.isdfarmersmarket.dao.enums.AuthError;
 import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.example.isdfarmersmarket.dao.models.RefreshToken;
 import com.example.isdfarmersmarket.dao.models.Role;
@@ -43,7 +44,7 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(username, password));
             return (User) authentication.getPrincipal();
         } catch (AuthenticationException e) {
-            throw new InvalidCredentialsException("Invalid username or password");
+            throw new InvalidCredentialsException(AuthError.INVALID_CREDENTIALS);
         }
     }
 
@@ -114,12 +115,12 @@ public class AuthService {
                 .getSubject());
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new InvalidCredentialsException("User not found"));
+                .orElseThrow(() -> new InvalidCredentialsException(AuthError.USER_NOT_FOUND));
 
         tokenRepository.findByUser(user).stream()
                 .filter(token -> token.getToken().equals(refreshToken))
                 .findFirst()
-                .orElseThrow(() -> new RefreshTokenException("Refresh token doesn't exist"));
+                .orElseThrow(() -> new RefreshTokenException(AuthError.REFRESH_TOKEN_INVALID));
 
         return jwtService.generateAccessToken(user);
     }
