@@ -27,8 +27,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER') and not hasRole('FARMER') ")
     @PostMapping("/review/farmer")
     public ResponseEntity<FarmerReviewDTO> rateFarmer(@RequestBody FarmerReviewCommand farmerReviewCommand,
-                                                      @AuthenticationPrincipal JwtPrincipal jwtPrincipal
-    ){
+                                                      @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(customerService.rateFarmer(farmerReviewCommand, jwtPrincipal.getId()));
@@ -56,19 +55,19 @@ public class CustomerController {
     }
     @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/wishlist")
-    public ResponseEntity<List<ProductInWishlistDTO>> getWishlistItems(@AuthenticationPrincipal JwtPrincipal jwtPrincipal) {
+    public ResponseEntity<List<CompactProductDTO>> getWishlistItems(@AuthenticationPrincipal JwtPrincipal jwtPrincipal) {
         return ResponseEntity.ok(customerService.getWishlistProducts(jwtPrincipal));
     }
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/wishlist/{id}")
-    public ResponseEntity<ProductInWishlistDTO> addToWishList(@PathVariable Long id,
-                                                              @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
+    public ResponseEntity<CompactProductDTO> addToWishList(@PathVariable Long id,
+                                                           @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
         return ResponseEntity.status(HttpStatus.CREATED).body(customerService.addProductToWishlist(id, jwtPrincipal));
     }
     @PreAuthorize("hasRole('CUSTOMER')")
     @DeleteMapping("/wishlist/{id}")
-    public ResponseEntity<ProductInWishlistDTO> deleteFromWishlist(@PathVariable Long id,
-                                                              @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
+    public ResponseEntity<CompactProductDTO> deleteFromWishlist(@PathVariable Long id,
+                                                                @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
         return ResponseEntity.status(HttpStatus.OK).body(customerService.deleteProductFromWishlist(id, jwtPrincipal));
     }
 

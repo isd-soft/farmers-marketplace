@@ -10,5 +10,5 @@ public class CustomerProductReviewDTO {
     Long id;
     Float rating;
     String content;
-    ProductInWishlistDTO product;
+    CompactProductDTO product;
 }

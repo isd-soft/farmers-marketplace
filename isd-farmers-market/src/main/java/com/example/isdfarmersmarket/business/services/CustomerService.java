@@ -100,7 +100,7 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductInWishlistDTO> getWishlistProducts(JwtPrincipal jwtPrincipal) {
+    public List<CompactProductDTO> getWishlistProducts(JwtPrincipal jwtPrincipal) {
         User user = userRepository.findById(jwtPrincipal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
         return user.getWishlist().stream()
@@ -109,7 +109,7 @@ public class CustomerService {
     }
 
     @Transactional
-    public ProductInWishlistDTO addProductToWishlist(Long productId, JwtPrincipal principal) {
+    public CompactProductDTO addProductToWishlist(Long productId, JwtPrincipal principal) {
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
         Product product = productRepository.findById(productId)
@@ -122,7 +122,7 @@ public class CustomerService {
         return productMapper.mapToProductInWishlistDTO(product);
     }
     @Transactional
-    public ProductInWishlistDTO deleteProductFromWishlist(Long productId, JwtPrincipal principal) {
+    public CompactProductDTO deleteProductFromWishlist(Long productId, JwtPrincipal principal) {
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
         Product product = productRepository.findById(productId)
