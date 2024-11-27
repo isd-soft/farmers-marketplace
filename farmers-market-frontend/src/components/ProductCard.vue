@@ -12,14 +12,36 @@
       <p class="product-description">
         {{ product.description }}
       </p>
-      <div class="product-price">
-        <span>{{ product.pricePerUnit }} MDL / {{ product.unitType }}</span>
+        <div class="product-cost">
+                <span v-if="product.discountPercents && product.discountPercents > 0">
+                  <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
+                    ${{ product.pricePerUnit }}
+                  </s>
+                  <span style="color: #007bff; font-size: 1.5rem">
+                    ${{
+                      product.pricePerUnit * ((100 - product.discountPercents) / 100).toFixed(2)
+                    }}
+                  </span>
+                </span>
+          <span v-else
+          ><span style="color: #007bff; font-size: 1.5rem">
+                    ${{ product.pricePerUnit }}
+                  </span>
+                </span>
+          <i
+            :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
+            style="font-size: 1rem; cursor: pointer; color: red; margin-left: 10px; vertical-align: middle;"
+            @click="toggleWishlist"
+            :title="product.isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'"
+          />
+        </div>
       </div>
-    </div>
   </div>
 </template>
 
 <script>
+
+import axiosInstance from "@/utils/axiosInstance.js";
 
 export default {
   name: "ProductCard",
@@ -28,7 +50,30 @@ export default {
       type: Object,
       required: true,
     },
+    setup(props){
+      const toggleWishlist = async () => {
+        if (!this.product.value.id) return
+
+        try {
+          if (this.product.value.isInWishlist) {
+            await axiosInstance.delete(`/customer/wishlist/${props.id}`)
+          } else {
+            await axiosInstance.post(`/customer/wishlist/${props.id}`)
+          }
+          this.product.value.isInWishlist = !this.product.value.isInWishlist
+        } catch (error) {
+          console.error(
+            `Failed to ${this.product.value.isInWishlist ? 'remove' : 'add'} product to/from wishlist:`,
+            error.message,
+          )
+        }
+      }
+      return {
+        toggleWishlist,
+      }
+    },
   },
+
 
   methods: {
     goToProductPage() {
