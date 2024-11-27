@@ -3,9 +3,7 @@ import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.CustomerService;
 import com.example.isdfarmersmarket.web.commands.FarmerReviewCommand;
 import com.example.isdfarmersmarket.web.commands.ProductReviewCommand;
-import com.example.isdfarmersmarket.web.dto.FarmerReviewDTO;
-import com.example.isdfarmersmarket.web.dto.ProductInWishlistDTO;
-import com.example.isdfarmersmarket.web.dto.ProductReviewDTO;
+import com.example.isdfarmersmarket.web.dto.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,8 +27,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER') and not hasRole('FARMER') ")
     @PostMapping("/review/farmer")
     public ResponseEntity<FarmerReviewDTO> rateFarmer(@RequestBody FarmerReviewCommand farmerReviewCommand,
-                                                      @AuthenticationPrincipal JwtPrincipal jwtPrincipal
-    ){
+                                                      @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(customerService.rateFarmer(farmerReviewCommand, jwtPrincipal.getId()));
@@ -45,32 +42,32 @@ public class CustomerController {
                 .body(customerService.rateProduct(productReviewCommand, principal.getId()));
     }
     @GetMapping("/{userId}/reviews/farmer")
-    public ResponseEntity<List<FarmerReviewDTO>> getAllFarmerReviews(@PathVariable Long userId,
-                                                                     @RequestParam Integer page,
-                                                                     @RequestParam Integer pageSize) {
-        return ResponseEntity.ok(customerService.fetchAllFarmerReviews(userId, page, pageSize));
+    public ResponseEntity<List<CustomerFarmerReviewDTO>> getAllFarmerReviews(@PathVariable Long userId,
+                                                                             @RequestParam Integer page,
+                                                                             @RequestParam Integer pageSize) {
+            return ResponseEntity.ok(customerService.fetchAllFarmerReviews(userId, page, pageSize));
     }
     @GetMapping("/{userId}/reviews/product")
-    public ResponseEntity<List<ProductReviewDTO>> getAllProductReviews(@PathVariable Long userId,
-                                                                       @RequestParam Integer page,
-                                                                       @RequestParam Integer pageSize) {
+    public ResponseEntity<List<CustomerProductReviewDTO>> getAllProductReviews(@PathVariable Long userId,
+                                                                               @RequestParam Integer page,
+                                                                               @RequestParam Integer pageSize) {
         return ResponseEntity.ok(customerService.fetchAllProductReviews(userId, page, pageSize));
     }
     @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/wishlist")
-    public ResponseEntity<List<ProductInWishlistDTO>> getWishlistItems(@AuthenticationPrincipal JwtPrincipal jwtPrincipal) {
+    public ResponseEntity<List<CompactProductDTO>> getWishlistItems(@AuthenticationPrincipal JwtPrincipal jwtPrincipal) {
         return ResponseEntity.ok(customerService.getWishlistProducts(jwtPrincipal));
     }
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/wishlist/{id}")
-    public ResponseEntity<ProductInWishlistDTO> addToWishList(@PathVariable Long id,
-                                                              @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
+    public ResponseEntity<CompactProductDTO> addToWishList(@PathVariable Long id,
+                                                           @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
         return ResponseEntity.status(HttpStatus.CREATED).body(customerService.addProductToWishlist(id, jwtPrincipal));
     }
     @PreAuthorize("hasRole('CUSTOMER')")
     @DeleteMapping("/wishlist/{id}")
-    public ResponseEntity<ProductInWishlistDTO> deleteFromWishlist(@PathVariable Long id,
-                                                              @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
+    public ResponseEntity<CompactProductDTO> deleteFromWishlist(@PathVariable Long id,
+                                                                @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
         return ResponseEntity.status(HttpStatus.OK).body(customerService.deleteProductFromWishlist(id, jwtPrincipal));
     }
 
