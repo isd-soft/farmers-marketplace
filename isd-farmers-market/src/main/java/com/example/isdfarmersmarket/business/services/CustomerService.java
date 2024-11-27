@@ -15,6 +15,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,15 +37,23 @@ public class CustomerService {
     private final ProductMapper productMapper;
     private final FarmerService farmerService;
 
+    private JwtPrincipal getPrincipal() {
+        return (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
     @Transactional
-    public FarmerReviewDTO rateFarmer(FarmerReviewCommand farmerReviewCommand,
-                                      Long id) {
-        User creator = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("No such customer found"));
-        User farmer = userRepository.findById(farmerReviewCommand.getFarmerId())
+    public FarmerReviewDTO rateFarmer(FarmerReviewCommand farmerReviewCommand) {
+        JwtPrincipal principal = getPrincipal();
+
+        User creator = userRepository
+                .findById(principal.getId())
+                .orElseThrow(EntityNotFoundException::new);
+        User farmer = userRepository
+                .findById(farmerReviewCommand.getFarmerId())
                 .orElseThrow(() -> new EntityNotFoundException("No such farmer found"));
 
-        Role farmerRole = roleRepository.findByRole(ERole.FARMER).orElseThrow(() ->
+        Role farmerRole = roleRepository
+                .findByRole(ERole.FARMER).orElseThrow(() ->
                 new EntityNotFoundException("Role doesn't exist"));
 
         if (farmer.getRoles().contains(farmerRole)) {
@@ -59,9 +69,10 @@ public class CustomerService {
     }
 
     @Transactional
-    public ProductReviewDTO rateProduct(ProductReviewCommand productReviewCommand, Long id) {
+    public ProductReviewDTO rateProduct(ProductReviewCommand productReviewCommand) {
+        JwtPrincipal principal = getPrincipal();
         User creator = userRepository
-                .findById(id)
+                .findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such customer found"));
         Product product = productRepository
                 .findById(productReviewCommand.getProductId())
@@ -100,8 +111,9 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public List<CompactProductDTO> getWishlistProducts(JwtPrincipal jwtPrincipal) {
-        User user = userRepository.findById(jwtPrincipal.getId())
+    public List<CompactProductDTO> getWishlistProducts() {
+        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
         return user.getWishlist().stream()
                 .map(productMapper::mapToProductInWishlistDTO)
@@ -109,7 +121,8 @@ public class CustomerService {
     }
 
     @Transactional
-    public CompactProductDTO addProductToWishlist(Long productId, JwtPrincipal principal) {
+    public CompactProductDTO addProductToWishlist(Long productId) {
+        JwtPrincipal principal = getPrincipal();
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
         Product product = productRepository.findById(productId)
@@ -122,7 +135,8 @@ public class CustomerService {
         return productMapper.mapToProductInWishlistDTO(product);
     }
     @Transactional
-    public CompactProductDTO deleteProductFromWishlist(Long productId, JwtPrincipal principal) {
+    public CompactProductDTO deleteProductFromWishlist(Long productId) {
+        JwtPrincipal principal = getPrincipal();
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
         Product product = productRepository.findById(productId)
