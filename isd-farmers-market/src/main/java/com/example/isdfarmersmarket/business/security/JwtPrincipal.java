@@ -9,10 +9,9 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
-@Setter
 @Getter
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JwtPrincipal {
     Long id;
     String email;
