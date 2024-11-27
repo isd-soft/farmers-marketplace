@@ -1,5 +1,6 @@
 package com.example.isdfarmersmarket.web.dto;
 
+import com.example.isdfarmersmarket.dao.models.Image;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -14,4 +15,5 @@ public class ProductInWishlistDTO {
     private BigDecimal pricePerUnit;
     private int discountPercents;
     private Float rating;
+    private ImageDTO image;
 }

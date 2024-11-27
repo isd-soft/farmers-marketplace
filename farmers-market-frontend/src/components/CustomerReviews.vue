@@ -57,7 +57,7 @@ import Button from 'primevue/button'
 import axiosInstance from '@/utils/axiosInstance.js'
 
 export default {
-  name: 'ProductReviews',
+  name: 'CustomerReviews',
   components: {
     Rating,
     Card,

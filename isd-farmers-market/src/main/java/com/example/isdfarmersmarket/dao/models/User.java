@@ -31,6 +31,7 @@ public class User implements UserDetails {
     @Column(name = "phone_number")
     private String phoneNumber;
     private String description;
+    private Integer reviewCount;
     private String address;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ItemInCart> cart = new HashSet<>();

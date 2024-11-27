@@ -3,9 +3,7 @@ import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.CustomerService;
 import com.example.isdfarmersmarket.web.commands.FarmerReviewCommand;
 import com.example.isdfarmersmarket.web.commands.ProductReviewCommand;
-import com.example.isdfarmersmarket.web.dto.FarmerReviewDTO;
-import com.example.isdfarmersmarket.web.dto.ProductInWishlistDTO;
-import com.example.isdfarmersmarket.web.dto.ProductReviewDTO;
+import com.example.isdfarmersmarket.web.dto.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -45,15 +43,15 @@ public class CustomerController {
                 .body(customerService.rateProduct(productReviewCommand, principal.getId()));
     }
     @GetMapping("/{userId}/reviews/farmer")
-    public ResponseEntity<List<FarmerReviewDTO>> getAllFarmerReviews(@PathVariable Long userId,
-                                                                     @RequestParam Integer page,
-                                                                     @RequestParam Integer pageSize) {
-        return ResponseEntity.ok(customerService.fetchAllFarmerReviews(userId, page, pageSize));
+    public ResponseEntity<List<CustomerFarmerReviewDTO>> getAllFarmerReviews(@PathVariable Long userId,
+                                                                             @RequestParam Integer page,
+                                                                             @RequestParam Integer pageSize) {
+            return ResponseEntity.ok(customerService.fetchAllFarmerReviews(userId, page, pageSize));
     }
     @GetMapping("/{userId}/reviews/product")
-    public ResponseEntity<List<ProductReviewDTO>> getAllProductReviews(@PathVariable Long userId,
-                                                                       @RequestParam Integer page,
-                                                                       @RequestParam Integer pageSize) {
+    public ResponseEntity<List<CustomerProductReviewDTO>> getAllProductReviews(@PathVariable Long userId,
+                                                                               @RequestParam Integer page,
+                                                                               @RequestParam Integer pageSize) {
         return ResponseEntity.ok(customerService.fetchAllProductReviews(userId, page, pageSize));
     }
     @PreAuthorize("hasRole('CUSTOMER')")

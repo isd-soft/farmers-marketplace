@@ -17,7 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -156,14 +155,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void updateProductReview(Product product) {
-        ProductReviewStatsDTO productReviewStatsDTO = productReviewRepository
+    public void updateProductRating(Product product) {
+        ReviewStatsDTO reviewStatsDTO = productReviewRepository
                 .findReviewStatsByProduct(product);
 
-        product.setRating(productReviewStatsDTO
+        product.setRating(reviewStatsDTO
                 .getAverageRating()
                 .floatValue());
-        product.setReviewCount(productReviewStatsDTO
+        product.setReviewCount(reviewStatsDTO
                 .getReviewCount()
                 .intValue());
 

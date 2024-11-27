@@ -161,8 +161,11 @@
           </TabPanel>
         </TabView>
       </div>
+
     </template>
+
   </Card>
+
 </template>
 
 <script>
@@ -205,7 +208,7 @@ export default {
 
     const responsiveOptions = ref([
       { breakpoint: '1024px', numVisible: 3 },
-      { breakpoint: '1024px', numVisible: 1 },
+      { breakpoint: '600px', numVisible: 1 },
     ])
 
     const isLoading = ref(true)
@@ -219,7 +222,8 @@ export default {
 
         if (response.data.images && response.data.images.length > 0) {
           images.value = response.data.images.map((img) => ({
-            img: img.startsWith('data:image') ? img : `data:image/png;base64,${img}`,
+            itemImageSrc: img.bytes.startsWith('data:image') ? img.bytes : `data:image/png;base64,${img.bytes}`,
+            thumbnailImageSrc: img.bytes.startsWith('data:image') ? img.bytes : `data:image/png;base64,${img.bytes}`,
             alt: 'Product Image',
             title: 'Product Image',
           }))
@@ -341,6 +345,7 @@ export default {
 .thumbnail-image {
   width: 100%;
   height: auto;
+  max-width: 15em;
   aspect-ratio: 3 / 2;
   object-fit: cover;
   padding: 5%;

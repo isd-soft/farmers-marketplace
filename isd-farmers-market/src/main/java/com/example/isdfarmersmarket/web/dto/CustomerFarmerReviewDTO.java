@@ -1,19 +1,14 @@
 package com.example.isdfarmersmarket.web.dto;
 
-
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserProfileDTO {
+public class CustomerFarmerReviewDTO {
     Long id;
-    String firstName;
-    String lastName;
-    Boolean isFarmer;
-    Boolean isCurrentUser;
-    String email;
-    Float rating;
-    Integer reviewCount;
+    float rating;
+    String content;
+    UserProfileDTO farmer;
 }
