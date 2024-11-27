@@ -92,10 +92,8 @@ public class ProductController {
             description = "This endpoint is used to get a detailed product page by ID"
     )
     @GetMapping("/{productId}/page")
-    public ResponseEntity<ProductPageDTO> getProductPage(@PathVariable Long productId, @AuthenticationPrincipal JwtPrincipal principal) {
-        Long principalId = null;
-        if(principal != null) principalId = principal.getId();
-        return ResponseEntity.status(OK).body(productService.getProductPageById(productId, principal));
+    public ResponseEntity<ProductPageDTO> getProductPage(@PathVariable Long productId) {
+        return ResponseEntity.status(OK).body(productService.getProductPageById(productId));
     }
 
 }

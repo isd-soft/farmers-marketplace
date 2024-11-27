@@ -24,5 +24,5 @@ public interface ProductService {
     PageResponseDTO<ProductReviewDTO> getProductReviews(Long id, int page, int pageSize);
     void updateProductRating(Product product);
 
-    ProductPageDTO getProductPageById(Long id, JwtPrincipal principal);
+    ProductPageDTO getProductPageById(Long id);
 }

@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -171,7 +172,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductPageDTO getProductPageById(Long productId, @AuthenticationPrincipal JwtPrincipal principal) {
+    public ProductPageDTO getProductPageById(Long productId) {
+        JwtPrincipal principal = getPrincipal();
         var product = productRepository
                 .findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
@@ -194,4 +196,8 @@ public class ProductServiceImpl implements ProductService {
         image.setBytes(decodedBytes);
         return image;
     }
+    private JwtPrincipal getPrincipal() {
+        return (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
 }

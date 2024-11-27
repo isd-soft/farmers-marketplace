@@ -19,27 +19,25 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/customer")
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class CustomerController {
     CustomerService customerService;
     @PreAuthorize("hasRole('CUSTOMER') and not hasRole('FARMER') ")
     @PostMapping("/review/farmer")
-    public ResponseEntity<FarmerReviewDTO> rateFarmer(@RequestBody FarmerReviewCommand farmerReviewCommand,
-                                                      @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
+    public ResponseEntity<FarmerReviewDTO> rateFarmer(@RequestBody FarmerReviewCommand farmerReviewCommand){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(customerService.rateFarmer(farmerReviewCommand, jwtPrincipal.getId()));
+                .body(customerService.rateFarmer(farmerReviewCommand));
     }
     @PreAuthorize("hasRole('CUSTOMER') and not hasRole('FARMER') ")
     @PostMapping("/review/product")
-    public ResponseEntity<ProductReviewDTO> rateProduct(@RequestBody ProductReviewCommand productReviewCommand,
-                                                        @AuthenticationPrincipal JwtPrincipal principal)
+    public ResponseEntity<ProductReviewDTO> rateProduct(@RequestBody ProductReviewCommand productReviewCommand)
     {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(customerService.rateProduct(productReviewCommand, principal.getId()));
+                .body(customerService.rateProduct(productReviewCommand));
     }
     @GetMapping("/{userId}/reviews/farmer")
     public ResponseEntity<List<CustomerFarmerReviewDTO>> getAllFarmerReviews(@PathVariable Long userId,
@@ -55,20 +53,20 @@ public class CustomerController {
     }
     @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/wishlist")
-    public ResponseEntity<List<CompactProductDTO>> getWishlistItems(@AuthenticationPrincipal JwtPrincipal jwtPrincipal) {
-        return ResponseEntity.ok(customerService.getWishlistProducts(jwtPrincipal));
+    public ResponseEntity<List<CompactProductDTO>> getWishlistItems() {
+        return ResponseEntity.ok(customerService.getWishlistProducts());
     }
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/wishlist/{id}")
-    public ResponseEntity<CompactProductDTO> addToWishList(@PathVariable Long id,
-                                                           @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
-        return ResponseEntity.status(HttpStatus.CREATED).body(customerService.addProductToWishlist(id, jwtPrincipal));
+    public ResponseEntity<CompactProductDTO> addToWishList(@PathVariable Long id){
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(customerService.addProductToWishlist(id));
     }
     @PreAuthorize("hasRole('CUSTOMER')")
     @DeleteMapping("/wishlist/{id}")
-    public ResponseEntity<CompactProductDTO> deleteFromWishlist(@PathVariable Long id,
-                                                                @AuthenticationPrincipal JwtPrincipal jwtPrincipal){
-        return ResponseEntity.status(HttpStatus.OK).body(customerService.deleteProductFromWishlist(id, jwtPrincipal));
+    public ResponseEntity<CompactProductDTO> deleteFromWishlist(@PathVariable Long id){
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(customerService.deleteProductFromWishlist(id));
     }
 
 }
