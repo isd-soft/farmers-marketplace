@@ -24,27 +24,25 @@ public class DeliveryTypeController {
 
     @PostMapping()
     public ResponseEntity<DeliveryTypeDTO> createDeliveryType(
-            @AuthenticationPrincipal JwtPrincipal jwtPrincipal,
             @RequestBody @Valid CreateDeliveryTypeCommand createDeliveryTypeCommand) {
         return ResponseEntity.status(CREATED)
-                .body(deliveryTypeService.createDeliveryType(jwtPrincipal, createDeliveryTypeCommand));
+                .body(deliveryTypeService.createDeliveryType(createDeliveryTypeCommand));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<DeliveryTypeDTO> updateDeliveryType(
-            @AuthenticationPrincipal JwtPrincipal jwtPrincipal,
             @PathVariable Long id,
             @RequestBody @Valid UpdateDeliveryTypeCommand updateDeliveryTypeCommand) {
+        updateDeliveryTypeCommand.setId(id);
         return ResponseEntity.status(OK)
-                .body(deliveryTypeService.updateDeliveryType(jwtPrincipal, id, updateDeliveryTypeCommand));
+                .body(deliveryTypeService.updateDeliveryType(updateDeliveryTypeCommand));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<DeliveryTypeDTO> deleteDeliveryType(
-            @AuthenticationPrincipal JwtPrincipal jwtPrincipal,
             @PathVariable Long id) {
         return ResponseEntity.status(OK)
-                .body(deliveryTypeService.deleteDeliveryType(jwtPrincipal, id));
+                .body(deliveryTypeService.deleteDeliveryType(id));
     }
 
     @GetMapping
