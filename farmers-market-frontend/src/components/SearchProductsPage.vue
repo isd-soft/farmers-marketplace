@@ -36,12 +36,13 @@
   </div>
 </template>
 <script>
-  import { ref, onMounted } from "vue";
+import {ref, onMounted, watch} from "vue";
   import axiosInstance from "@/utils/axiosInstance.js";
   import Header from "@/components/Header.vue";
   import Footer from "@/components/Footer.vue";
   import Select from "primevue/select";
   import ProductCard from "@/components/ProductCard.vue";
+  import {useRoute} from "vue-router";
   export default {
     name: 'SearchProducts',
     components: {
@@ -55,6 +56,7 @@
       const categories = ref([])
       const category = ref()
       const searchQ = ref("");
+      const route = useRoute();
       const fetchProducts = async () => {
         try {
           let url = `/product?search=${searchQ.value}`;
@@ -86,9 +88,22 @@
         }
       }
       onMounted(() => {
+        searchQ.value = route.query.search || "";
+        category.value = route.query.category
+          ? parseInt(route.query.category, 10)
+          : null;
         fetchProducts()
         fetchCategories()
-      })
+      });
+      watch(() => route.query.search, (newSearchQuery) => {
+        searchQ.value = newSearchQuery || "";
+        fetchProducts();
+      });
+      watch(() => route.query.category, (newCategory) => {
+        category.value = newCategory ? parseInt(route.query.category, 10)
+          : null;
+        fetchProducts();
+      });
       return {
         products,
         fetchProducts,
