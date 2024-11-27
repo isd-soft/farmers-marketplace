@@ -1,6 +1,7 @@
 package com.example.isdfarmersmarket.dao.models;
 
 import com.example.isdfarmersmarket.dao.enums.ERole;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -52,6 +53,7 @@ public class User implements UserDetails {
     @Column(name = "free_delivery_from")
     private  int freeDeliveryFrom;
     @OneToMany(mappedBy = "farmer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<DeliveryTypeFarmer> deliveryTypes = new HashSet<>();
 
     private float rating;
