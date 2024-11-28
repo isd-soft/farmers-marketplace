@@ -10,9 +10,11 @@ import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.repositories.RefreshTokenRepository;
 import com.example.isdfarmersmarket.dao.repositories.RoleRepository;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
+import com.example.isdfarmersmarket.web.commands.UpdatePasswordCommand;
 import com.example.isdfarmersmarket.web.commands.UserUpgradeCommand;
 import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
 import io.jsonwebtoken.JwtException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,7 +36,6 @@ public class AuthService {
     private final RefreshTokenRepository tokenRepository;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
     private final RegisterCommandMapper registerCommandMapper;
 
     @Transactional(readOnly = true )
@@ -47,7 +48,6 @@ public class AuthService {
             throw new InvalidCredentialsException();
         }
     }
-
 
     @Transactional
     public void deleteRefreshToken(String refreshToken) {
@@ -101,11 +101,20 @@ public class AuthService {
         User user = userRepository.findById(id)
                 .orElseThrow(InvalidCredentialsException::new);
 
-        tokenRepository.findByUser(user).stream()
-                .filter(token -> token.getToken().equals(refreshToken))
-                .findFirst()
+        tokenRepository.findByUserAndToken(user, refreshToken)
                 .orElseThrow(RefreshTokenException::new);
 
         return jwtService.generateAccessToken(user);
+    }
+    @Transactional
+    public void updatePassword(UpdatePasswordCommand updatePasswordCommand) {
+        User user = userRepository.findById(updatePasswordCommand.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User with the specified ID not found"));
+
+        if (!passwordEncoder.matches(updatePasswordCommand.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Old password is incorrect");
+        }
+        user.setPassword(passwordEncoder.encode(updatePasswordCommand.getPassword()));
+        userRepository.save(user);
     }
 }

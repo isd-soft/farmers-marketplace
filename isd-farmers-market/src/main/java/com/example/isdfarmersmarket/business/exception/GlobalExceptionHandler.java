@@ -25,6 +25,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityExistsException.class)
     public ResponseEntity<ErrorDetails> handleEntityExistsException(EntityExistsException ex, WebRequest request) {
+
         final ErrorDetails errorDetails = new ErrorDetails(LocalDate.now(), ex.getMessage());
         return ResponseEntity.status(CONFLICT).body(errorDetails);
     }

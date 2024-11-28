@@ -1,16 +1,6 @@
 package com.example.isdfarmersmarket.web.dto;
 
-
-import com.example.isdfarmersmarket.dao.enums.OrderStatus;
-import com.example.isdfarmersmarket.dao.models.ItemInOrder;
-import com.example.isdfarmersmarket.dao.models.User;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
-import jdk.jshell.Snippet;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;

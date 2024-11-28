@@ -216,7 +216,7 @@ export default {
 
     const fetchProduct = async () => {
       try {
-        const response = await axiosInstance.get(`/product/${props.id}`)
+        const response = await axiosInstance.get(`/product/${props.id}/page`)
         console.log(response)
         product.value = response.data
 

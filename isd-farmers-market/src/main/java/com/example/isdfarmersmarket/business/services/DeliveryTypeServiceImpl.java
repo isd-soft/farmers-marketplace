@@ -48,8 +48,7 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
     public DeliveryTypeDTO updateDeliveryType(UpdateDeliveryTypeCommand updateDeliveryTypeCommand) {
         DeliveryTypeFarmer existingDeliveryType =
                 deliveryTypeRepository.getDeliveryTypeFarmerById(updateDeliveryTypeCommand.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Delivery type with the specified id not found")
-                );
+                .orElseThrow(() -> new EntityNotFoundException("Delivery type with the specified id not found"));
         JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long id = updateDeliveryTypeCommand.getId();
         BigDecimal price = updateDeliveryTypeCommand.getPrice();

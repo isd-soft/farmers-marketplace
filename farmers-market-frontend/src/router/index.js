@@ -53,12 +53,6 @@ const routes = [
     component: SearchProductsPage,
 
   },
-  {
-    path: '/ordermanagement',
-    name: 'Order Management',
-    component: OrderManagementPage,
-
-  },
 ]
 
 const router = createRouter({
