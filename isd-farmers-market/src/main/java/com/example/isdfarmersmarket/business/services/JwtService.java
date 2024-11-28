@@ -1,15 +1,19 @@
 package com.example.isdfarmersmarket.business.services;
 
+import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.example.isdfarmersmarket.dao.models.Role;
 import com.example.isdfarmersmarket.dao.models.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -19,23 +23,24 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Slf4j
 public class JwtService {
 
     @Value("${jwt.secret}")
-    private String secret;
+    String secret;
 
     @Getter
     @Value("${jwt.expiration}")
-    private int expiration;
+    int expiration;
 
     @Getter
     @Value("${jwt.refreshExpiration}")
-    private int refreshExpiration;
+    int refreshExpiration;
 
-    private Key signingKey;
+    Key signingKey;
 
     @PostConstruct
     public void init() {

@@ -5,14 +5,12 @@ import com.example.isdfarmersmarket.business.services.ProductService;
 import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateProductCommand;
-import com.example.isdfarmersmarket.web.dto.PageResponseDTO;
-import com.example.isdfarmersmarket.web.dto.ProductDTO;
-import com.example.isdfarmersmarket.web.dto.ProductPageDTO;
-import com.example.isdfarmersmarket.web.dto.ProductReviewDTO;
+import com.example.isdfarmersmarket.web.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,8 +19,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -64,10 +64,12 @@ public class ProductController {
             description = "This endpoint is used to get all products"
     )
     @GetMapping()
-    public ResponseEntity<List<ProductDTO>> getAllProducts(
+    public ResponseEntity<Map<String, Object>> getAllProducts(
+            Pageable pageable,
             @RequestParam(required = false) Long category,
-            @RequestParam(required = false) String search) {
-        return ResponseEntity.status(OK).body(productService.getAllProducts(category, search));
+            @RequestParam(required = false) String search
+            ) {
+        return ResponseEntity.status(OK).body(productService.getAllProducts(category, search, pageable));
     }
     @Operation(
             description = "This endpoint is used to get a product by id"
@@ -90,10 +92,8 @@ public class ProductController {
             description = "This endpoint is used to get a detailed product page by ID"
     )
     @GetMapping("/{productId}/page")
-    public ResponseEntity<ProductPageDTO> getProductPage(@PathVariable Long productId, @AuthenticationPrincipal JwtPrincipal principal) {
-        Long principalId = null;
-        if(principal != null) principalId = principal.getId();
-        return ResponseEntity.status(OK).body(productService.getProductPageById(productId, principal));
+    public ResponseEntity<ProductPageDTO> getProductPage(@PathVariable Long productId) {
+        return ResponseEntity.status(OK).body(productService.getProductPageById(productId));
     }
 
 }

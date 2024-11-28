@@ -7,8 +7,8 @@
 
       <template #end>
         <div class="right-section">
-          <div class="search-bar">
-            <InputText v-model="searchQuery" />
+          <div class="search-bar" v-if="!isSearchPage">
+            <InputText @keydown.enter="search" v-model="searchQ"/>
             <Button @click="search" class="search-button">
               <i class="pi pi-search"></i>
             </Button>
@@ -33,14 +33,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import {ref, onMounted, watch, computed} from 'vue';
 import { isLoggedIn } from '@/shared/authState';
 import axiosInstance from '@/utils/axiosInstance';
 import Menubar from 'primevue/menubar';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import {useRoute, useRouter} from "vue-router";
 
-const searchQuery = ref('');
+const searchQ = ref('');
 
 const items = ref([
   { label: 'Deals' },
@@ -60,28 +61,29 @@ const accountMenu = ref([
     ],
   },
 ]);
-
+const route = useRoute();
+const router = useRouter();
+const isSearchPage = computed(() => route.name === 'SearchProducts');
+const search = () => {
+  router.push({ name: 'SearchProducts', query: { search: searchQ.value } });
+};
 const fetchCategories = async () => {
-  try {
-    const response = await axiosInstance.get('/category');
-    const categories = response.data;
-    const categoryItems = categories.map(category => ({
-      label: category.title,
-      command: () => goToCategory(category.id),
-    }));
+    try {
+      const response = await axiosInstance.get('/category');
+      const categories = response.data;
+      const categoryItems = categories.map(category => ({
+        label: category.title,
+        command: () => goToCategory(category.id),
+      }));
 
-    items.value = [{ label: 'Categories', items: categoryItems }, ...items.value];
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-  }
+      items.value = [{label: 'Categories', items: categoryItems}, ...items.value];
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
 };
 
 const goHome = () => {
   window.location.href = '/';
-};
-
-const search = () => {
-  console.log('Searching for:', searchQuery.value);
 };
 
 const goToLogin = () => {
@@ -105,22 +107,24 @@ const goToSettings = () => {
 };
 
 const goToCategory = (categoryId) => {
-  window.location.href = `/category/${categoryId}`;
+  router.push({ name: 'SearchProducts', query: { category: categoryId } });
 };
 
 const logout = () => {
   console.log('Logging out...');
   localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
   window.location.href = '/login';
 };
 
-// Watch for changes in login state and react accordingly
 watch(isLoggedIn, (newValue) => {
   console.log('Login state changed:', newValue);
 });
 
 onMounted(() => {
-  fetchCategories();
+  if("!isSearchPage") {
+    fetchCategories();
+  }
 });
 </script>
 

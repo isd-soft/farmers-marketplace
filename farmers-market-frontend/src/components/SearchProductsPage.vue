@@ -32,38 +32,53 @@
         :product="product"
       />
     </div>
+    <Paginator
+      style="margin-top: 30px"
+      :rows="pageSize"
+      :totalRecords="totalRecords"
+      :first="currentPage * pageSize"
+      @page="onPageChange"
+    />
   <Footer class = "footer"></Footer>
   </div>
 </template>
 <script>
-  import { ref, onMounted } from "vue";
+import {ref, onMounted, watch} from "vue";
   import axiosInstance from "@/utils/axiosInstance.js";
   import Header from "@/components/Header.vue";
   import Footer from "@/components/Footer.vue";
   import Select from "primevue/select";
   import ProductCard from "@/components/ProductCard.vue";
+  import {useRoute} from "vue-router";
+  import Paginator from 'primevue/paginator';
   export default {
     name: 'SearchProducts',
     components: {
       ProductCard,
       Header,
       Footer,
-      Select
+      Select,
+      Paginator
     },
     setup() {
       const products = ref([])
       const categories = ref([])
       const category = ref()
       const searchQ = ref("");
+      const route = useRoute();
+      const currentPage = ref(0);
+      const pageSize = ref(6);
+      const totalRecords = ref(0);
       const fetchProducts = async () => {
         try {
-          let url = `/product?search=${searchQ.value}`;
+          let url = `/product?search=${searchQ.value}&page=${currentPage.value}&size=${pageSize.value}`;
           if (category.value) {
             url += `&category=${category.value}`;
           }
           const response = await axiosInstance.get(url);
           console.log(response)
-          products.value = response.data
+          products.value = response.data.content;
+          totalRecords.value = response.data.totalElements;
         } catch (error) {
           console.error('Failed to load products:', error.message)
         }
@@ -85,10 +100,27 @@
           console.error('Failed to load categories:', error.message)
         }
       }
+      const onPageChange = (event) => {
+        currentPage.value = event.page;
+        fetchProducts();
+      }
       onMounted(() => {
+        searchQ.value = route.query.search || "";
+        category.value = route.query.category
+          ? parseInt(route.query.category, 10)
+          : null;
         fetchProducts()
         fetchCategories()
-      })
+      });
+      watch(() => route.query.search, (newSearchQuery) => {
+        searchQ.value = newSearchQuery || "";
+        fetchProducts();
+      });
+      watch(() => route.query.category, (newCategory) => {
+        category.value = newCategory ? parseInt(route.query.category, 10)
+          : null;
+        fetchProducts();
+      });
       return {
         products,
         fetchProducts,
@@ -96,6 +128,10 @@
         category,
         fetchCategories,
         searchQ,
+        onPageChange,
+        pageSize,
+        totalRecords,
+        currentPage,
       }
     },
   }

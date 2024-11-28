@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <Header class = "navbar"></Header>
-    
+
   <!-- Banner -->
   <main class="main-content">
     <div class="carousel-container">
@@ -18,8 +18,8 @@
 </template>
 
 <script>
-import Header from "./Header.vue"; 
-import Footer from "../components/Footer.vue"; 
+import Header from "./Header.vue";
+import Footer from "../components/Footer.vue";
 import Carousel from "primevue/carousel";
 import banner1 from "@/assets/banner1.png";
 import banner2 from "@/assets/banner2.png";
@@ -34,7 +34,7 @@ export default {
   Footer,
   Carousel,
 },
- 
+
   data() {
   return {
     images: [banner1, banner2, banner3],
@@ -53,8 +53,8 @@ export default {
 .home{
   display: flex;
   flex-direction: column;
-  min-height: 100vh; 
-  overflow-x: hidden; 
+  min-height: 100vh;
+  overflow-x: hidden;
   width: 100%;
   padding-top: 80px;
 }
@@ -69,15 +69,15 @@ export default {
   padding: 10px;
 }
 .carousel-container {
-  width:100%;      
-  height: auto;  
+  width:100%;
+  height: auto;
 }
 
 .carousel-image {
-  width: 100%;      
-  height: auto;       
-  object-fit: cover;  
-  display: block;    
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
 }
 
 
@@ -86,5 +86,5 @@ export default {
 
 
 
- 
-  
+
+
