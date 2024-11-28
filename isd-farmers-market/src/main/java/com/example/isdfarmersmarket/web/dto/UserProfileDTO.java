@@ -17,4 +17,6 @@ public class UserProfileDTO {
     String phoneNumber;
     String description;
     String address;
+    Float rating;
+    Integer reviewCount;
 }

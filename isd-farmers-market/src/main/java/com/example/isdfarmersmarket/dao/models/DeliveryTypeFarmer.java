@@ -2,10 +2,7 @@ package com.example.isdfarmersmarket.dao.models;
 
 import com.example.isdfarmersmarket.dao.enums.DeliveryTypes;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -16,13 +13,14 @@ import java.util.Objects;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class DeliveryTypeFarmer {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
     private Long id;
     private BigDecimal price;
     private DeliveryTypes type;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "farmer_id", nullable = false)
     private User farmer;
 

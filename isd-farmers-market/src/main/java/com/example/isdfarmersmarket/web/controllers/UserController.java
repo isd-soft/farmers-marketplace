@@ -1,5 +1,6 @@
 package com.example.isdfarmersmarket.web.controllers;
 
+import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.UserService;
 import com.example.isdfarmersmarket.web.commands.UpdateUserCommand;
 import com.example.isdfarmersmarket.web.dto.UpdateUserDTO;

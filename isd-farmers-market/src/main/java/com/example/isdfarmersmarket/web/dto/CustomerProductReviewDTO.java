@@ -4,14 +4,11 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
-
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductInWishlistDTO {
+public class CustomerProductReviewDTO {
     Long id;
-    private String title;
-    private BigDecimal pricePerUnit;
-    private int discountPercents;
-    private Float rating;
+    Float rating;
+    String content;
+    CompactProductDTO product;
 }

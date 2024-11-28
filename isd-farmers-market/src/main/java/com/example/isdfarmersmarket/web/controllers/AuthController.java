@@ -9,7 +9,9 @@ import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
 import com.example.isdfarmersmarket.web.commands.UserUpgradeCommand;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +24,13 @@ import java.util.Map;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/auth")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class AuthController {
-    private final AuthService authService;
-    private final JwtService jwtService;
+    AuthService authService;
+    JwtService jwtService;
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> userRegister(@RequestBody UserRegisterCommand registerRequestDTO) {

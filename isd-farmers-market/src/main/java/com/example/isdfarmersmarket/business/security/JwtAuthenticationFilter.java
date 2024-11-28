@@ -1,7 +1,7 @@
 package com.example.isdfarmersmarket.business.security;
 
-
 import com.example.isdfarmersmarket.business.services.JwtService;
+import com.example.isdfarmersmarket.dao.enums.AuthError;
 import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
@@ -25,6 +25,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @AllArgsConstructor
@@ -33,7 +34,6 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ObjectMapper mapper;
     JwtService jwtService;
-
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -56,22 +56,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             setAuthentication(request, id, email, roles);
             // Continue request
             filterChain.doFilter(request, response);
-        } catch (ExpiredJwtException ex) {
-            sendErrorResponse(response, "JWT token has expired");
 
-        } catch (UnsupportedJwtException ex) {
-            sendErrorResponse(response, "JWT token is unsupported");
-
-        } catch (MalformedJwtException ex) {
-            sendErrorResponse(response, "JWT token is malformed");
-
-        } catch (SignatureException ex) {
-            sendErrorResponse(response, "JWT token signature validation failed");
-
-        } catch (IllegalArgumentException ex) {
-            sendErrorResponse(response, "Illegal argument during JWT processing");
         } catch (JwtException ex) {
-            sendErrorResponse(response, "Unexpected JWT exception");
+            handleJwtException(response, ex);
         }
 
     }
@@ -114,13 +101,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return token;
     }
 
-    private void sendErrorResponse(HttpServletResponse response, String message) throws IOException {
+    private void handleJwtException(HttpServletResponse response, JwtException ex) throws IOException {
+        sendErrorResponse(response, ex);
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, JwtException ex) throws IOException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json");
 
+        String message;
+        Map<String, Object> properties = Map.of();
+
+        if (ex instanceof ExpiredJwtException) {
+            message = AuthError.TOKEN_EXPIRED.name();
+        } else if (ex instanceof UnsupportedJwtException) {
+            message = "JWT token is unsupported";
+        } else if (ex instanceof MalformedJwtException) {
+            message = "JWT token is malformed";
+        } else if (ex instanceof SignatureException) {
+            message = "JWT token signature validation failed";
+        }  else {
+            message = "Unexpected JWT exception";
+        }
+
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, message);
+
+        problemDetail.setProperties(properties);
 
         response.getWriter().write(mapper.writeValueAsString(problemDetail));
     }
-
 }

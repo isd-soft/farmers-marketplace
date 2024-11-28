@@ -178,6 +178,7 @@
 import { ref } from "vue";
 import { useRouter} from "vue-router";
 import axiosInstance from "@/utils/axiosInstance";
+// eslint-disable-next-line no-unused-vars
 import { isLoggedIn } from '@/shared/authState';
 
 import Password from 'primevue/password';
@@ -223,8 +224,9 @@ export default {
       description: "",
     });
     const loading = ref(false);
+    // eslint-disable-next-line no-unused-vars
     const router = useRouter();
-    
+
     const validateLoginForm = () => {
       errors.value = { email: "", password: "" };
       let isValid = true;
@@ -311,13 +313,8 @@ export default {
         const { accessToken, refreshToken } = response.data;
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
-        console.log("Access Token:", localStorage.getItem("accessToken"));
-        console.log("Refresh Token:", localStorage.getItem("refreshToken"));
-        document.body.style.backgroundColor = 'white'; 
-        console.log("Login - Access Token:", accessToken); 
-        window.location.href = '/';
-  
-        
+        document.body.style.backgroundColor = 'white';
+        window.location.href = "/";
       } catch (error) {
         console.error("Login error:", error.response?.data || error.message);
         alert("Login failed: " + (error.response?.data?.message || error.message));

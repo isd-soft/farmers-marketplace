@@ -1,6 +1,8 @@
 <template>
   <Header class="navbar"></Header>
-  <Card :style="{ position: 'absolute', top: '10vh' }">
+  <Card
+    :style="{ position: 'absolute', top: '10vh', width: '80em', maxWidth: '95%', margin: '0 auto' }"
+  >
     <template #content>
       <div v-if="isLoading" class="loading-container">
         <div class="loading-content" style="text-align: center; padding: 20px">
@@ -110,14 +112,28 @@
                 <Button
                   class="add-to-cart-button"
                   @click="addToCart"
-                  style="width: 12em; background-color: green; color: white; border: none; display: inline-flex; align-items: center; justify-content: center;"
+                  style="
+                    width: 12em;
+                    background-color: green;
+                    color: white;
+                    border: none;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                  "
                 >
                   Add to Cart
                 </Button>
 
                 <i
                   :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
-                  style="font-size: 2.5rem; cursor: pointer; color: red; margin-left: 10px; vertical-align: middle;"
+                  style="
+                    font-size: 2.5rem;
+                    cursor: pointer;
+                    color: red;
+                    margin-left: 10px;
+                    vertical-align: middle;
+                  "
                   @click="toggleWishlist"
                   :title="product.isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'"
                 />
@@ -135,53 +151,7 @@
           </TabPanel>
 
           <TabPanel header="Reviews">
-            <div class="tab-content">
-              <!-- Add Review Form -->
-              <div class="add-review">
-                <h3>Leave a Review</h3>
-                <Rating v-model="newReview.rating" :stars="5" />
-                <textarea
-                  v-model="newReview.content"
-                  rows="6"
-                  placeholder="Write your review..."
-                  style="margin-top: 1em"
-                ></textarea>
-                <Button @click="submitReview" style="background-color: green; width: 12em"
-                  >Submit Review</Button
-                >
-              </div>
-
-              <!-- Reviews Section -->
-              <div class="reviews-section">
-                <h3>Customer Reviews</h3>
-                <div v-if="reviews.length > 0">
-                  <ul class="review-list">
-                    <li v-for="review in reviews" :key="review.id" class="review-item">
-                      <Card>
-                        <template #content>
-                          <Rating v-model="review.rating" :readOnly="true" :stars="5" />
-                          <strong
-                            >{{ review.creator.firstName }} {{ review.creator.lastName }}</strong
-                          >
-                          <p>{{ review.content }}</p>
-                        </template>
-                      </Card>
-                    </li>
-                  </ul>
-                  <!-- Load More Button -->
-                  <Button
-                    v-if="!isAllReviewsLoaded"
-                    label="Load More Reviews"
-                    class="p-button-text"
-                    style="margin-top: 20px"
-                    @click="loadMoreReviews"
-                  />
-                </div>
-                <div v-else>
-                  <p>No reviews yet. Be the first to leave one!</p>
-                </div>
-              </div>
-            </div>
+            <CustomerReviews :id="id" :review-type="'product'" />
           </TabPanel>
 
           <TabPanel header="Shipping">
@@ -191,15 +161,17 @@
           </TabPanel>
         </TabView>
       </div>
+
     </template>
+
   </Card>
+
 </template>
 
 <script>
 import { ref, onMounted } from 'vue'
 import axiosInstance from '@/utils/axiosInstance.js'
-import bootsImg from '@/assets/boots.png'
-import whatImg from '@/assets/what.jpg'
+import noPhotoImg from '@/assets/noPhoto.png'
 import Galleria from 'primevue/galleria'
 import TabView from 'primevue/tabview'
 import TabPanel from 'primevue/tabpanel'
@@ -209,10 +181,13 @@ import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 import ProgressSpinner from 'primevue/progressspinner'
 import Header from '@/components/Header.vue'
-
+import Footer from '@/components/Footer.vue'
+import CustomerReviews from '@/components/CustomerReviews.vue'
 export default {
   name: 'ProductPage',
   components: {
+    CustomerReviews,
+    Footer,
     Header,
     Galleria,
     Button,
@@ -226,23 +201,10 @@ export default {
   props: ['id'],
   setup(props) {
     const product = ref({})
-    const reviews = ref([])
-    const newReview = ref({ productId: props.id, rating: 0, content: '' })
     const quantity = ref(1)
-    const currentPage = ref(0) // Pagination state
-    const pageSize = ref(5) // Page size
     const isAllReviewsLoaded = ref(false)
 
-    const images = ref([
-      { itemImageSrc: bootsImg, thumbnailImageSrc: bootsImg, alt: 'Boots Image' },
-      { itemImageSrc: whatImg, thumbnailImageSrc: whatImg, alt: 'Farm Image' },
-      { itemImageSrc: bootsImg, thumbnailImageSrc: bootsImg, alt: 'Boots Image' },
-      { itemImageSrc: whatImg, thumbnailImageSrc: whatImg, alt: 'Farm Image' },
-      { itemImageSrc: bootsImg, thumbnailImageSrc: bootsImg, alt: 'Boots Image' },
-      { itemImageSrc: whatImg, thumbnailImageSrc: whatImg, alt: 'Farm Image' },
-      { itemImageSrc: bootsImg, thumbnailImageSrc: bootsImg, alt: 'Boots Image' },
-      { itemImageSrc: whatImg, thumbnailImageSrc: whatImg, alt: 'Farm Image' },
-    ])
+    const images = ref([])
 
     const responsiveOptions = ref([
       { breakpoint: '1024px', numVisible: 3 },
@@ -257,6 +219,20 @@ export default {
         const response = await axiosInstance.get(`/product/${props.id}/page`)
         console.log(response)
         product.value = response.data
+
+        if (response.data.images && response.data.images.length > 0) {
+          images.value = response.data.images.map((img) => ({
+            itemImageSrc: img.bytes.startsWith('data:image') ? img.bytes : `data:image/png;base64,${img.bytes}`,
+            thumbnailImageSrc: img.bytes.startsWith('data:image') ? img.bytes : `data:image/png;base64,${img.bytes}`,
+            alt: 'Product Image',
+            title: 'Product Image',
+          }))
+        } else {
+          images.value = [
+            { itemImageSrc: noPhotoImg, thumbnailImageSrc: noPhotoImg, alt: 'No Photo Image' },
+          ]
+        }
+
         isLoading.value = false
       } catch (error) {
         console.error('Failed to load product:', error.message)
@@ -264,9 +240,9 @@ export default {
         isLoading.value = false
       }
     }
+
     const toggleWishlist = async () => {
       if (!product.value.id) return
-
       try {
         if (product.value.isInWishlist) {
           await axiosInstance.delete(`/customer/wishlist/${props.id}`)
@@ -281,45 +257,6 @@ export default {
         )
       }
     }
-    const fetchReviews = async () => {
-      try {
-        const response = await axiosInstance.get(`/product/${props.id}/reviews`, {
-          params: { page: currentPage.value, pageSize: pageSize.value },
-        })
-        console.log(response.data)
-        console.log(currentPage.value * pageSize.value + response.data.content.length)
-
-        reviews.value.push(...response.data.content)
-        if (
-          currentPage.value * pageSize.value + response.data.content.length ===
-          response.data.totalElements
-        ) {
-          isAllReviewsLoaded.value = true
-        }
-        isLoading.value = false
-      } catch (error) {
-        console.error('Failed to load reviews:', error.message)
-        hasError.value = true
-        isLoading.value = false
-      }
-    }
-    const loadMoreReviews = () => {
-      currentPage.value += 1
-      fetchReviews()
-    }
-    const submitReview = async () => {
-      if (!newReview.value.rating || !newReview.value.content.trim()) {
-        console.error('Rating and content are required.')
-        return
-      }
-      try {
-        const response = await axiosInstance.post(`/customer/review/product`, newReview.value)
-        reviews.value.unshift(response.data)
-        newReview.value = { productId: props.id, rating: 0, content: '' }
-      } catch (error) {
-        console.error('Failed to submit review:', error.message)
-      }
-    }
 
     const addToCart = () => {
       console.log(
@@ -329,24 +266,17 @@ export default {
 
     onMounted(() => {
       fetchProduct()
-      fetchReviews()
     })
 
     return {
       product,
-      reviews,
-      newReview,
       quantity,
       images,
       responsiveOptions,
       isLoading,
       hasError,
-      currentPage,
-      pageSize,
       isAllReviewsLoaded,
-      loadMoreReviews,
       addToCart,
-      submitReview,
       toggleWishlist,
     }
   },
@@ -356,20 +286,43 @@ export default {
 <style scoped>
 .product-page {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: flex-start;
+  padding: 1rem;
 }
 
 .product-content {
   display: flex;
-  width: 100%;
-  max-width: 1200px;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
 }
 
-.product-gallery {
-  flex: 2;
-  margin-right: 20px;
+.product-gallery,
+.product-details {
+  flex: 1 1 100%;
+  max-width: 100%;
+}
+@media (min-width: 1200px) {
+  .product-gallery {
+    width: 60em;
+  }
+}
+
+@media (min-width: 768px) {
+  .product-gallery {
+    flex: 2;
+    max-width: 100%;
+  }
+
+  .product-details {
+    flex: 1;
+  }
+
+  .product-content {
+    flex-wrap: nowrap;
+  }
 }
 
 .product-details {
@@ -392,6 +345,7 @@ export default {
 .thumbnail-image {
   width: 100%;
   height: auto;
+  max-width: 15em;
   aspect-ratio: 3 / 2;
   object-fit: cover;
   padding: 5%;
@@ -447,53 +401,7 @@ export default {
   background-color: #0056b3;
 }
 
-.add-review {
-  margin-bottom: 20px;
-}
 
-.add-review h3 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.add-review textarea {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.add-review button {
-  background-color: #007bff;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.add-review button:hover {
-  background-color: #0056b3;
-}
-
-.reviews-section {
-  margin-top: 20px;
-}
-
-.review-list {
-  list-style: none;
-  padding: 0;
-}
-
-.review-item {
-  margin-bottom: 15px;
-}
-
-.review-item strong {
-  font-weight: bold;
-}
 
 .tab-content p {
   font-size: 1rem;
