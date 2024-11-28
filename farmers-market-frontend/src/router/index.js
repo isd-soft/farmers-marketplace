@@ -7,6 +7,7 @@ import CreateProduct from "@/components/CreateProduct.vue";
 import UserPage from "@/components/UserPage.vue";
 import SearchProductsPage from "@/components/SearchProductsPage.vue";
 import OrderManagementPage from '@/components/OrderManagementPage.vue';
+import SettingsPage from '@/components/SettingsPage.vue';
 
 const routes = [
   {
@@ -40,6 +41,8 @@ const routes = [
     path: '/settings',
     name: 'Settings',
     component: SettingsPage,
+  },
+  {
     path: '/product/create',
     name: 'CreateProduct',
     component: CreateProduct,
