@@ -36,18 +36,18 @@ public abstract class RegisterCommandMapper {
     @AfterMapping
     public void assignRoles(@MappingTarget User user, UserRegisterCommand userRegisterCommand) {
         Role customerRole = roleRepository.findByRole(ERole.CUSTOMER)
-                .orElseThrow(() -> new RoleDoesntExistException("ROLE CUSTOMER DOESN'T EXIST"));
+                .orElseThrow(RoleDoesntExistException::new);
         user.addRole(customerRole);
 
         switch (userRegisterCommand.getRoleType()) {
             case FARMER:
                 Role farmerRole = roleRepository.findByRole(ERole.FARMER)
-                        .orElseThrow(() -> new RoleDoesntExistException("ROLE FARMER DOESN'T EXIST"));
+                        .orElseThrow(RoleDoesntExistException::new);
                 user.addRole(farmerRole);
                 break;
             case ADMIN:
                 Role adminRole = roleRepository.findByRole(ERole.ADMIN)
-                        .orElseThrow(() -> new RoleDoesntExistException("ROLE ADMIN DOESN'T EXIST"));
+                        .orElseThrow((RoleDoesntExistException::new));
                 user.addRole(adminRole);
                 break;
             default:

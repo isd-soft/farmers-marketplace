@@ -16,53 +16,30 @@ import javax.naming.AuthenticationException;
 @RestControllerAdvice
 public class AuthenticationExceptionHandler {
 
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ProblemDetail handleEmailAlreadyExists() {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, AuthError.EMAIL_ALREADY_EXISTS.getMessage());
+    @ExceptionHandler({EmailAlreadyExistsException.class, RoleAlreadyExistsException.class,
+            RoleDoesntExistException.class, UsernameNotFoundException.class,
+            PasswordsDoNotMatchException.class, InvalidCredentialsException.class,
+            MalformedJwtException.class, AccessDeniedException.class,
+            BadCredentialsException.class, AuthenticationException.class})
+    public ProblemDetail handleException(Exception ex) {
+        AuthError authError = switch (ex) {
+            case EmailAlreadyExistsException e -> AuthError.EMAIL_ALREADY_EXISTS;
+            case RoleAlreadyExistsException e -> AuthError.ROLE_ALREADY_EXISTS;
+            case RoleDoesntExistException e -> AuthError.ROLE_DOESNT_EXIST;
+            case UsernameNotFoundException e -> AuthError.USERNAME_NOT_FOUND;
+            case PasswordsDoNotMatchException e -> AuthError.PASSWORDS_DO_NOT_MATCH;
+            case InvalidCredentialsException e -> AuthError.INVALID_CREDENTIALS;
+            case MalformedJwtException e -> AuthError.MALFORMED_JWT;
+            case AccessDeniedException e -> AuthError.ACCESS_DENIED;
+            case BadCredentialsException e -> AuthError.BAD_CREDENTIALS;
+            case AuthenticationException e -> AuthError.AUTHENTICATION_FAILED;
+            default -> AuthError.UNEXPECTED_JWT_ERROR;
+        };
+
+        return buildProblemDetail(authError);
     }
 
-    @ExceptionHandler(RoleAlreadyExistsException.class)
-    public ProblemDetail handleRoleAlreadyExists() {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, AuthError.ROLE_ALREADY_EXISTS.getMessage());
-    }
-
-    @ExceptionHandler(RoleDoesntExistException.class)
-    public ProblemDetail handleRoleDoesntExist() {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, AuthError.ROLE_DOESNT_EXIST.getMessage());
-    }
-
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ProblemDetail handleUsernameNotFound() {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, AuthError.USERNAME_NOT_FOUND.getMessage());
-    }
-
-    @ExceptionHandler(PasswordsDoNotMatchException.class)
-    public ProblemDetail handlePasswordsDoNotMatch() {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, AuthError.PASSWORDS_DO_NOT_MATCH.getMessage());
-    }
-
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ProblemDetail handleInvalidCredentials() {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, AuthError.INVALID_CREDENTIALS.getMessage());
-    }
-
-    @ExceptionHandler(MalformedJwtException.class)
-    public ProblemDetail handleMalformedJwtException() {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, AuthError.MALFORMED_JWT.getMessage());
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ProblemDetail handleAuthorizationDenied() {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, AuthError.ACCESS_DENIED.getMessage());
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public ProblemDetail handleBadCredentials() {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, AuthError.BAD_CREDENTIALS.getMessage());
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    public ProblemDetail handleAuthenticationFailed() {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, AuthError.AUTHENTICATION_FAILED.getMessage());
+    private ProblemDetail buildProblemDetail(AuthError authError) {
+        return ProblemDetail.forStatusAndDetail(authError.getHttpStatus(), authError.getMessage());
     }
 }

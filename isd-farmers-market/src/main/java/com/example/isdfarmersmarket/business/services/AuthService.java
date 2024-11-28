@@ -44,18 +44,20 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(username, password));
             return (User) authentication.getPrincipal();
         } catch (AuthenticationException e) {
-            throw new InvalidCredentialsException(AuthError.INVALID_CREDENTIALS);
+            throw new InvalidCredentialsException();
         }
     }
 
     @Transactional
     public void upgradeUser(String email, UserUpgradeCommand customerUpgradeCommand) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found."));
-        Role farmer = roleRepository.findByRole(ERole.FARMER).orElseThrow(
-                () -> new RuntimeException("ROLE DOESNT EXIST"));
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(CustomUsernameNotFoundException::new);
+        Role farmer = roleRepository
+                .findByRole(ERole.FARMER)
+                .orElseThrow(RoleDoesntExistException::new);
         if(user.getRoles().contains(farmer)) {
-            throw new RoleAlreadyExistsException("Role already exists");
+            throw new RoleAlreadyExistsException();
         }
         user.setAddress(customerUpgradeCommand.getAddress());
         user.setDescription(customerUpgradeCommand.getDescription());
@@ -80,7 +82,7 @@ public class AuthService {
     @Transactional
     public void registerUser(UserRegisterCommand registerRequestDTO) {
         if (userRepository.existsByEmail(registerRequestDTO.getEmail())) {
-            throw new EmailAlreadyExistsException("Email already in use");
+            throw new EmailAlreadyExistsException();
         }
         User newUser = registerCommandMapper.map(registerRequestDTO);
         userRepository.save(newUser);
@@ -115,12 +117,12 @@ public class AuthService {
                 .getSubject());
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new InvalidCredentialsException(AuthError.AUTHENTICATED_USER_NOT_FOUND));
+                .orElseThrow(InvalidCredentialsException::new);
 
         tokenRepository.findByUser(user).stream()
                 .filter(token -> token.getToken().equals(refreshToken))
                 .findFirst()
-                .orElseThrow(() -> new RefreshTokenException(AuthError.REFRESH_TOKEN_INVALID));
+                .orElseThrow(RefreshTokenException::new);
 
         return jwtService.generateAccessToken(user);
     }
