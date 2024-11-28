@@ -57,7 +57,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Continue request
             filterChain.doFilter(request, response);
         } catch (JwtException ex) {
-            handleJwtException(response, ex);
+            // Handle JwtException and send error response
+            sendErrorResponse(response, ex);
+        } catch (IllegalArgumentException ex) {
+            // Handle IllegalArgumentException
+            sendErrorResponse(response, AuthError.UNEXPECTED_JWT_ERROR.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -98,34 +102,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String token = authHeader.substring(7);
         return token;
     }
-
-    private void handleJwtException(HttpServletResponse response, JwtException ex) throws IOException {
-        sendErrorResponse(response, ex);
-    }
-
+    // Jwt-specific exception handling method
     private void sendErrorResponse(HttpServletResponse response, JwtException ex) throws IOException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json");
 
         String message;
         Map<String, Object> properties = Map.of();
-
         if (ex instanceof ExpiredJwtException) {
-            message = AuthError.TOKEN_EXPIRED.name();
+            message = AuthError.TOKEN_EXPIRED.getMessage();
         } else if (ex instanceof UnsupportedJwtException) {
-            message = "JWT token is unsupported";
+            message = AuthError.UNSUPPORTED_JWT.getMessage();
         } else if (ex instanceof MalformedJwtException) {
-            message = "JWT token is malformed";
+            message = AuthError.MALFORMED_JWT.getMessage();
         } else if (ex instanceof SignatureException) {
-            message = "JWT token signature validation failed";
-        }  else {
-            message = "Unexpected JWT exception";
+            message = AuthError.SIGNATURE_VALIDATION_FAILED.getMessage();
+        } else {
+            message = AuthError.UNEXPECTED_JWT_ERROR.getMessage();
         }
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, message);
-
         problemDetail.setProperties(properties);
 
+        response.getWriter().write(mapper.writeValueAsString(problemDetail));
+    }
+    // General exception handling method
+    private void sendErrorResponse(HttpServletResponse response, String message, HttpStatus status) throws IOException {
+        response.setStatus(status.value());
+        response.setContentType("application/json");
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, message);
         response.getWriter().write(mapper.writeValueAsString(problemDetail));
     }
 }

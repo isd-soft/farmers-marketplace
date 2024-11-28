@@ -35,7 +35,7 @@ public class FarmerService {
                 .stream()
                 .map(reviewMapper::map)
                 .toList();
-        return new PageResponseDTO<>(content, totalReviews, page, pageSize);
+        return new PageResponseDTO<>(content, totalReviews);
     }
     public void updateFarmerRating(User farmer){
         ReviewStatsDTO reviewStatsDTO = farmerReviewRepository

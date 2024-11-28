@@ -115,7 +115,7 @@ public class AuthService {
                 .getSubject());
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new InvalidCredentialsException(AuthError.USER_NOT_FOUND));
+                .orElseThrow(() -> new InvalidCredentialsException(AuthError.AUTHENTICATED_USER_NOT_FOUND));
 
         tokenRepository.findByUser(user).stream()
                 .filter(token -> token.getToken().equals(refreshToken))

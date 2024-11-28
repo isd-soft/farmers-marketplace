@@ -8,6 +8,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,15 +43,13 @@ public class CustomerController {
     }
     @GetMapping("/{userId}/reviews/farmer")
     public ResponseEntity<List<CustomerFarmerReviewDTO>> getAllFarmerReviews(@PathVariable Long userId,
-                                                                             @RequestParam Integer page,
-                                                                             @RequestParam Integer pageSize) {
-            return ResponseEntity.ok(customerService.fetchAllFarmerReviews(userId, page, pageSize));
+                                                                             Pageable pageable) {
+            return ResponseEntity.ok(customerService.fetchAllFarmerReviews(userId, pageable));
     }
     @GetMapping("/{userId}/reviews/product")
     public ResponseEntity<List<CustomerProductReviewDTO>> getAllProductReviews(@PathVariable Long userId,
-                                                                               @RequestParam Integer page,
-                                                                               @RequestParam Integer pageSize) {
-        return ResponseEntity.ok(customerService.fetchAllProductReviews(userId, page, pageSize));
+                                                                               Pageable pageable) {
+        return ResponseEntity.ok(customerService.fetchAllProductReviews(userId, pageable));
     }
     @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/wishlist")

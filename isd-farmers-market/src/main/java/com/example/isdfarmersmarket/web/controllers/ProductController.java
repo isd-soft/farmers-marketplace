@@ -83,10 +83,9 @@ public class ProductController {
     )
     @GetMapping("/{productId}/reviews")
     public ResponseEntity<PageResponseDTO<ProductReviewDTO>> getProductReviews(
-            @PathVariable Long productId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int pageSize) {
-        return ResponseEntity.status(OK).body(productService.getProductReviews(productId, page, pageSize));
+            Pageable pageable,
+            @PathVariable Long productId) {
+        return ResponseEntity.status(OK).body(productService.getProductReviews(productId, pageable));
     }
     @Operation(
             description = "This endpoint is used to get a detailed product page by ID"

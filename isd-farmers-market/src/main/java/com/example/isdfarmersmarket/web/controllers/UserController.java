@@ -6,6 +6,7 @@ import com.example.isdfarmersmarket.web.dto.UserProfileDTO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,13 +27,13 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserProfileDTO> getAllUsers(@RequestParam Integer page, @RequestParam Integer pageSize) {
-        return userService.getAllUsers(page, pageSize);
+    public List<UserProfileDTO> getAllUsers(Pageable pageable) {
+        return userService.getAllUsers(pageable);
     }
 
     @GetMapping("/search")
-    public List<UserProfileDTO> searchUsersByFullName(@RequestParam String fullName, @RequestParam Integer page, @RequestParam Integer pageSize) {
-        return userService.searchUsersByFullName(fullName, page, pageSize);
+    public List<UserProfileDTO> searchUsersByFullName(@RequestParam String fullName, Pageable pageable) {
+        return userService.searchUsersByFullName(fullName, pageable);
     }
 
 

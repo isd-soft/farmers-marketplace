@@ -21,7 +21,7 @@ public interface ProductService {
     ProductDTO deleteProduct(Long id);
     Map<String, Object> getAllProducts(Long category, String search, Pageable pageable);
     ProductDTO getProductById(Long id);
-    PageResponseDTO<ProductReviewDTO> getProductReviews(Long id, int page, int pageSize);
+    PageResponseDTO<ProductReviewDTO> getProductReviews(Long id, Pageable pageable);
     void updateProductRating(Product product);
 
     ProductPageDTO getProductPageById(Long id);

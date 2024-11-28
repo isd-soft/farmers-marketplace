@@ -15,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -87,24 +88,24 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public List<CustomerProductReviewDTO> fetchAllProductReviews(Long id, Integer page, Integer pageSize) {
+    public List<CustomerProductReviewDTO> fetchAllProductReviews(Long id, Pageable pageable) {
         User customer = userRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
 
-        return productReviewRepository.findByCreatorOrderByCreatedDate(customer, PageRequest.of(page, pageSize))
+        return productReviewRepository.findByCreatorOrderByCreatedDate(customer, pageable)
                 .stream()
                 .map(reviewMapper::mapToCustomerProductReview)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<CustomerFarmerReviewDTO> fetchAllFarmerReviews(Long id, Integer page, Integer pageSize) {
+    public List<CustomerFarmerReviewDTO> fetchAllFarmerReviews(Long id, Pageable pageable) {
         User farmer = userRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
 
-        return farmerReviewRepository.findByCreatorOrderByCreatedDate(farmer, PageRequest.of(page, pageSize))
+        return farmerReviewRepository.findByCreatorOrderByCreatedDate(farmer, pageable)
                 .stream()
                 .map(reviewMapper::mapToCustomerFarmerReview)
                 .toList();

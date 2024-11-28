@@ -15,6 +15,7 @@ import com.example.isdfarmersmarket.web.dto.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -137,13 +138,13 @@ public class ProductServiceImpl implements ProductService {
     }
     @Override
     @Transactional(readOnly = true)
-    public PageResponseDTO<ProductReviewDTO> getProductReviews(Long productId, int page, int pageSize) {
+    public PageResponseDTO<ProductReviewDTO> getProductReviews(Long productId, Pageable pageable) {
         Product product = productRepository
                 .findById(productId)
                 .orElseThrow(()->new EntityNotFoundException("Product not found"));
 
         var reviewsPage = productReviewRepository
-                .findAllByProductOrderByCreatedDateDesc(product, PageRequest.of(page,pageSize));
+                .findAllByProductOrderByCreatedDateDesc(product, pageable);
         var totalReviews = reviewsPage.getTotalElements();
         var content = reviewsPage
                 .getContent()
@@ -151,7 +152,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(reviewMapper::mapWithoutProductDetails)
                 .toList();
 
-        return new PageResponseDTO<>(content,totalReviews,page,pageSize);
+        return new PageResponseDTO<>(content,totalReviews);
     }
 
     @Override
