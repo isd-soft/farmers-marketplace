@@ -29,6 +29,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(CONFLICT).body(errorDetails);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorDetails> handleIlegalAergumentException(IllegalArgumentException ex, WebRequest request) {
+        final ErrorDetails errorDetails = new ErrorDetails(LocalDate.now(), ex.getMessage());
+        return ResponseEntity.status(BAD_REQUEST).body(errorDetails);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
