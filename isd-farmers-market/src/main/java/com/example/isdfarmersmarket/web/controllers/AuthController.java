@@ -35,15 +35,6 @@ public class AuthController {
                 .body(Map.of("message", "User registered successfully"));
     }
 
-    @PreAuthorize("hasRole('CUSTOMER')")
-    @PostMapping("/customer/upgrade")
-    public ResponseEntity<Map<String, String>> upgradeCustomer(@RequestBody UserUpgradeCommand customerUpgradeCommand,
-                                                               Authentication authentication) {
-        authService.upgradeUser(authentication.getName(), customerUpgradeCommand);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(Map.of("message", "Customer upgraded successfully"));
-    }
-
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody UserLoginCommand userLoginCommand) {
         User user = authService.authenticate(userLoginCommand.getEmail(), userLoginCommand.getPassword());

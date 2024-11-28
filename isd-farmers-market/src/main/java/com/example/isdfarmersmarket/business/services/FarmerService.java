@@ -1,7 +1,7 @@
 package com.example.isdfarmersmarket.business.services;
 
 import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
-import com.example.isdfarmersmarket.dao.models.Product;
+import com.example.isdfarmersmarket.dao.models.FarmerReview;
 import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.repositories.FarmerReviewRepository;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
@@ -12,9 +12,13 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,11 +29,11 @@ public class FarmerService {
     ReviewMapper reviewMapper;
 
     @Transactional(readOnly = true)
-    public PageResponseDTO<FarmerReviewDTO> getFarmerReviews(Long farmerId, int page, int pageSize) {
+    public PageResponseDTO<FarmerReviewDTO> getFarmerReviews(Long farmerId, Pageable pageable) {
         User farmer = userRepository.findById(farmerId).orElseThrow(EntityNotFoundException::new);
         var reviewsPage = farmerReviewRepository
-                .findAllByFarmerOrderByCreatedDateDesc(farmer, PageRequest.of(page, pageSize));
-        var totalReviews = reviewsPage.getTotalElements();
+                .findByFarmerOrderByCreatedDateDesc(farmer, pageable);
+        long totalReviews = reviewsPage.getTotalElements();
         var content = reviewsPage
                 .getContent()
                 .stream()

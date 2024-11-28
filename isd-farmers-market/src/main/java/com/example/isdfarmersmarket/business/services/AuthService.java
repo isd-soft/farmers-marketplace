@@ -48,24 +48,6 @@ public class AuthService {
         }
     }
 
-    @Transactional
-    public void upgradeUser(String email, UserUpgradeCommand customerUpgradeCommand) {
-        User user = userRepository
-                .findByEmail(email)
-                .orElseThrow(CustomUsernameNotFoundException::new);
-        Role farmer = roleRepository
-                .findByRole(ERole.FARMER)
-                .orElseThrow(RoleDoesntExistException::new);
-        if(user.getRoles().contains(farmer)) {
-            throw new RoleAlreadyExistsException();
-        }
-        user.setAddress(customerUpgradeCommand.getAddress());
-        user.setDescription(customerUpgradeCommand.getDescription());
-
-
-        user.addRole(farmer);
-        userRepository.save(user);
-    }
 
     @Transactional
     public void deleteRefreshToken(String refreshToken) {

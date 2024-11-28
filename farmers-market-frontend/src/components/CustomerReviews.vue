@@ -80,7 +80,7 @@ export default {
     const fetchReviews = async () => {
       try {
         const response = await axiosInstance.get(`/${props.reviewType}/${props.id}/reviews`, {
-          params: { page: currentPage.value, pageSize: pageSize.value },
+          params: { page: currentPage.value, size: pageSize.value },
         })
         reviews.value.push(...response.data.content)
         if (currentPage.value * pageSize.value + response.data.content.length === response.data.totalElements) {

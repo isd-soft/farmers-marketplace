@@ -1,22 +1,25 @@
         package com.example.isdfarmersmarket.business.services;
 
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.CustomUsernameNotFoundException;
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.RoleAlreadyExistsException;
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.RoleDoesntExistException;
 import com.example.isdfarmersmarket.business.mapper.ProductMapper;
 import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
 import com.example.isdfarmersmarket.web.commands.FarmerReviewCommand;
 import com.example.isdfarmersmarket.web.commands.ProductReviewCommand;
+import com.example.isdfarmersmarket.web.commands.UserUpgradeCommand;
 import com.example.isdfarmersmarket.web.dto.*;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +30,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CustomerService {
-
     UserRepository userRepository;
     ProductRepository productRepository;
     ProductReviewRepository productReviewRepository;
@@ -35,16 +37,12 @@ public class CustomerService {
     RoleRepository roleRepository;
     ReviewMapper reviewMapper;
     ProductService productService;
-    private final ProductMapper productMapper;
-    private final FarmerService farmerService;
-
-    private JwtPrincipal getPrincipal() {
-        return (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
+    ProductMapper productMapper;
+    FarmerService farmerService;
 
     @Transactional
     public FarmerReviewDTO rateFarmer(FarmerReviewCommand farmerReviewCommand) {
-        JwtPrincipal principal = getPrincipal();
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
 
         User creator = userRepository
                 .findById(principal.getId())
@@ -61,9 +59,9 @@ public class CustomerService {
             FarmerReview review = reviewMapper.map(farmerReviewCommand);
             review.setCreator(creator);
             review.setFarmer(farmer);
-            FarmerReview farmerReview = farmerReviewRepository.save(review);
+            farmerReviewRepository.save(review);
             farmerService.updateFarmerRating(farmer);
-            return reviewMapper.map(farmerReview);
+            return reviewMapper.map(review);
         } else {
             throw new IllegalArgumentException("The email provided is not a farmer.");
         }
@@ -71,7 +69,7 @@ public class CustomerService {
 
     @Transactional
     public ProductReviewDTO rateProduct(ProductReviewCommand productReviewCommand) {
-        JwtPrincipal principal = getPrincipal();
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
         User creator = userRepository
                 .findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such customer found"));
@@ -88,27 +86,56 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public List<CustomerProductReviewDTO> fetchAllProductReviews(Long id, Pageable pageable) {
-        User customer = userRepository
+    public PageResponseDTO<CustomerProductReviewDTO> fetchAllProductReviews(Long id, Pageable pageable) {
+        User creator = userRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
 
-        return productReviewRepository.findByCreatorOrderByCreatedDate(customer, pageable)
+        var reviewsPage = productReviewRepository
+                .findByCreatorOrderByCreatedDate(creator, pageable);
+        var totalReviews = reviewsPage.getTotalElements();
+        var content = reviewsPage
+                .getContent()
                 .stream()
                 .map(reviewMapper::mapToCustomerProductReview)
                 .toList();
+        return new PageResponseDTO<>(content, totalReviews);
     }
 
     @Transactional(readOnly = true)
-    public List<CustomerFarmerReviewDTO> fetchAllFarmerReviews(Long id, Pageable pageable) {
-        User farmer = userRepository
+    public PageResponseDTO<CustomerFarmerReviewDTO> fetchAllFarmerReviews(Long id, Pageable pageable) {
+        User creator = userRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
 
-        return farmerReviewRepository.findByCreatorOrderByCreatedDate(farmer, pageable)
+        var reviewsPage = farmerReviewRepository
+                .findByCreatorOrderByCreatedDate(creator, pageable);
+        var totalReviews = reviewsPage.getTotalElements();
+        var content = reviewsPage
+                .getContent()
                 .stream()
                 .map(reviewMapper::mapToCustomerFarmerReview)
                 .toList();
+        return new PageResponseDTO<>(content, totalReviews);
+
+    }
+    @Transactional
+    public void upgradeUser(UserUpgradeCommand customerUpgradeCommand) {
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+        User user = userRepository
+                .findById(principal.getId())
+                .orElseThrow(CustomUsernameNotFoundException::new);
+        Role farmer = roleRepository
+                .findByRole(ERole.FARMER)
+                .orElseThrow(RoleDoesntExistException::new);
+
+        if(user.getRoles().contains(farmer)) {
+            throw new RoleAlreadyExistsException();
+        }
+        user.setAddress(customerUpgradeCommand.getAddress());
+        user.setDescription(customerUpgradeCommand.getDescription());
+        user.addRole(farmer);
+        userRepository.save(user);
     }
 
     @Transactional(readOnly = true)
@@ -123,7 +150,7 @@ public class CustomerService {
 
     @Transactional
     public CompactProductDTO addProductToWishlist(Long productId) {
-        JwtPrincipal principal = getPrincipal();
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
         Product product = productRepository.findById(productId)
@@ -137,7 +164,7 @@ public class CustomerService {
     }
     @Transactional
     public CompactProductDTO deleteProductFromWishlist(Long productId) {
-        JwtPrincipal principal = getPrincipal();
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
         Product product = productRepository.findById(productId)

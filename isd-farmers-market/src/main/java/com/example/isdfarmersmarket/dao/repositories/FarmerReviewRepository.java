@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface FarmerReviewRepository extends JpaRepository<FarmerReview, Long> {
     Page<FarmerReview> findByCreatorOrderByCreatedDate(User creator, Pageable pageable);
-    Page<FarmerReview> findAllByFarmerOrderByCreatedDateDesc(User farmer, Pageable pageable);
+    Page<FarmerReview> findByFarmerOrderByCreatedDateDesc(User farmer, Pageable pageable);
     @Query("SELECT new com.example.isdfarmersmarket.web.dto.ReviewStatsDTO(AVG(r.rating), COUNT(r)) " +
             "FROM FarmerReview r WHERE r.farmer = :farmer")
     ReviewStatsDTO findReviewStatsByFarmer(@Param("farmer") User farmer);
