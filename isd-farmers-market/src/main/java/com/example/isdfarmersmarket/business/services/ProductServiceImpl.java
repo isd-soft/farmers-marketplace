@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -119,11 +120,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ProductDTO getProductById(Long id) {
         Product product = productRepository.getProductById(id)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
         return productMapper.map(product);
     }
+
     private Image toImageEntity(MultipartFile file) throws IOException {
         Image image = new Image();
         image.setName(file.getName());
@@ -133,15 +136,16 @@ public class ProductServiceImpl implements ProductService {
         image.setBytes(file.getBytes());
         return image;
     }
+
     @Override
     @Transactional(readOnly = true)
     public PageResponseDTO<ProductReviewDTO> getProductReviews(Long productId, int page, int pageSize) {
         Product product = productRepository
                 .getProductById(productId)
-                .orElseThrow(()->new EntityNotFoundException("Product not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
         var reviewsPage = productReviewRepository
-                .findAllByProductOrderByCreatedDateDesc(product, PageRequest.of(page,pageSize));
+                .findAllByProductOrderByCreatedDateDesc(product, PageRequest.of(page, pageSize));
         var totalReviews = reviewsPage.getTotalElements();
         var content = reviewsPage
                 .getContent()
@@ -149,7 +153,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(reviewMapper::mapWithoutProductDetails)
                 .toList();
 
-        return new PageResponseDTO<>(content,totalReviews,page,pageSize);
+        return new PageResponseDTO<>(content, totalReviews, page, pageSize);
     }
 
     @Override
@@ -176,7 +180,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
         User user = userRepository.findById(principal.getId()).orElseThrow();
         ProductPageDTO productPageDTO = productMapper.mapToProductPage(product);
-        if(user.getWishlist().contains(product)) productPageDTO.setIsInWishlist(true);
+        if (user.getWishlist().contains(product)) productPageDTO.setIsInWishlist(true);
         return productPageDTO;
     }
 }

@@ -1,12 +1,14 @@
 package com.example.isdfarmersmarket.web.controllers;
 
-import com.example.isdfarmersmarket.web.commands.UserUpgradeCommand;
-import com.example.isdfarmersmarket.web.commands.UserLoginCommand;
-import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.business.services.AuthService;
 import com.example.isdfarmersmarket.business.services.JwtService;
+import com.example.isdfarmersmarket.dao.models.User;
+import com.example.isdfarmersmarket.web.commands.UpdatePasswordCommand;
+import com.example.isdfarmersmarket.web.commands.UserLoginCommand;
 import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
+import com.example.isdfarmersmarket.web.commands.UserUpgradeCommand;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+
+import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,7 +59,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refreshToken(@Parameter(hidden = true)
-                                                            @RequestHeader(value="Authorization", required = false) String authorizationHeader) {
+                                                            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
         String oldRefreshToken = jwtService.extractTokenFromHeader(authorizationHeader);
         String newAccessToken = authService.generateAccessToken(oldRefreshToken);
 
@@ -68,5 +72,11 @@ public class AuthController {
         String refreshToken = jwtService.extractTokenFromHeader(authorizationHeader);
         authService.deleteRefreshToken(refreshToken);
         return ResponseEntity.ok(Map.of("message", "User logged out successfully"));
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<String> updatePassword(@RequestBody @Valid UpdatePasswordCommand updatePasswordCommand) {
+        authService.updatePassword(updatePasswordCommand);
+        return ResponseEntity.status(OK).body("Password updated successfully");
     }
 }

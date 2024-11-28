@@ -4,6 +4,7 @@ import HomePage from '@/components/HomePage.vue'
 import ProductPage from '@/components/ProductPage.vue'
 import UserPage from '@/components/UserPage.vue'
 import Wishlist from '@/components/WishlistPage.vue'
+import SettingsPage from '@/components/SettingsPage.vue'
 
 const routes = [
   {
@@ -32,6 +33,11 @@ const routes = [
     path: '/',
     name: 'Home',
     component: HomePage,
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: SettingsPage,
   },
 ]
 

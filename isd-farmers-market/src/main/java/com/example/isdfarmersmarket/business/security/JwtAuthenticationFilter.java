@@ -17,8 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -40,7 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-        try{
+        try {
             // Getting token from header
             final String token = getToken(request, response, filterChain);
             // Return if there is no token
@@ -56,8 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             setAuthentication(request, id, email, roles);
             // Continue request
             filterChain.doFilter(request, response);
-        }
-        catch (ExpiredJwtException ex) {
+        } catch (ExpiredJwtException ex) {
             sendErrorResponse(response, "JWT token has expired");
 
         } catch (UnsupportedJwtException ex) {
@@ -71,8 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (IllegalArgumentException ex) {
             sendErrorResponse(response, "Illegal argument during JWT processing");
-        }
-        catch (JwtException ex) {
+        } catch (JwtException ex) {
             sendErrorResponse(response, "Unexpected JWT exception");
         }
 
@@ -90,7 +88,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 principal,
                 null,
                 roles.stream().map(roleName -> new SimpleGrantedAuthority("ROLE_" + roleName))
-                                .toList()
+                        .toList()
         );
 
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

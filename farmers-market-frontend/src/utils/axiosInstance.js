@@ -1,9 +1,11 @@
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8080",
   headers: {
     "Content-Type": "application/json",
+    "Accept": "application/json", 
   },
   withCredentials: true,
 });
@@ -28,12 +30,14 @@ const refreshTokens = async () => {
       throw new Error("No refresh token available");
     }
 
+    console.log("Attempting to refresh token...");
     const response = await axios.post("http://localhost:8080/auth/refresh", {
       refreshToken,
     });
 
     const { accessToken, refreshToken: newRefreshToken } = response.data;
 
+    console.log("Token refresh successful. New accessToken:", accessToken);
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", newRefreshToken);
 
@@ -70,6 +74,18 @@ axiosInstance.interceptors.response.use(
   }
 );
 
+export const getUserId = () => {
+  const accessToken = localStorage.getItem("accessToken");
+  if (accessToken) {
+    try {
+      const decodedToken = jwtDecode(accessToken);
+      return decodedToken.sub || decodedToken.userId; 
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+  }
+  return null; 
+};
+
+
 export default axiosInstance;
-
-
