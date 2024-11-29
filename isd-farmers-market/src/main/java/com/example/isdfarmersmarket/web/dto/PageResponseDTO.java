@@ -13,6 +13,4 @@ import java.util.List;
 public class PageResponseDTO<T> {
     List<T> content;
     Long totalElements;
-    Integer pageNumber;
-    Integer pageSize;
 }
