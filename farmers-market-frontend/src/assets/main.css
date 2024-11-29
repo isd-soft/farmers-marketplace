@@ -14,11 +14,10 @@
 
 @media (min-width: 1024px) {
   body {
-    background-color:white!;
-    display: flex;
+    background-color:white!important;
+    display: block !important;
     justify-content: center;
     align-items: center;
-    height: 100vh;
     margin: 0;
   }
 }

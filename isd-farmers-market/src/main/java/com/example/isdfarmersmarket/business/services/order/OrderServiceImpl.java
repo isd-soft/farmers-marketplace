@@ -1,5 +1,6 @@
 package com.example.isdfarmersmarket.business.services.order;
 
+import com.example.isdfarmersmarket.business.listeners.OrderConfirmedListener;
 import com.example.isdfarmersmarket.business.mapper.OrderMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
@@ -33,6 +34,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
     private static final String ORDER_FIND_FAILED_BY_ID = "Order with the specified user id not found";
+    private final OrderConfirmedListener orderConfirmedListener;
 
     @Override
     @Transactional
@@ -83,6 +85,8 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_FIND_FAILED_BY_ID));
 
         order.setOrderStatus(OrderStatus.valueOf(updateOrderCommand.getOrderStatus().toUpperCase()));
+
+        orderConfirmedListener.handleOnConfirmedOrder(order);
         return orderMapper.map(orderRepository.save(order));
     }
 
