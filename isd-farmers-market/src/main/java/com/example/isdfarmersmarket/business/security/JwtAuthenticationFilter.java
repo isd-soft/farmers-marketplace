@@ -68,11 +68,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
 
         message = switch (ex) {
-            case ExpiredJwtException e -> AuthError.TOKEN_EXPIRED.getMessage();
-            case UnsupportedJwtException e -> AuthError.UNSUPPORTED_JWT.getMessage();
-            case MalformedJwtException e -> AuthError.MALFORMED_JWT.getMessage();
-            case SignatureException e -> AuthError.SIGNATURE_VALIDATION_FAILED.getMessage();
-            default -> AuthError.UNEXPECTED_JWT_ERROR.getMessage();
+            case ExpiredJwtException e -> AuthError.TOKEN_EXPIRED.name();
+            case UnsupportedJwtException e -> AuthError.UNSUPPORTED_JWT.name();
+            case MalformedJwtException e -> AuthError.MALFORMED_JWT.name();
+            case SignatureException e -> AuthError.SIGNATURE_VALIDATION_FAILED.name();
+            default -> AuthError.UNEXPECTED_JWT_ERROR.name();
         };
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, message);
