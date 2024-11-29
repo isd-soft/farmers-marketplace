@@ -1,5 +1,6 @@
 package com.example.isdfarmersmarket.web.controllers;
 
+import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.order.OrderService;
 import com.example.isdfarmersmarket.web.commands.order.CreateOrderCommand;
 import com.example.isdfarmersmarket.web.commands.order.UpdateOrderCommand;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,9 +32,8 @@ public class OrderController {
             description = "This endpoint is used to create an order"
     )
     @PostMapping
-    public ResponseEntity<OrderDTO> createOrder(
-            @RequestBody @Valid CreateOrderCommand createOrderCommand,  String authenticatedUserEmail) {
-        return ResponseEntity.status(CREATED).body(orderService.createOrder(createOrderCommand, authenticatedUserEmail));
+    public ResponseEntity<OrderDTO> createOrder(@RequestBody @Valid CreateOrderCommand createOrderCommand) {
+        return ResponseEntity.status(CREATED).body(orderService.createOrder(createOrderCommand));
     }
 
     @Operation(
