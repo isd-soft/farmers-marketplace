@@ -28,8 +28,7 @@ public class ItemInOrder {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    @JsonBackReference
+    @JoinColumn(name = "order_id")
     private Order order;
 
 

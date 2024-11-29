@@ -14,9 +14,9 @@ import java.util.Set;
 
 @Data
 public class CreateOrderCommand {
-    @NotNull(message = "Order Id cannot be null")
-    @Schema(example = "1")
-    private Long orderId;
+//    @NotNull(message = "Order Id cannot be null")
+//    @Schema(example = "1")
+//    private Long orderId;
 
     @NotNull(message = "Order Status cannot be null")
     @Schema(example = "PENDING")

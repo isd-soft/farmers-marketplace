@@ -4,9 +4,7 @@ import com.example.isdfarmersmarket.business.mapper.OrderMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
 import com.example.isdfarmersmarket.dao.models.*;
-import com.example.isdfarmersmarket.dao.repositories.OrderRepository;
-import com.example.isdfarmersmarket.dao.repositories.ProductRepository;
-import com.example.isdfarmersmarket.dao.repositories.UserRepository;
+import com.example.isdfarmersmarket.dao.repositories.*;
 import com.example.isdfarmersmarket.web.commands.order.CreateOrderCommand;
 import com.example.isdfarmersmarket.web.commands.order.UpdateOrderCommand;
 import com.example.isdfarmersmarket.web.dto.ItemInOrderDTO;
@@ -19,10 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +26,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final ItemInOrderRepository itemInOrderRepository;
     private final OrderMapper orderMapper;
     private static final String ORDER_FIND_FAILED_BY_ID = "Order with the specified user id not found";
 
@@ -41,15 +37,7 @@ public class OrderServiceImpl implements OrderService {
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + principal.getId()));
 
-        Order order = Order.builder()
-                .id(createOrderCommand.getOrderId())
-                .user(user)
-                .orderStatus(createOrderCommand.getOrderStatus())
-                .totalPrice(BigDecimal.ZERO)
-                .createdDate(LocalDateTime.now())
-                .build();
-
-        Set<ItemInOrder> items = createOrderCommand.getProductsId().stream()
+        List<ItemInOrder> items = createOrderCommand.getProductsId().stream()
                 .map(productItem -> {
                     Product product = productRepository.findById(productItem.getId())
                             .orElseThrow(() -> new EntityNotFoundException("Product not found with ID: " + productItem.getId()));
@@ -57,22 +45,35 @@ public class OrderServiceImpl implements OrderService {
                     ItemInOrder item = new ItemInOrder();
                     item.setProduct(product);
                     item.setPricePerUnit(product.getPricePerUnit());
-                    item.setQuantity(productItem.getQuantity());
-                    item.setOrder(order);
+
+//                    item.setQuantity(productItem.getQuantity());
 
                     return item;
                 })
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
 
-        order.setProducts(items);
+
+        itemInOrderRepository.saveAll(items);
+
+
+        Order order = Order.builder()
+                .user(user)
+                .orderStatus(createOrderCommand.getOrderStatus())
+                .totalPrice(BigDecimal.ZERO)
+                .createdDate(LocalDateTime.now())
+                .build();
+
+
+        order.setProducts(new HashSet<>(items));
 
         BigDecimal totalPrice = items.stream()
                 .map(item -> item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         order.setTotalPrice(totalPrice);
-
-        return orderMapper.map(orderRepository.save(order));
+        orderRepository.save(order);
+        items.forEach(itemInOrder -> itemInOrder.setOrder(order));
+        return orderMapper.map(order);
     }
 
 
