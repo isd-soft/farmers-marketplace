@@ -22,9 +22,10 @@ public class ProductDTO {
     private int discountPercents;
     private int quantity;
     private CategoryDTO category;
-    private UserDTO user;
+    private UserProfileDTO user;
     private Float rating;
     private Integer reviewCount;
+    private String unitTypeShort;
     private Set<ProductReviewDTO> reviews = new HashSet<>();
     private Set<ImageDTO> images = new HashSet<>();
 }

@@ -7,6 +7,8 @@ import CreateProduct from "@/components/CreateProduct.vue";
 import UserPage from "@/components/UserPage.vue";
 import SearchProductsPage from "@/components/SearchProductsPage.vue";
 import OrderManagementPage from '@/components/OrderManagementPage.vue';
+import MyProductsPage from "@/components/MyProductsPage.vue";
+import UpdateProduct from "@/components/UpdateProduct.vue";
 
 const routes = [
   {
@@ -42,9 +44,21 @@ const routes = [
     component: CreateProduct,
   },
   {
+    path: '/product/update/:id',
+    name: 'EditProduct',
+    component: UpdateProduct,
+    props: true,
+  },
+  {
     path: '/product',
     name: 'SearchProducts',
     component: SearchProductsPage,
+
+  },
+  {
+    path: '/product/management',
+    name: 'MyProductsPage',
+    component: MyProductsPage,
 
   },
   {

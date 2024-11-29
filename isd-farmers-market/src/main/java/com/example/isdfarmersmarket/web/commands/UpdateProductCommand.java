@@ -17,10 +17,6 @@ import java.util.Set;
 
 @Data
 public class UpdateProductCommand {
-    @NotBlank(message = "Product title cannot be blank")
-    @Schema(example = "Fresh tomatoes")
-    @Size(min = 1, max = 80, message = "Product title should have a size between 1 and 80 characters")
-    private String title;
     @NotBlank(message = "Product description cannot be blank")
     @Schema(example = "Fresh tomatoes of the best quality")
     @Size(min = 1, max = 1000, message = "Product title should have a size between 1 and 1000 characters")
@@ -30,11 +26,8 @@ public class UpdateProductCommand {
     @NotNull(message = "Product price cannot be blank")
     @Min(value = 1, message = "Product price should be minimum 1")
     private BigDecimal pricePerUnit;
-    private Integer discountPercents;
     @NotNull(message = "Product quantity cannot be blank")
     @Min(value = 0, message = "Product quantity should be minimum 0")
     private Integer quantity;
-    @NotNull(message = "Product category cannot be blank")
-    private Long categoryId;
     List<String> imagesBase64 = new ArrayList<>();
 }
