@@ -1,6 +1,7 @@
 package com.example.isdfarmersmarket.web.commands.order;
 
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
+import com.example.isdfarmersmarket.dao.models.ItemInOrder;
 import com.example.isdfarmersmarket.dao.models.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,6 +14,10 @@ import java.util.Set;
 
 @Data
 public class CreateOrderCommand {
+    @NotNull(message = "Order Id cannot be null")
+    @Schema(example = "1")
+    private Long orderId;
+
     @NotNull(message = "Order Status cannot be null")
     @Schema(example = "PENDING")
     private OrderStatus orderStatus;
@@ -27,7 +32,7 @@ public class CreateOrderCommand {
 
     @NotEmpty(message = "Products cannot be empty")
     @Schema(description = "List of products and their quantities", example = "[{\"id\": 1, \"quantity\": 2}, {\"id\": 2, \"quantity\": 3}]")
-    private Set<ProductItem> productsId;
+    private Set<ProductItem> productsId;//ia iteminorder dto, prea multe val orata
 
     private LocalDateTime createdDate = LocalDateTime.now();
 
