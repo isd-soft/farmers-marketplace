@@ -1,4 +1,5 @@
 <template>
+  <div class="home">
   <Header class="navbar"></Header>
   <Card
     :style="{ position: 'absolute', top: '10vh', width: '80em', maxWidth: '95%', margin: '0 auto' }"
@@ -165,6 +166,8 @@
     </template>
 
   </Card>
+  <Footer class="footer"></Footer>
+  </div>
 
 </template>
 
@@ -402,9 +405,23 @@ export default {
 }
 
 
-
+.footer {
+  text-align: center;
+  padding: 10px;
+  bottom: 0;
+  margin-top: auto;
+}
 .tab-content p {
   font-size: 1rem;
   color: #333;
+}
+.home{
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  width: 100%;
+  padding-top: 100px;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>
