@@ -13,10 +13,6 @@
         />
         <label for="product-title">Title</label>
       </FloatLabel>
-      <span v-if="v$.title.$error" class="error-message">
-        Title is required and cannot exceed 80 characters.
-      </span>
-
       <FloatLabel variant="on">
         <InputText
           id="product-desc"
