@@ -1,8 +1,79 @@
 {
-  "hash": "5048d385",
+  "hash": "78165a7b",
   "configHash": "bf9792a9",
-  "lockfileHash": "e3b0c442",
-  "browserHash": "a64c4083",
-  "optimized": {},
-  "chunks": {}
+  "lockfileHash": "888f49a4",
+  "browserHash": "4b6d5768",
+  "optimized": {
+    "vue": {
+      "src": "../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "4b0df4a5",
+      "needsInterop": false
+    },
+    "primevue/config": {
+      "src": "../../node_modules/primevue/config/index.mjs",
+      "file": "primevue_config.js",
+      "fileHash": "6b66b3af",
+      "needsInterop": false
+    },
+    "@primevue/themes/aura": {
+      "src": "../../node_modules/@primevue/themes/aura/index.mjs",
+      "file": "@primevue_themes_aura.js",
+      "fileHash": "59038ee3",
+      "needsInterop": false
+    },
+    "primevue/button": {
+      "src": "../../node_modules/primevue/button/index.mjs",
+      "file": "primevue_button.js",
+      "fileHash": "2a3680c8",
+      "needsInterop": false
+    },
+    "primevue/selectbutton": {
+      "src": "../../node_modules/primevue/selectbutton/index.mjs",
+      "file": "primevue_selectbutton.js",
+      "fileHash": "d0868bd7",
+      "needsInterop": false
+    },
+    "primevue/inputtext": {
+      "src": "../../node_modules/primevue/inputtext/index.mjs",
+      "file": "primevue_inputtext.js",
+      "fileHash": "60173031",
+      "needsInterop": false
+    },
+    "primevue/floatlabel": {
+      "src": "../../node_modules/primevue/floatlabel/index.mjs",
+      "file": "primevue_floatlabel.js",
+      "fileHash": "45bbf7f1",
+      "needsInterop": false
+    },
+    "vue-router": {
+      "src": "../../node_modules/vue-router/dist/vue-router.mjs",
+      "file": "vue-router.js",
+      "fileHash": "120b6c06",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-7Z65L2QW": {
+      "file": "chunk-7Z65L2QW.js"
+    },
+    "chunk-JVACOY4S": {
+      "file": "chunk-JVACOY4S.js"
+    },
+    "chunk-Y2ESNEQ6": {
+      "file": "chunk-Y2ESNEQ6.js"
+    },
+    "chunk-CUHSAYRT": {
+      "file": "chunk-CUHSAYRT.js"
+    },
+    "chunk-RSMNO5O2": {
+      "file": "chunk-RSMNO5O2.js"
+    },
+    "chunk-O4J5F3AB": {
+      "file": "chunk-O4J5F3AB.js"
+    },
+    "chunk-IJV5NOMV": {
+      "file": "chunk-IJV5NOMV.js"
+    }
+  }
 }

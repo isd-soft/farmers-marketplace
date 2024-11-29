@@ -14,14 +14,8 @@
             </Button>
           </div>
           <Menubar v-if="isLoggedIn" :model="accountMenu" class="menubar-item"></Menubar>
-          <Button
-            v-if="!isLoggedIn"
-            @click="goToLogin"
-            class="login button"
-            label="Login"
-            severity="primary"
-            variant="text"
-          ></Button>
+          <Button v-if="!isLoggedIn" @click="goToLogin" class="login button" label="Login" severity="primary"
+            variant="text"></Button>
           <Button @click="goToCart" class="cart button" label="Cart" severity="secondary" variant="text">
             <i class="pi pi-shopping-cart cart-icon"></i>
             <span class="cart-text">Cart</span>
@@ -104,6 +98,7 @@ const goToFavorites = () => {
 
 const goToSettings = () => {
   window.location.href = '/settings';
+
 };
 
 const goToCategory = (categoryId) => {
@@ -204,15 +199,14 @@ onMounted(() => {
 
 .cart.button:hover .cart-icon,
 .cart.button:hover .cart-text,
-.login.button{
+.login.button {
   color: #179739 !important;
   background-color: transparent !important;
 }
 
 .cart.button .cart-icon,
 .cart.button .cart-text,
-.login.button:hover{
+.login.button:hover {
   color: #334155 !important;
 }
-
 </style>

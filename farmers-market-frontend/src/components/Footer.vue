@@ -64,9 +64,9 @@
   right: 0;
 
   border-top: 1px solid var(--p-gray-300);
-  }
+}
 
-  .footer-section {
+.footer-section {
   flex: 1;
   text-align: center;
 }

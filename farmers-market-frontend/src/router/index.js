@@ -9,6 +9,7 @@ import SearchProductsPage from "@/components/SearchProductsPage.vue";
 import OrderManagementPage from '@/components/OrderManagementPage.vue';
 import MyProductsPage from "@/components/MyProductsPage.vue";
 import UpdateProduct from "@/components/UpdateProduct.vue";
+import SettingsPage from '@/components/SettingsPage.vue';
 
 const routes = [
   {
@@ -37,6 +38,11 @@ const routes = [
     path: '/',
     name: 'Home',
     component: HomePage,
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: SettingsPage,
   },
   {
     path: '/product/create',
@@ -72,6 +78,15 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.name === 'Login') {
+    document.body.classList.add('login-bg');
+  } else {
+    document.body.classList.remove('login-bg');
+  }
+  next();
 })
 
 export default router

@@ -24,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+
 import java.util.*;
+
 
 
 @Service
@@ -147,6 +149,7 @@ public class ProductServiceImpl implements ProductService {
         ProductDTO productDTO = productMapper.map(product);
         return productDTO;
     }
+
     @Override
     @Transactional(readOnly = true)
     public PageResponseDTO<ProductReviewDTO> getProductReviews(Long productId, int page, int pageSize) {
@@ -155,7 +158,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(()->new EntityNotFoundException("Product not found"));
 
         var reviewsPage = productReviewRepository
-                .findAllByProductOrderByCreatedDateDesc(product, PageRequest.of(page,pageSize));
+                .findAllByProductOrderByCreatedDateDesc(product, PageRequest.of(page, pageSize));
         var totalReviews = reviewsPage.getTotalElements();
         var content = reviewsPage
                 .getContent()
@@ -163,7 +166,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(reviewMapper::mapWithoutProductDetails)
                 .toList();
 
-        return new PageResponseDTO<>(content,totalReviews,page,pageSize);
+        return new PageResponseDTO<>(content, totalReviews, page, pageSize);
     }
 
     @Override
