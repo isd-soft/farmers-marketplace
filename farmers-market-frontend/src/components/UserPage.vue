@@ -87,7 +87,6 @@
     <Footer class="footer"></Footer>
   </div>
 </template>
-
 <script>
 import { ref, onMounted } from 'vue'
 import axiosInstance from '@/utils/axiosInstance.js'
