@@ -260,8 +260,8 @@ export default {
               firstName: this.data.firstName,
               lastName: this.data.lastName,
               phoneNumber: this.data.phoneNumber,
-              address: this.data.roleType === "FARMER" ? address.value : null,
-              description: this.data.roleType === "FARMER" ? description.value : null,
+              address: this.data.roleType === "FARMER" ? this.data.address : null,
+              description: this.data.roleType === "FARMER" ? this.data.description : null,
               roleType: this.data.roleType,
             });
 
