@@ -16,10 +16,11 @@ import java.util.Set;
 public interface ProductService {
     ProductDTO createProduct(CreateProductCommand createProductCommand);
 
-    ProductDTO updateProduct(Long id, UpdateProductCommand updateProductCommand, Set<MultipartFile> files, Set<Long> imagesToDeleteId);
+    ProductDTO updateProduct(Long id, UpdateProductCommand updateProductCommand);
 
     ProductDTO deleteProduct(Long id);
     Map<String, Object> getAllProducts(Long category, String search, Pageable pageable);
+    Map<String, Object> getCurrentUserProducts(Pageable pageable);
     ProductDTO getProductById(Long id);
     PageResponseDTO<ProductReviewDTO> getProductReviews(Long id, int page, int pageSize);
     void updateProductRating(Product product);
