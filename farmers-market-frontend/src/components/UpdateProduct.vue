@@ -1,114 +1,89 @@
 <template>
   <div class="home">
-  <Header class = "navbar"></Header>
-  <div class="create-product-container">
-    <h1 class="create-product-main-text">Create new product</h1>
-    <form @submit="handleNewProduct" class="create-product-form">
-      <FloatLabel variant="on">
-        <InputText
-          id="product-title"
-          v-model="title"
-          required
-          class="create-product-input"
-        />
-        <label for="product-title">Title</label>
-      </FloatLabel>
-
-      <FloatLabel variant="on">
-        <InputText
-          id="product-desc"
-          v-model="description"
-          required
-          class="create-product-input"
-        />
-        <label for="product-desc">Description</label>
-      </FloatLabel>
-
-      <FloatLabel variant="on">
-        <Select
-          id="product-category"
-          v-if="categories.length > 0"
-          v-model="category"
-          :options="categories"
-          optionLabel="label"
-          optionValue="value"
-          required
-          class="create-product-input"
-        />
-        <label for="product-category">Category</label>
-      </FloatLabel>
-
-      <FloatLabel variant="on">
-        <Select
-          v-model="unitType"
-          :options="unitTypes"
-          optionLabel="label"
-          option-value="value"
-          required
-          class="create-product-input"
-        />
-        <label for="product-unit-type">Unit Type</label>
-      </FloatLabel>
-
-      <FloatLabel variant="on">
-        <InputNumber
-          id="product-price"
-          v-model="price"
-          required
-          min="1"
-          class="create-product-input"
-        />
-        <label for="product-price">Price</label>
-      </FloatLabel>
-
-      <FloatLabel variant="on">
-        <InputNumber
-          id="product-quantity"
-          v-model="quantity"
-          required
-          min="0"
-          class="create-product-input"
-        />
-        <label for="product-price">Quantity</label>
-      </FloatLabel>
-
-      <div>
-        <label for="file-uploader" class="file-uploader">
-          <input
-            id="file-uploader"
-            type="file"
-            accept="image/*"
-            multiple
-            @change="handleFileChange"
-            :disabled="selectedFiles.length >= 5"
+    <Header class = "navbar"></Header>
+    <div class="create-product-container">
+      <h1 class="create-product-main-text">Edit product</h1>
+      <form @submit="handleEditProduct" class="create-product-form">
+        <h1 class="create-product-main-text">{{ product.title }}</h1>
+        <FloatLabel variant="on">
+          <InputText
+            id="product-desc"
+            v-model="description"
+            required
+            class="create-product-input"
           />
-          <span v-if="selectedFiles.length < 5">Upload Images (max 5)</span>
-          <span v-else>Maximum images reached</span>
-        </label>
+          <label for="product-desc">Description</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
+          <Select
+            v-model="unitType"
+            :options="unitTypes"
+            optionLabel="label"
+            option-value="value"
+            required
+            class="create-product-input"
+          />
+          <label for="product-unit-type">Unit Type</label>
+        </FloatLabel>
 
-        <div class="image-preview-container">
-          <div
-            v-for="(file, index) in selectedFiles"
-            :key="index"
-            class="image-preview"
-          >
-            <img :src="file.preview" :alt="file.name" />
-            <button type="button" @click="removeFile(index)">Remove</button>
+        <FloatLabel variant="on">
+          <InputNumber
+            id="product-price"
+            v-model="price"
+            required
+            min="1"
+            class="create-product-input"
+          />
+          <label for="product-price">Price</label>
+        </FloatLabel>
+
+        <FloatLabel variant="on">
+          <InputNumber
+            id="product-quantity"
+            v-model="quantity"
+            required
+            min="0"
+            class="create-product-input"
+          />
+          <label for="product-price">Quantity</label>
+        </FloatLabel>
+
+        <div>
+          <label for="file-uploader" class="file-uploader">
+            <input
+              id="file-uploader"
+              type="file"
+              accept="image/*"
+              multiple
+              @change="handleFileChange"
+              :disabled="selectedFiles.length >= 5"
+            />
+            <span v-if="selectedFiles.length < 5">Upload Images (max 5)</span>
+            <span v-else>Maximum images reached</span>
+          </label>
+
+          <div class="image-preview-container">
+            <div
+              v-for="(file, index) in selectedFiles"
+              :key="index"
+              class="image-preview"
+            >
+              <img :src="file.preview" :alt="file.name" />
+              <button type="button" @click="removeFile(index)">Remove</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <ThemedButton
-        class="create-product-button"
-        type="submit"
-        label="Create product"
-      />
-    </form>
-  </div>
-  <Footer class = "footer"></Footer>
+        <ThemedButton
+          class="create-product-button"
+          type="submit"
+          label="Save"
+        />
+      </form>
+    </div>
+    <Footer class = "footer"></Footer>
   </div>
 </template>
-
 <script>
 import { ref, onMounted } from "vue";
 import { required, maxLength, minLength, minValue, maxValue } from "@vuelidate/validators";
@@ -122,9 +97,10 @@ import FloatLabel from "primevue/floatlabel";
 import InputNumber from "primevue/inputnumber";
 import Select from "primevue/select";
 import router from "@/router/index.js";
+import noPhotoImg from "@/assets/noPhoto.png";
 
 export default {
-  name: "CreateProduct",
+  name: "EditProduct",
   components: {
     InputText,
     FloatLabel,
@@ -133,16 +109,17 @@ export default {
     Header,
     Footer
   },
-  setup() {
+  props: ['id'],
+  setup(props) {
+    const product = ref({})
     const title = ref("");
     const description = ref("");
     const price = ref();
     const quantity = ref();
     const unitType = ref();
     const unitTypes = ref([]);
-    const category = ref();
-    const categories = ref([]);
     const selectedFiles = ref([]);
+
 
     const handleFileChange = async (event) => {
       const files = event.target.files;
@@ -180,11 +157,32 @@ export default {
         const reader = new FileReader();
         reader.onload = (e) => resolve(e.target.result);
         reader.onerror = (e) => reject(e);
-        reader.readAsDataURL(file); // Convert file to Base64
+        reader.readAsDataURL(file);
       });
     };
 
     onMounted(async () => {
+      try {
+        console.log(props.id)
+        const response = await axiosInstance.get(`/product/${props.id}`)
+        console.log(response)
+        product.value = response.data;
+
+        description.value = product.value.description;
+        price.value = product.value.pricePerUnit;
+        quantity.value = product.value.quantity;
+        unitType.value = product.value.unitType;
+
+        if (product.value.images && Array.isArray(product.value.images)) {
+          selectedFiles.value = product.value.images.map((image) => ({
+            base64: `data:image/jpeg;base64,${image.bytes}`,
+            preview: `data:image/jpeg;base64,${image.bytes}`,
+            name: image.name || "Existing Image",
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to load product:', error.message)
+      }
       try {
         const response = await axiosInstance.get("/unit-types");
         if (Array.isArray(response.data)) {
@@ -196,24 +194,12 @@ export default {
         } else {
           console.error("Unexpected unit types format:", response.data);
         }
-
-        console.log("Fetching categories...");
-        const categoriesResponse = await axiosInstance.get("/category");
-        if (categoriesResponse.data && categoriesResponse.data.length > 0) {
-          categories.value = categoriesResponse.data.map((category) => ({
-            label: category.title,
-            value: category.id,
-          }));
-          console.log("Categories loaded:", categories.value);
-        } else {
-          console.error("Unexpected categories format:", categoriesResponse.data);
-        }
       } catch (error) {
         console.error("Error loading unit types or categories:", error);
       }
     });
 
-    const handleNewProduct = async (event) => {
+    const handleEditProduct = async (event) => {
       event.preventDefault();
       try {
         console.log("Preparing images for submission...");
@@ -221,33 +207,30 @@ export default {
         console.log("Images Base64:", imagesBase64);
 
         console.log("Submitting product data...");
-        const response = await axiosInstance.post("/product/create", {
+        const response = await axiosInstance.put(`/product/update/${props.id}`, {
           title: title.value,
           description: description.value,
           unitType: unitType.value,
           pricePerUnit: price.value,
           quantity: quantity.value,
-          categoryId: category.value,
           imagesBase64: imagesBase64,
         });
 
-        console.log("Product created successfully:", response.data);
+        console.log("Product updated successfully:", response.data);
         const createdProductId = response.data.id;
         await router.push(`/product/${createdProductId}`);
       } catch (error) {
-        console.error("Error creating product:", error.response?.data || error.message);
+        console.error("Error updating product:", error.response?.data || error.message);
         alert(
-          "Creating new product failed: " +
+          "Updating product failed: " +
           (error.response?.data?.message || error.message)
         );
       }
     };
 
     return {
-      title,
+      product,
       description,
-      category,
-      categories,
       unitType,
       unitTypes,
       price,
@@ -255,7 +238,7 @@ export default {
       selectedFiles,
       handleFileChange,
       removeFile,
-      handleNewProduct,
+      handleEditProduct,
       v$: useVuelidate(),
 
     };
@@ -342,6 +325,6 @@ export default {
   bottom: 0;
 }
 .create-product-main-text{
-text-align: center;
+  text-align: center;
 }
 </style>

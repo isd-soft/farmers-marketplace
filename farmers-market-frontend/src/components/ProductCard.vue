@@ -1,12 +1,19 @@
 <template>
   <div class="product-card" @click="goToProductPage">
 
-    <img
-      v-if="product.image"
-      :src="getFirstImage(product.image)"
-      alt="Product image"
-      class="product-image"
-    />
+    <td>
+      <div class="image-container">
+        <img
+          v-if="product.image"
+          :src="getFirstImage(product.image)"
+          alt="Product image"
+          class="product-image"
+        />
+        <div v-else class="no-image">
+          No Image
+        </div>
+      </div>
+    </td>
     <div class="product-info">
       <h3 class="product-title">{{ product.title }}</h3>
       <p class="product-description">
@@ -109,10 +116,35 @@ export default {
   box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
 }
 
+.image-container {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+}
+
 .product-image {
   width: 100%;
   height: 250px;
   object-fit: cover;
+}
+
+.no-image {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  align-items: center;
+  justify-content: center;
+  vertical-align: center;
+  horiz-align: center;
+  align-content: center;
+  background-color: #17973930;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
 }
 
 .product-info {
@@ -134,10 +166,5 @@ export default {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-}
-
-.product-price {
-  font-size: 16px;
-  font-weight: bold;
 }
 </style>

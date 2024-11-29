@@ -1,27 +1,17 @@
 package com.example.isdfarmersmarket.web.controllers;
 
-import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.ProductService;
-import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateProductCommand;
 import com.example.isdfarmersmarket.web.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.HttpStatus.CREATED;
@@ -45,11 +35,9 @@ public class ProductController {
     @Operation(
             description = "This endpoint is used to update a product"
     )
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ProductDTO> updateCategory(@PathVariable Long id, @RequestPart @Valid UpdateProductCommand updateProductCommand,
-                                                     @RequestPart(value = "files", required = false) List<MultipartFile>files,
-                                                     @RequestPart(value = "imagesToDeleteId", required = false) List<Long>imagesToDeleteId) {
-        return ResponseEntity.status(OK).body(productService.updateProduct(id, updateProductCommand,new HashSet<>(files), new HashSet<>(imagesToDeleteId)));
+    @PutMapping(value = "/update/{id}")
+    public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody UpdateProductCommand updateProductCommand) {
+        return ResponseEntity.status(OK).body(productService.updateProduct(id, updateProductCommand));
     }
 
     @Operation(
@@ -70,6 +58,10 @@ public class ProductController {
             @RequestParam(required = false) String search
             ) {
         return ResponseEntity.status(OK).body(productService.getAllProducts(category, search, pageable));
+    }
+    @GetMapping("/management")
+    public ResponseEntity<Map<String, Object>> getCurrentUserProducts(Pageable pageable) {
+        return ResponseEntity.status(OK).body(productService.getCurrentUserProducts(pageable));
     }
     @Operation(
             description = "This endpoint is used to get a product by id"

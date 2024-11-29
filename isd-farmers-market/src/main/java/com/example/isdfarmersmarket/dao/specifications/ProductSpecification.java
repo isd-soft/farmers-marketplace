@@ -15,5 +15,9 @@ public class ProductSpecification {
         return (root, query, builder) ->
             builder.equal(root.get("category").get("id"), categoryId);
     }
+    public static Specification<Product> creatorIs(Long userId) {
+        return (root, query, builder) ->
+                builder.equal(root.get("user").get("id"), userId);
+    }
 
 }
