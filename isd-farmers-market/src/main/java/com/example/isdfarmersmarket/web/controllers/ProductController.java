@@ -7,6 +7,7 @@ import com.example.isdfarmersmarket.web.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +53,7 @@ public class ProductController {
             description = "This endpoint is used to get all products"
     )
     @GetMapping()
-    public ResponseEntity<Map<String, Object>> getAllProducts(
+    public ResponseEntity<Page<CompactProductDTO>> getAllProducts(
             Pageable pageable,
             @RequestParam(required = false) Long category,
             @RequestParam(required = false) String search
@@ -60,7 +61,7 @@ public class ProductController {
         return ResponseEntity.status(OK).body(productService.getAllProducts(category, search, pageable));
     }
     @GetMapping("/management")
-    public ResponseEntity<Map<String, Object>> getCurrentUserProducts(Pageable pageable) {
+    public ResponseEntity<Page<CompactProductDTO>> getCurrentUserProducts(Pageable pageable) {
         return ResponseEntity.status(OK).body(productService.getCurrentUserProducts(pageable));
     }
     @Operation(

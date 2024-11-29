@@ -84,7 +84,7 @@
                         >
                           <div>
                             <h2>{{ product.productTitle }}</h2>
-                            <p>{{ product.productDescription }}</p>
+                            <p class="product-description">{{ product.productDescription }}</p>
                           </div>
 
                           <div :class="'stars-container'">
@@ -421,7 +421,7 @@ onMounted(async () => {
 /* .stars {
   display: inline-block;
   font-size: 20px;
-  color: #ffd700; /* Gold color for the stars 
+  color: #ffd700; /* Gold color for the stars
 }
 
 .star {
@@ -429,25 +429,35 @@ onMounted(async () => {
   width: 20px;
   height: 20px;
   background-size: cover;
-  background-image: url('path_to_your_star_image.svg'); /* Full star image 
+  background-image: url('path_to_your_star_image.svg'); /* Full star image
 }
 
-/* Full star - 100% gold 
-/* Full star - 100% gold 
+/* Full star - 100% gold
+/* Full star - 100% gold
 .star.full {
-  background-image: url('@/assets/star_full.svg'); /* Adjust path based on your project 
+  background-image: url('@/assets/star_full.svg'); /* Adjust path based on your project
 }
 
-/* Half star - 50% gold 
+/* Half star - 50% gold
 .star.half {
-  background-image: url('@/assets/star_half.svg'); /* Adjust path based on your project 
+  background-image: url('@/assets/star_half.svg'); /* Adjust path based on your project
 }
 
-/* Empty star - transparent or gray 
+/* Empty star - transparent or gray
 .star.empty {
-  background-image: url('@/assets/star_empty.svg'); /* Adjust path based on your project 
+  background-image: url('@/assets/star_empty.svg'); /* Adjust path based on your project
 }  */
-
+.product-description {
+  font-size: 14px;
+  color: #555;
+  margin: 0 0 10px;
+  height: 45px;
+  overflow: hidden;
+  display: -webkit-box;
+  max-width: 150px;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
 .stars-container {
   display: flex;
   gap: 4px;

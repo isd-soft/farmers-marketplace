@@ -64,6 +64,7 @@ public class OrderServiceImpl implements OrderService {
                 })
                 .collect(Collectors.toSet());
 
+
         order.setProducts(items);
 
         BigDecimal totalPrice = items.stream()

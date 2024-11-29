@@ -12,6 +12,7 @@
         <th>Price</th>
         <th>Quantity</th>
         <th>Orders</th>
+        <th>Discount</th>
         <th class="actions">Actions</th>
       </tr>
       </thead>
@@ -36,6 +37,17 @@
         <td>{{ product.pricePerUnit }}/{{ product.unitTypeShort }}</td>
         <td>{{ product.quantity }}</td>
         <td>10</td>
+        <td><Button     style="
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      border-style: none;
+      font-size: 14px;
+      line-height: 0px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    ">+</Button></td>
         <td class="actions">
           <div class="actions-container">
             <i @click="editProduct(product)" class="pi pi-pencil action-icon"></i>

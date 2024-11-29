@@ -15,13 +15,13 @@ import com.example.isdfarmersmarket.web.dto.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -119,26 +119,20 @@ public class ProductServiceImpl implements ProductService {
     }
     @Override
     @Transactional
-    public Map<String, Object> getAllProducts(Long category, String search, Pageable pageable) {
+    public Page<CompactProductDTO> getAllProducts(Long category, String search, Pageable pageable) {
         Specification<Product> filters = Specification.
                 where(StringUtils.isBlank(search) ? null : ProductSpecification.titleOrDescLike(search))
                 .and((category == null || category == 0L) ? null : ProductSpecification.categoryIs(category));
-        Map<String, Object> response = new HashMap<>();
-        response.put("content",productMapper.mapToCompactProductsDTO(productRepository.findAll(filters, pageable).stream().toList()));
-        response.put("totalElements", productRepository.count(filters));
-        return response;
+        return productMapper.mapToCompactProductsDTO(productRepository.findAll(filters, pageable));
     }
     @Override
     @Transactional
-    public Map<String, Object> getCurrentUserProducts(Pageable pageable) {
+    public Page<CompactProductDTO> getCurrentUserProducts(Pageable pageable) {
         JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long creator = principal.getId();
-        Map<String, Object> response = new HashMap<>();
         Specification<Product> filters = Specification.
                 where((creator == null || creator == 0L) ? null : ProductSpecification.creatorIs(creator));
-        response.put("content",productMapper.mapToCompactProductsDTO(productRepository.findAll(filters, pageable).stream().toList()));
-        response.put("totalElements", productRepository.count(filters));
-        return response;
+        return productMapper.mapToCompactProductsDTO(productRepository.findAll(filters, pageable));
     }
 
     @Override
