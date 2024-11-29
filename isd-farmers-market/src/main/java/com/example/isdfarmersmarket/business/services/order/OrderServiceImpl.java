@@ -2,6 +2,7 @@ package com.example.isdfarmersmarket.business.services.order;
 
 import com.example.isdfarmersmarket.business.listeners.OrderConfirmedListener;
 import com.example.isdfarmersmarket.business.mapper.OrderMapper;
+import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
 import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.OrderRepository;
@@ -9,15 +10,19 @@ import com.example.isdfarmersmarket.dao.repositories.ProductRepository;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
 import com.example.isdfarmersmarket.web.commands.order.CreateOrderCommand;
 import com.example.isdfarmersmarket.web.commands.order.UpdateOrderCommand;
+import com.example.isdfarmersmarket.web.dto.ItemInOrderDTO;
 import com.example.isdfarmersmarket.web.dto.OrderDTO;
 import jakarta.persistence.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,11 +38,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderDTO createOrder(CreateOrderCommand createOrderCommand, String authenticatedUserEmail) {
-        User user = userRepository.findByEmail(authenticatedUserEmail)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + authenticatedUserEmail));
+    public OrderDTO createOrder(CreateOrderCommand createOrderCommand) {
+        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + principal.getId()));
 
         Order order = Order.builder()
+                .id(createOrderCommand.getOrderId())
                 .user(user)
                 .orderStatus(createOrderCommand.getOrderStatus())
                 .totalPrice(BigDecimal.ZERO)
@@ -64,10 +71,12 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal totalPrice = items.stream()
                 .map(item -> item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         order.setTotalPrice(totalPrice);
 
         return orderMapper.map(orderRepository.save(order));
     }
+
 
     @Override
     @Transactional
@@ -83,6 +92,7 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
+    @Transactional
     public OrderDTO deleteOrder(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_FIND_FAILED_BY_ID));
@@ -91,16 +101,58 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<OrderDTO> getAllOrders() {
-        List<Order> order = orderRepository.findAll();
-        return orderMapper.mapOrders(order);
-    }
-
-    @Override
+    @Transactional
     public OrderDTO getOrderById(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_FIND_FAILED_BY_ID));
+
         return orderMapper.map(order);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderDTO> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+
+        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + principal.getId()));
+
+
+        return orders.stream()
+                .map(order -> {
+                    Set<ItemInOrderDTO> itemInOrderDTOs = order.getProducts().stream()
+                            .map(itemInOrder -> {
+                                Product product =itemInOrder.getProduct();
+
+                                Optional<Image> firstImage = product.getImages().stream().findFirst();
+                                String imageBase64 = convertImageToBase64(firstImage);
+
+                                return ItemInOrderDTO.builder()
+                                        .productId(product.getId())
+                                        .productTitle(product.getTitle())
+                                        .productDescription(product.getDescription())
+                                        .quantity(itemInOrder.getQuantity())
+                                        .pricePerUnit(itemInOrder.getPricePerUnit())
+                                        .imageBase64(imageBase64)
+                                        .reviewCount(product.getReviewCount())
+                                        .rating(product.getRating())
+                                        .build();
+                            }).collect(Collectors.toSet());
+
+                    return OrderDTO.builder()
+                            .id(order.getId())
+                            .orderStatus(order.getOrderStatus().name())
+                            .userId(user.getId())
+                            .totalPrice(order.getTotalPrice())
+                            .products(itemInOrderDTOs)
+                            .createdDate(order.getCreatedDate())
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    private String convertImageToBase64(Optional<Image> image) {
+        return image.map(img -> Base64.getEncoder().encodeToString(img.getBytes())).orElse(null);
     }
 }

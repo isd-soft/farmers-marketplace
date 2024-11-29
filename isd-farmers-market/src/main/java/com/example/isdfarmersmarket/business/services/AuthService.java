@@ -1,9 +1,6 @@
 package com.example.isdfarmersmarket.business.services;
 
-import com.example.isdfarmersmarket.business.exception.custom_exceptions.EmailAlreadyExistsException;
-import com.example.isdfarmersmarket.business.exception.custom_exceptions.InvalidCredentialsException;
-import com.example.isdfarmersmarket.business.exception.custom_exceptions.RefreshTokenException;
-import com.example.isdfarmersmarket.business.exception.custom_exceptions.RoleAlreadyExistsException;
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.*;
 import com.example.isdfarmersmarket.business.mapper.RegisterCommandMapper;
 import com.example.isdfarmersmarket.dao.enums.AuthError;
 import com.example.isdfarmersmarket.dao.enums.ERole;
@@ -14,8 +11,9 @@ import com.example.isdfarmersmarket.dao.repositories.RefreshTokenRepository;
 import com.example.isdfarmersmarket.dao.repositories.RoleRepository;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
 import com.example.isdfarmersmarket.web.commands.UpdatePasswordCommand;
-import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
 import com.example.isdfarmersmarket.web.commands.UserUpgradeCommand;
+import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
+import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,42 +36,24 @@ public class AuthService {
     private final RefreshTokenRepository tokenRepository;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
     private final RegisterCommandMapper registerCommandMapper;
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true )
     public User authenticate(String username, String password) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password));
             return (User) authentication.getPrincipal();
         } catch (AuthenticationException e) {
-            throw new InvalidCredentialsException(AuthError.INVALID_CREDENTIALS);
+            throw new InvalidCredentialsException();
         }
-    }
-
-    @Transactional
-    public void upgradeUser(String email, UserUpgradeCommand customerUpgradeCommand) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found."));
-        Role farmer = roleRepository.findByRole(ERole.FARMER).orElseThrow(
-                () -> new RuntimeException("ROLE DOESNT EXIST"));
-        if (user.getRoles().contains(farmer)) {
-            throw new RoleAlreadyExistsException("Role already exists");
-        }
-        user.setAddress(customerUpgradeCommand.getAddress());
-        user.setDescription(customerUpgradeCommand.getDescription());
-
-
-        user.addRole(farmer);
-        userRepository.save(user);
     }
 
     @Transactional
     public void deleteRefreshToken(String refreshToken) {
         Long id = Long.valueOf(jwtService
                 .extractAllClaims(refreshToken)
-                .getSubject());
+                        .getSubject());
         log.error(jwtService
                 .extractAllClaims(refreshToken).getId());
         User user = userRepository.findById(id)
@@ -84,7 +64,7 @@ public class AuthService {
     @Transactional
     public void registerUser(UserRegisterCommand registerRequestDTO) {
         if (userRepository.existsByEmail(registerRequestDTO.getEmail())) {
-            throw new EmailAlreadyExistsException("Email already in use");
+            throw new EmailAlreadyExistsException();
         }
         User newUser = registerCommandMapper.map(registerRequestDTO);
         userRepository.save(newUser);
@@ -119,16 +99,13 @@ public class AuthService {
                 .getSubject());
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new InvalidCredentialsException(AuthError.USER_NOT_FOUND));
+                .orElseThrow(InvalidCredentialsException::new);
 
-        tokenRepository.findByUser(user).stream()
-                .filter(token -> token.getToken().equals(refreshToken))
-                .findFirst()
-                .orElseThrow(() -> new RefreshTokenException(AuthError.REFRESH_TOKEN_INVALID));
+        tokenRepository.findByUserAndToken(user, refreshToken)
+                .orElseThrow(RefreshTokenException::new);
 
         return jwtService.generateAccessToken(user);
     }
-
     @Transactional
     public void updatePassword(UpdatePasswordCommand updatePasswordCommand) {
         User user = userRepository.findById(updatePasswordCommand.getId())
