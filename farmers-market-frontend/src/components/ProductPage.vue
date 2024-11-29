@@ -166,7 +166,6 @@
     </template>
 
   </Card>
-  <Footer class="footer"></Footer>
   </div>
 
 </template>
