@@ -13,7 +13,6 @@
         />
         <label for="product-title">Title</label>
       </FloatLabel>
-
       <FloatLabel variant="on">
         <InputText
           id="product-desc"
@@ -55,6 +54,7 @@
           id="product-price"
           v-model="price"
           required
+          min="1"
           class="create-product-input"
         />
         <label for="product-price">Price</label>
@@ -62,18 +62,10 @@
 
       <FloatLabel variant="on">
         <InputNumber
-          id="product-discount"
-          v-model="discount"
-          class="create-product-input"
-        />
-        <label for="product-discount">Discount</label>
-      </FloatLabel>
-
-      <FloatLabel variant="on">
-        <InputNumber
           id="product-quantity"
           v-model="quantity"
           required
+          min="0"
           class="create-product-input"
         />
         <label for="product-price">Quantity</label>
@@ -118,6 +110,8 @@
 
 <script>
 import { ref, onMounted } from "vue";
+import { required, maxLength, minLength, minValue, maxValue } from "@vuelidate/validators";
+import useVuelidate from "@vuelidate/core";
 import Header from "./Header.vue";
 import Footer from "../components/Footer.vue";
 import axios from "axios";
@@ -142,7 +136,6 @@ export default {
     const title = ref("");
     const description = ref("");
     const price = ref();
-    const discount = ref();
     const quantity = ref();
     const unitType = ref();
     const unitTypes = ref([]);
@@ -232,7 +225,6 @@ export default {
           description: description.value,
           unitType: unitType.value,
           pricePerUnit: price.value,
-          discountPercents: discount.value,
           quantity: quantity.value,
           categoryId: category.value,
           imagesBase64: imagesBase64,
@@ -258,12 +250,13 @@ export default {
       unitType,
       unitTypes,
       price,
-      discount,
       quantity,
       selectedFiles,
       handleFileChange,
       removeFile,
       handleNewProduct,
+      v$: useVuelidate(),
+
     };
   },
 };
