@@ -64,6 +64,15 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.name === 'Login') {
+    document.body.classList.add('login-bg');
+  } else {
+    document.body.classList.remove('login-bg');
+  }
+  next();
 })
 
 export default router
