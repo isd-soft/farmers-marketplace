@@ -11,9 +11,12 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemInOrderDTO {
-    private Long id;
     private Long productId;
+    private String productTitle;
+    private String productDescription;
     private float quantity;
     private BigDecimal pricePerUnit;
-    private Long orderId;
+    private String imageBase64;
+    private Integer reviewCount;
+    private Float rating;
 }
