@@ -2,6 +2,7 @@ package com.example.isdfarmersmarket.business.services.order;
 
 import com.example.isdfarmersmarket.business.mapper.OrderMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
 import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
@@ -15,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -33,7 +35,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderDTO createOrder(CreateOrderCommand createOrderCommand) {
-        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + principal.getId()));
 
@@ -46,8 +51,6 @@ public class OrderServiceImpl implements OrderService {
                     item.setProduct(product);
                     item.setPricePerUnit(product.getPricePerUnit());
 
-//                    item.setQuantity(productItem.getQuantity());
-
                     return item;
                 })
                 .collect(Collectors.toList());
@@ -57,7 +60,7 @@ public class OrderServiceImpl implements OrderService {
 
 
         Order order = Order.builder()
-                .user(user)
+                .customer()
                 .orderStatus(createOrderCommand.getOrderStatus())
                 .totalPrice(BigDecimal.ZERO)
                 .createdDate(LocalDateTime.now())
