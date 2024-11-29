@@ -3,18 +3,23 @@ import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.CustomerService;
 import com.example.isdfarmersmarket.web.commands.FarmerReviewCommand;
 import com.example.isdfarmersmarket.web.commands.ProductReviewCommand;
+import com.example.isdfarmersmarket.web.commands.UserUpgradeCommand;
 import com.example.isdfarmersmarket.web.dto.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -40,16 +45,14 @@ public class CustomerController {
                 .body(customerService.rateProduct(productReviewCommand));
     }
     @GetMapping("/{userId}/reviews/farmer")
-    public ResponseEntity<List<CustomerFarmerReviewDTO>> getAllFarmerReviews(@PathVariable Long userId,
-                                                                             @RequestParam Integer page,
-                                                                             @RequestParam Integer pageSize) {
-            return ResponseEntity.ok(customerService.fetchAllFarmerReviews(userId, page, pageSize));
+    public ResponseEntity<PageResponseDTO<CustomerFarmerReviewDTO>> getAllFarmerReviews(@PathVariable Long userId,
+                                                                             Pageable pageable) {
+            return ResponseEntity.ok(customerService.fetchAllFarmerReviews(userId, pageable));
     }
     @GetMapping("/{userId}/reviews/product")
-    public ResponseEntity<List<CustomerProductReviewDTO>> getAllProductReviews(@PathVariable Long userId,
-                                                                               @RequestParam Integer page,
-                                                                               @RequestParam Integer pageSize) {
-        return ResponseEntity.ok(customerService.fetchAllProductReviews(userId, page, pageSize));
+    public ResponseEntity<PageResponseDTO<CustomerProductReviewDTO>> getAllProductReviews(@PathVariable Long userId,
+                                                                               Pageable pageable) {
+        return ResponseEntity.ok(customerService.fetchAllProductReviews(userId, pageable));
     }
     @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/wishlist")
@@ -67,6 +70,13 @@ public class CustomerController {
     public ResponseEntity<CompactProductDTO> deleteFromWishlist(@PathVariable Long id){
         return ResponseEntity.status(HttpStatus.OK)
                 .body(customerService.deleteProductFromWishlist(id));
+    }
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @PostMapping("/customer/upgrade")
+    public ResponseEntity<Map<String, String>> upgradeCustomer(@RequestBody UserUpgradeCommand customerUpgradeCommand) {
+        customerService.upgradeUser(customerUpgradeCommand);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(Map.of("message", "Customer upgraded successfully"));
     }
 
 }

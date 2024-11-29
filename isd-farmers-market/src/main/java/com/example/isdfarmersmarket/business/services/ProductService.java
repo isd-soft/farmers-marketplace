@@ -22,7 +22,7 @@ public interface ProductService {
     Map<String, Object> getAllProducts(Long category, String search, Pageable pageable);
     Map<String, Object> getCurrentUserProducts(Pageable pageable);
     ProductDTO getProductById(Long id);
-    PageResponseDTO<ProductReviewDTO> getProductReviews(Long id, int page, int pageSize);
+    PageResponseDTO<ProductReviewDTO> getProductReviews(Long id, Pageable pageable);
     void updateProductRating(Product product);
 
     ProductPageDTO getProductPageById(Long id);
