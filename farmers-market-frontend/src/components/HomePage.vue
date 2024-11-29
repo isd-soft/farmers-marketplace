@@ -1,19 +1,19 @@
 <template>
   <div class="home">
-    <Header class = "navbar"></Header>
+    <Header class="navbar"></Header>
 
-  <!-- Banner -->
-  <main class="main-content">
-    <div class="carousel-container">
-      <Carousel :value="images" :numVisible="1" :numScroll="1" circular :autoplayInterval="6000">
-            <template #item="slotProps">
-              <img :src="slotProps.data" alt="Banner Image" class="carousel-image" />
-            </template>
+    <!-- Banner -->
+    <main class="main-content">
+      <div class="carousel-container">
+        <Carousel :value="images" :numVisible="1" :numScroll="1" circular :autoplayInterval="6000">
+          <template #item="slotProps">
+            <img :src="slotProps.data" alt="Banner Image" class="carousel-image" />
+          </template>
         </Carousel>
-    </div>
-</main>
+      </div>
+    </main>
 
-    <Footer class = "footer"></Footer>
+    <Footer class="footer"></Footer>
   </div>
 </template>
 
@@ -30,16 +30,16 @@ import { useRouter } from "vue-router";
 export default {
   name: "HomePage",
   components: {
-  Header,
-  Footer,
-  Carousel,
-},
+    Header,
+    Footer,
+    Carousel,
+  },
 
   data() {
-  return {
-    images: [banner1, banner2, banner3],
-  };
-},
+    return {
+      images: [banner1, banner2, banner3],
+    };
+  },
 
   setup() {
     return {
@@ -49,8 +49,7 @@ export default {
 };
 </script>
 <style scoped>
-
-.home{
+.home {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -61,15 +60,18 @@ export default {
 
 .main-content {
   width: 100%;
-  flex:1;
+  flex: 1;
 }
 
 .footer {
   text-align: center;
   padding: 10px;
+  position: fixed;
+  bottom: 0;
 }
+
 .carousel-container {
-  width:100%;
+  width: 100%;
   height: auto;
 }
 
@@ -79,12 +81,4 @@ export default {
   object-fit: cover;
   display: block;
 }
-
-
 </style>
-
-
-
-
-
-

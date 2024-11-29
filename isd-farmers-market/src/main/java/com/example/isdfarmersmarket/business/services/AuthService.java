@@ -1,6 +1,9 @@
 package com.example.isdfarmersmarket.business.services;
 
-import com.example.isdfarmersmarket.business.exception.custom_exceptions.*;
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.EmailAlreadyExistsException;
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.InvalidCredentialsException;
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.RefreshTokenException;
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.RoleAlreadyExistsException;
 import com.example.isdfarmersmarket.business.mapper.RegisterCommandMapper;
 import com.example.isdfarmersmarket.dao.enums.AuthError;
 import com.example.isdfarmersmarket.dao.enums.ERole;
@@ -10,9 +13,10 @@ import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.repositories.RefreshTokenRepository;
 import com.example.isdfarmersmarket.dao.repositories.RoleRepository;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
-import com.example.isdfarmersmarket.web.commands.UserUpgradeCommand;
+import com.example.isdfarmersmarket.web.commands.UpdatePasswordCommand;
 import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
-import io.jsonwebtoken.JwtException;
+import com.example.isdfarmersmarket.web.commands.UserUpgradeCommand;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,7 +41,7 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final RegisterCommandMapper registerCommandMapper;
 
-    @Transactional(readOnly = true )
+    @Transactional(readOnly = true)
     public User authenticate(String username, String password) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -54,7 +58,7 @@ public class AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found."));
         Role farmer = roleRepository.findByRole(ERole.FARMER).orElseThrow(
                 () -> new RuntimeException("ROLE DOESNT EXIST"));
-        if(user.getRoles().contains(farmer)) {
+        if (user.getRoles().contains(farmer)) {
             throw new RoleAlreadyExistsException("Role already exists");
         }
         user.setAddress(customerUpgradeCommand.getAddress());
@@ -69,7 +73,7 @@ public class AuthService {
     public void deleteRefreshToken(String refreshToken) {
         Long id = Long.valueOf(jwtService
                 .extractAllClaims(refreshToken)
-                        .getSubject());
+                .getSubject());
         log.error(jwtService
                 .extractAllClaims(refreshToken).getId());
         User user = userRepository.findById(id)
@@ -123,5 +127,17 @@ public class AuthService {
                 .orElseThrow(() -> new RefreshTokenException(AuthError.REFRESH_TOKEN_INVALID));
 
         return jwtService.generateAccessToken(user);
+    }
+
+    @Transactional
+    public void updatePassword(UpdatePasswordCommand updatePasswordCommand) {
+        User user = userRepository.findById(updatePasswordCommand.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User with the specified ID not found"));
+
+        if (!passwordEncoder.matches(updatePasswordCommand.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Old password is incorrect");
+        }
+        user.setPassword(passwordEncoder.encode(updatePasswordCommand.getPassword()));
+        userRepository.save(user);
     }
 }

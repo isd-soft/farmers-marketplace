@@ -12,7 +12,9 @@ import com.example.isdfarmersmarket.web.commands.CreateDeliveryTypeCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateDeliveryTypeCommand;
 import com.example.isdfarmersmarket.web.dto.DeliveryTypeDTO;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+//@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DeliveryTypeServiceImpl implements DeliveryTypeService {
     private final DeliveryTypeRepository deliveryTypeRepository;
     private final UserRepository userRepository;

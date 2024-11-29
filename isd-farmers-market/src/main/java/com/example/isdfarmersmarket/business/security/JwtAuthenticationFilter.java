@@ -17,8 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -56,9 +56,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             setAuthentication(request, id, email, roles);
             // Continue request
             filterChain.doFilter(request, response);
+
         } catch (JwtException ex) {
             handleJwtException(response, ex);
         }
+
     }
 
     private void setAuthentication(HttpServletRequest request, Long id, String email, List<String> roles) {

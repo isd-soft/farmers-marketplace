@@ -28,8 +28,6 @@ app.use(PrimeVue, {
 
 app.use(router)
 
-
-
 app.component('ThemedButton', Button)
 app.component('SelectButton', SelectButton)
 app.component('InputText', InputText)
