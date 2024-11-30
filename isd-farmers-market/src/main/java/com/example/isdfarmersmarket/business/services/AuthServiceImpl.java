@@ -2,18 +2,13 @@ package com.example.isdfarmersmarket.business.services;
 
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.*;
 import com.example.isdfarmersmarket.business.mapper.RegisterCommandMapper;
-import com.example.isdfarmersmarket.dao.enums.AuthError;
-import com.example.isdfarmersmarket.dao.enums.ERole;
+import com.example.isdfarmersmarket.business.services.interfaces.AuthService;
 import com.example.isdfarmersmarket.dao.models.RefreshToken;
-import com.example.isdfarmersmarket.dao.models.Role;
 import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.repositories.RefreshTokenRepository;
-import com.example.isdfarmersmarket.dao.repositories.RoleRepository;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
 import com.example.isdfarmersmarket.web.commands.UpdatePasswordCommand;
-import com.example.isdfarmersmarket.web.commands.UserUpgradeCommand;
 import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
-import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AuthService {
+public class AuthServiceImpl implements AuthService {
 
-    private final JwtService jwtService;
+    private final JwtServiceImpl jwtService;
     private final UserRepository userRepository;
     private final RefreshTokenRepository tokenRepository;
     private final AuthenticationManager authenticationManager;

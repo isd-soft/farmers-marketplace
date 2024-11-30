@@ -1,6 +1,6 @@
 package com.example.isdfarmersmarket.business.initializers;
 
-import com.example.isdfarmersmarket.business.services.AuthService;
+import com.example.isdfarmersmarket.business.services.AuthServiceImpl;
 import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
 import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class MainAdminInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
-    private final AuthService authService;
+    private final AuthServiceImpl authService;
     @Value("${admin.email}")
     private String adminEmail;
 

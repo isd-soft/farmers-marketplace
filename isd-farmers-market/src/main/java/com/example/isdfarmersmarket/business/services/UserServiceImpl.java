@@ -1,14 +1,25 @@
 package com.example.isdfarmersmarket.business.services;
 
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.CustomUsernameNotFoundException;
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.RoleAlreadyExistsException;
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.RoleDoesntExistException;
 import com.example.isdfarmersmarket.business.mapper.UserProfileMapper;
+import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.services.interfaces.UserService;
+import com.example.isdfarmersmarket.business.utils.SecurityUtils;
+import com.example.isdfarmersmarket.dao.enums.ERole;
+import com.example.isdfarmersmarket.dao.models.Role;
 import com.example.isdfarmersmarket.dao.models.User;
+import com.example.isdfarmersmarket.dao.repositories.RoleRepository;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
+import com.example.isdfarmersmarket.web.commands.CustomerUpgradeCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateUserCommand;
 import com.example.isdfarmersmarket.web.dto.UpdateUserDTO;
 import com.example.isdfarmersmarket.web.dto.UserProfileDTO;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,19 +32,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserDetailsService {
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class UserServiceImpl implements UserDetailsService, UserService {
 
-    private final UserRepository userRepository;
-    private final UserProfileMapper userProfileMapper;
-
-
-    public void save(User user) {
-        userRepository.save(user);
-    }
-
-    public boolean existsByEmail(String email) {
-        return userRepository.findByEmail(email).isPresent();
-    }
+    UserRepository userRepository;
+    UserProfileMapper userProfileMapper;
+    RoleRepository roleRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -74,6 +78,27 @@ public class UserService implements UserDetailsService {
         user.setAddress(updateUserCommand.getAddress());
         userRepository.save(user);
         return userProfileMapper.mapToUpdateDTO(user);
+    }
+
+    @Override
+    public UserProfileDTO upgradeToFarmer(CustomerUpgradeCommand command) {
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+        User customer = userRepository.findById(principal.getId())
+                .orElseThrow(CustomUsernameNotFoundException::new);
+
+        Role farmerRole = roleRepository.findByRole(ERole.FARMER)
+                .orElseThrow(RoleDoesntExistException::new);
+
+        if (customer.getRoles().contains(farmerRole)) {
+            throw new RoleAlreadyExistsException();
+        }
+
+        customer.setAddress(command.getAddress());
+        customer.setDescription(command.getDescription());
+        customer.addRole(farmerRole);
+
+        userRepository.save(customer);
+        return userProfileMapper.map(customer);
     }
 
 

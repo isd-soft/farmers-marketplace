@@ -118,7 +118,7 @@ export default {
     const user = ref({})
     const productReviews = ref([])
     const farmerReviews = ref([])
-    const currentPage = ref(0);
+    const currentPage = ref(0)
     const newProductReview = ref({ customerId: props.id, rating: 0, content: '' })
     const newFarmerReview = ref({ customerId: props.id, rating: 0, content: '' })
     const isAllProductReviewsLoaded = ref(false)
@@ -137,7 +137,7 @@ export default {
 
     const fetchProductReviews = async (page = 0, pageSize = 5) => {
       try {
-        const response = await axiosInstance.get(`customer/${props.id}/reviews/product`, {
+        const response = await axiosInstance.get(`/reviews/customers/${props.id}/product-reviews`, {
           params: { page, size: pageSize },
         })
         productReviews.value.push(...response.data.content)
@@ -151,7 +151,7 @@ export default {
 
     const fetchFarmerReviews = async (page = 0, pageSize = 5) => {
       try {
-        const response = await axiosInstance.get(`customer/${props.id}/reviews/farmer`, {
+        const response = await axiosInstance.get(`/reviews/customers/${props.id}/farmer-reviews`, {
           params: { page, size: pageSize },
         })
         farmerReviews.value.push(...response.data.content)
@@ -163,11 +163,10 @@ export default {
       }
     }
 
-
     const submitProductReview = async () => {
       try {
         const response = await axiosInstance.post(
-          '/customer/review/product',
+          '/reviews/customers/product-reviews',
           newProductReview.value,
         )
         productReviews.value.unshift(response.data)
@@ -179,7 +178,7 @@ export default {
 
     const submitFarmerReview = async () => {
       try {
-        const response = await axiosInstance.post('/customer/review/farmer', newFarmerReview.value)
+        const response = await axiosInstance.post('/reviews/customers/farmer-reviews', newFarmerReview.value)
         farmerReviews.value.unshift(response.data)
         newFarmerReview.value = { customerId: props.id, rating: 0, content: '' }
       } catch (error) {
@@ -224,6 +223,7 @@ export default {
   },
 }
 </script>
+
 <style>
 .user-page {
   width: 80%;

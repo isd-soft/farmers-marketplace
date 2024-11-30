@@ -243,13 +243,14 @@ export default {
       }
     }
 
+
     const toggleWishlist = async () => {
       if (!product.value.id) return
       try {
         if (product.value.isInWishlist) {
-          await axiosInstance.delete(`/customer/wishlist/${props.id}`)
+          await axiosInstance.delete(`/wishlist/${props.id}`)
         } else {
-          await axiosInstance.post(`/customer/wishlist/${props.id}`)
+          await axiosInstance.post(`/wishlist/${props.id}`)
         }
         product.value.isInWishlist = !product.value.isInWishlist
       } catch (error) {

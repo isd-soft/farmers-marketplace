@@ -147,40 +147,6 @@ public class ProductServiceImpl implements ProductService {
         ProductDTO productDTO = productMapper.map(product);
         return productDTO;
     }
-    @Override
-    @Transactional(readOnly = true)
-    public PageResponseDTO<ProductReviewDTO> getProductReviews(Long productId, Pageable pageable) {
-        Product product = productRepository
-                .findById(productId)
-                .orElseThrow(()->new EntityNotFoundException("Product not found"));
-
-        var reviewsPage = productReviewRepository
-                .findAllByProductOrderByCreatedDateDesc(product, pageable);
-        var totalReviews = reviewsPage.getTotalElements();
-        var content = reviewsPage
-                .getContent()
-                .stream()
-                .map(reviewMapper::mapWithoutProductDetails)
-                .toList();
-
-        return new PageResponseDTO<>(content,totalReviews);
-    }
-
-    @Override
-    @Transactional
-    public void updateProductRating(Product product) {
-        ReviewStatsDTO reviewStatsDTO = productReviewRepository
-                .findReviewStatsByProduct(product);
-
-        product.setRating(reviewStatsDTO
-                .getAverageRating()
-                .floatValue());
-        product.setReviewCount(reviewStatsDTO
-                .getReviewCount()
-                .intValue());
-
-        productRepository.save(product);
-    }
 
     @Override
     @Transactional
