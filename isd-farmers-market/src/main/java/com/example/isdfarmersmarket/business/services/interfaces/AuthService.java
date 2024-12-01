@@ -12,7 +12,7 @@ public interface AuthService {
 
     void registerUser(UserRegisterCommand registerRequestDTO);
 
-    String generateRefreshToken(String email);
+    String generateRefreshToken(Long id);
 
     String generateAccessToken(String refreshToken);
 

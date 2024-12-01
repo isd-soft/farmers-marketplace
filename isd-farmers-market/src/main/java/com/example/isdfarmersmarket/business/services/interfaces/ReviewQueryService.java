@@ -6,8 +6,11 @@ import org.springframework.data.domain.Pageable;
 public interface ReviewQueryService {
 
     PageResponseDTO<CustomerProductReviewDTO> fetchAllProductReviewsForCustomer(Long id, Pageable pageable);
+
     PageResponseDTO<CustomerFarmerReviewDTO> fetchAllFarmerReviewsForCustomer(Long id, Pageable pageable);
+
     PageResponseDTO<ProductReviewDTO> getProductReviews(Long id, Pageable pageable);
+
     PageResponseDTO<FarmerReviewDTO> getFarmerReviews(Long farmerId, Pageable pageable);
 
 }

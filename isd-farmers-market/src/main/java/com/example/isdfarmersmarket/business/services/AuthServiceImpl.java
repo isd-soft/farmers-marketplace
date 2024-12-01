@@ -49,8 +49,6 @@ public class AuthServiceImpl implements AuthService {
         Long id = Long.valueOf(jwtService
                 .extractAllClaims(refreshToken)
                         .getSubject());
-        log.error(jwtService
-                .extractAllClaims(refreshToken).getId());
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found."));
         tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
@@ -66,9 +64,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Transactional
-    public String generateRefreshToken(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public String generateRefreshToken(Long id) {
+        User user = userRepository
+                .findById(id)
+                .orElseThrow(EntityNotFoundException::new);
 
         String refreshToken = jwtService.generateRefreshToken(user);
 

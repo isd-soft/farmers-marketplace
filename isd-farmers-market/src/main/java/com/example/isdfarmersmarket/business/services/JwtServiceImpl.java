@@ -78,7 +78,6 @@ public class JwtServiceImpl implements JwtService {
                 .getBody();
     }
 
-    // use in filter
     public String extractTokenFromHeader(String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             return authorizationHeader.substring(7);

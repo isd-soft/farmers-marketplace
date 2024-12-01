@@ -7,12 +7,15 @@ import com.example.isdfarmersmarket.web.dto.UserProfileDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 
 @Mapper(componentModel = "spring")
 public interface UserProfileMapper {
 
     @Mapping(target = "isFarmer", expression = "java(isFarmer(user))")
     UserProfileDTO map(User user);
+    List<UserProfileDTO> map(List<User> user);
 
     UpdateUserDTO mapToUpdateDTO(User user);
 
