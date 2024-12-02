@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Set;
 
 @Mapper(componentModel = "spring", uses = ImageMapper.class)
 public interface ProductMapper {
@@ -17,6 +18,18 @@ public interface ProductMapper {
     @Mapping(target = "image", expression = "java(imageMapper.map(product.getImages().stream().findFirst().orElse(null)))")
     @Mapping(target = "unitTypeShort", expression = "java(product.getUnitType().getShortName())")
     CompactProductDTO mapToProductInWishlistDTO(Product product);
+    default Page<CompactProductDTO> mapToCompactProductsDTO(Page<Product> products, Set<Product> wishlist) {
+        return products.map(product -> {
+            CompactProductDTO compactProductDTO = this.mapToProductInWishlistDTO(product);
+            // Проверяем, есть ли продукт в вишлисте пользователя
+            if (wishlist.contains(product)) {
+                compactProductDTO.setIsInWishlist(true);
+            } else {
+                compactProductDTO.setIsInWishlist(false);
+            }
+            return compactProductDTO;
+        });
+    }
     default Page<CompactProductDTO> mapToCompactProductsDTO(Page<Product> products) {
         return products.map(this::mapToProductInWishlistDTO);
     }

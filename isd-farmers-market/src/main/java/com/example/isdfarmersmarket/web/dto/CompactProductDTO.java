@@ -18,6 +18,7 @@ public class CompactProductDTO {
     private UnitType unitType;
     private String unitTypeShort;
     private int discountPercents;
+    Boolean isInWishlist;
     private Float rating;
     private ImageDTO image;
 }

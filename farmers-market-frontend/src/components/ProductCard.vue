@@ -1,6 +1,5 @@
 <template>
   <div class="product-card" @click="goToProductPage">
-
     <td>
       <div class="image-container">
         <img
@@ -9,45 +8,44 @@
           alt="Product image"
           class="product-image"
         />
-        <div v-else class="no-image">
-          No Image
-        </div>
+        <div v-else class="no-image">No Image</div>
       </div>
     </td>
     <div class="product-info">
       <h3 class="product-title">{{ product.title }}</h3>
-      <p class="product-description">
-        {{ product.description }}
-      </p>
+      <p class="product-description">{{ product.description }}</p>
+      <div class="product-cost-icons">
         <div class="product-cost">
-                <span v-if="product.discountPercents && product.discountPercents > 0">
-                  <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
-                    ${{ product.pricePerUnit }}
-                  </s>
-                  <span style="color: #007bff; font-size: 1.5rem">
-                    ${{
-                      product.pricePerUnit * ((100 - product.discountPercents) / 100).toFixed(2)
-                    }}
-                  </span>
-                </span>
-          <span v-else
-          ><span style="color: #007bff; font-size: 1.5rem">
-                    ${{ product.pricePerUnit }}
-                  </span>
-                </span>
+          <span v-if="product.discountPercents && product.discountPercents > 0">
+            <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
+              ${{ product.pricePerUnit }}
+            </s>
+            <span style="color: #179739; font-size: 1.5rem">
+              ${{ discountedPrice }}
+            </span>
+          </span>
+          <span v-else>
+            <span style="color: #179739; font-size: 1.5rem">
+              ${{ product.pricePerUnit }}
+            </span>
+          </span>
+        </div>
+        <div class="product-icons">
+          <i class="pi pi-shopping-cart cart-icon icons"></i>
           <i
             :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
-            style="font-size: 1rem; cursor: pointer; color: red; margin-left: 10px; vertical-align: middle;"
-            @click="toggleWishlist"
+            class="icons"
+            @click.stop="toggleWishlist"
             :title="product.isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'"
           />
         </div>
       </div>
+    </div>
   </div>
 </template>
 
 <script>
-
+import { computed } from "vue";
 import axiosInstance from "@/utils/axiosInstance.js";
 
 export default {
@@ -57,39 +55,46 @@ export default {
       type: Object,
       required: true,
     },
-    setup(props){
-      const toggleWishlist = async () => {
-        if (!this.product.value.id) return
-
-        try {
-          if (this.product.value.isInWishlist) {
-            await axiosInstance.delete(`/customer/wishlist/${props.id}`)
-          } else {
-            await axiosInstance.post(`/customer/wishlist/${props.id}`)
-          }
-          this.product.value.isInWishlist = !this.product.value.isInWishlist
-        } catch (error) {
-          console.error(
-            `Failed to ${this.product.value.isInWishlist ? 'remove' : 'add'} product to/from wishlist:`,
-            error.message,
-          )
-        }
-      }
-      return {
-        toggleWishlist,
-      }
-    },
   },
+  setup(props) {
+    const toggleWishlist = async () => {
+      if (!props.product.id) return;
+      try {
+        if (props.product.isInWishlist) {
+          await axiosInstance.delete(`/customer/wishlist/${props.product.id}`);
+        } else {
+          await axiosInstance.post(`/customer/wishlist/${props.product.id}`);
+        }
+        props.product.isInWishlist = !props.product.isInWishlist;
+      } catch (error) {
+        console.error(
+          `Failed to ${
+            props.product.isInWishlist ? "remove" : "add"
+          } product to/from wishlist:`,
+          error.message
+        );
+      }
+    };
 
+    const discountedPrice = computed(() => {
+      return (
+        props.product.pricePerUnit *
+        ((100 - (props.product.discountPercents || 0)) / 100)
+      ).toFixed(2);
+    });
 
+    return {
+      toggleWishlist,
+      discountedPrice,
+    };
+  },
   methods: {
     goToProductPage() {
       this.$router.push(`/product/${this.product.id}`);
     },
     getFirstImage(image) {
       if (image) {
-        const firstImage = image;
-        return `data:image/jpeg;base64,${firstImage.bytes}`;
+        return `data:image/jpeg;base64,${image.bytes}`;
       }
       return "";
     },
@@ -166,5 +171,22 @@ export default {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+}
+.icons{
+  font-size: 20px;
+  cursor: pointer;
+  color: #179739;
+}
+.product-cost-icons{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: space-between;
+}
+.product-icons{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-self: center;
 }
 </style>

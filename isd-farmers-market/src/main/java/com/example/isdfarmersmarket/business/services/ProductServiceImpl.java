@@ -111,6 +111,16 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    public ProductDTO setDiscountProduct(Long id, int discount) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
+        product.setDiscountPercents(discount);
+        productRepository.save(product);
+        return productMapper.map(product);
+    }
+
+    @Override
+    @Transactional
     public ProductDTO deleteProduct(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
@@ -120,10 +130,17 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public Page<CompactProductDTO> getAllProducts(Long category, String search, Pageable pageable) {
-        Specification<Product> filters = Specification.
-                where(StringUtils.isBlank(search) ? null : ProductSpecification.titleOrDescLike(search))
+        Specification<Product> filters = Specification
+                .where(StringUtils.isBlank(search) ? null : ProductSpecification.titleOrDescLike(search))
                 .and((category == null || category == 0L) ? null : ProductSpecification.categoryIs(category));
-        return productMapper.mapToCompactProductsDTO(productRepository.findAll(filters, pageable));
+        Page<Product> products = productRepository.findAll(filters, pageable);
+        JwtPrincipal principal = getPrincipal();
+        Set<Product> wishlist = new HashSet<>();
+        if (principal != null) {
+            User user = userRepository.findById(principal.getId()).orElseThrow();
+            wishlist = user.getWishlist();
+        }
+        return productMapper.mapToCompactProductsDTO(products, wishlist);
     }
     @Override
     @Transactional

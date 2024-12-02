@@ -18,6 +18,7 @@ public interface ProductService {
     ProductDTO createProduct(CreateProductCommand createProductCommand);
 
     ProductDTO updateProduct(Long id, UpdateProductCommand updateProductCommand);
+    ProductDTO setDiscountProduct(Long id, int discount);
 
     ProductDTO deleteProduct(Long id);
     Page<CompactProductDTO> getAllProducts(Long category, String search, Pageable pageable);

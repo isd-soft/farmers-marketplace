@@ -37,17 +37,20 @@
         <td>{{ product.pricePerUnit }}/{{ product.unitTypeShort }}</td>
         <td>{{ product.quantity }}</td>
         <td>10</td>
-        <td><Button     style="
-      width: 20px;
-      height: 20px;
-      padding: 0;
-      border-style: none;
-      font-size: 14px;
-      line-height: 0px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    ">+</Button></td>
+        <td>
+        <div>
+          <Button
+            v-if="!product.discountPercents"
+            @click="setDiscountProduct(product)"
+            style="width: 20px; height: 20px; padding: 0; border-style: none; font-size: 14px; line-height: 0px; display: flex; justify-content: center; align-items: center;"
+          >+</Button>
+          <div class="actions-container-disc" v-else>
+            {{ product.discountPercents }}%
+            <i class="pi pi-pencil action-icon" @click="setDiscountProduct(product)"></i>
+            <i class="pi pi-trash action-icon" @click="removeDiscount(product)"></i>
+          </div>
+        </div>
+        </td>
         <td class="actions">
           <div class="actions-container">
             <i @click="editProduct(product)" class="pi pi-pencil action-icon"></i>
@@ -57,6 +60,21 @@
       </tbody>
     </table>
     <h3 style="margin-top: 50px; margin-bottom: 50px; text-align: center; width: 1200px" v-if="products.length===0">Looks like you have no products yet</h3>
+
+    <Dialog v-model:visible="showDiscountDialog" modal header="Set Discount" :position="'top'">
+      <div class="popup-content">
+        <p v-if="selectedProduct && selectedProduct.discountPercents > 0">
+          Current discount: {{ selectedProduct.discountPercents }}%
+        </p>
+        <p v-else>No discount applied.</p>
+        <InputText v-model="newDiscount" placeholder="Enter discount value (%)" style="margin-top: 10px;" />
+        <div class="popup-actions">
+          <Button @click="cancelDiscount" class="popup-actions-button">Cancel</Button>
+          <Button @click="applyDiscount" class="popup-actions-button">Apply</Button>
+        </div>
+      </div>
+    </Dialog>
+
     <Dialog v-model:visible="showConfirmation" modal header="Delete product" :position="'top'">
       <div class="popup-content">
         <p>Are you sure you want to delete the product "{{ productToDelete?.title }}"?</p>
@@ -66,6 +84,8 @@
         </div>
       </div>
     </Dialog>
+
+
     <Paginator
       style="margin-top: 30px"
       :rows="pageSize"
@@ -89,6 +109,7 @@ import Paginator from 'primevue/paginator';
 import { PrimeIcons } from '@primevue/core/api';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
+import InputText from "primevue/inputtext";
 export default {
   name: 'SearchProducts',
   components: {
@@ -100,6 +121,7 @@ export default {
     PrimeIcons,
     Dialog,
     Button,
+    InputText,
   },
   setup() {
     const products = ref([]);
@@ -110,6 +132,9 @@ export default {
 
     const showConfirmation = ref(false);
     const productToDelete = ref(null);
+    const showDiscountDialog = ref(false);
+    const selectedProduct = ref(null);
+    const newDiscount = ref("");
     const confirmDelete = (product) => {
       productToDelete.value = product;
       showConfirmation.value = true;
@@ -133,6 +158,37 @@ export default {
     const cancelDelete = () => {
       productToDelete.value = null;
       showConfirmation.value = false;
+    };
+    const setDiscountProduct = (product) => {
+      selectedProduct.value = product;
+      newDiscount.value = product.discountPercents || "";
+      showDiscountDialog.value = true;
+    };
+
+    const applyDiscount = async () => {
+      if (selectedProduct.value) {
+        try {
+          const discountValue = parseInt(newDiscount.value, 10);
+          await axiosInstance.put(`/product/discount/${selectedProduct.value.id}`, {discountPercents : discountValue});
+          selectedProduct.value.discountPercents = discountValue;
+          showDiscountDialog.value = false;
+        } catch (error) {
+          console.error("Failed to apply discount:", error.message);
+        }
+      }
+    };
+    const removeDiscount = async (product) => {
+      try {
+        await axiosInstance.put(`/product/discount/${product.id}`, { discount: 0 });
+        product.discountPercents = 0;
+      } catch (error) {
+        console.error("Failed to remove discount:", error.message);
+      }
+    };
+    const cancelDiscount = () => {
+      showDiscountDialog.value = false;
+      selectedProduct.value = null;
+      newDiscount.value = "";
     };
 
     const fetchProducts = async () => {
@@ -165,6 +221,13 @@ export default {
       deleteProduct,
       showConfirmation,
       productToDelete,
+      showDiscountDialog,
+      selectedProduct,
+      newDiscount,
+      setDiscountProduct,
+      applyDiscount,
+      cancelDiscount,
+      removeDiscount,
     }
   },
   methods: {
@@ -195,6 +258,7 @@ body{
   padding-top: 120px;
   align-items: center;
 }
+
 .products-table {
    width: 1200px;
    border-collapse: collapse;
@@ -221,6 +285,12 @@ body{
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  gap: 20px;
+}
+.actions-container-disc {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   gap: 20px;
 }
 .footer{

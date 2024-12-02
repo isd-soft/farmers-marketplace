@@ -2,6 +2,7 @@ package com.example.isdfarmersmarket.web.controllers;
 
 import com.example.isdfarmersmarket.business.services.ProductService;
 import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
+import com.example.isdfarmersmarket.web.commands.ProductDiscountCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateProductCommand;
 import com.example.isdfarmersmarket.web.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,6 +40,10 @@ public class ProductController {
     @PutMapping(value = "/update/{id}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody UpdateProductCommand updateProductCommand) {
         return ResponseEntity.status(OK).body(productService.updateProduct(id, updateProductCommand));
+    }
+    @PutMapping(value = "/discount/{id}")
+    public ResponseEntity<ProductDTO> setDiscountProduct(@PathVariable Long id, @RequestBody ProductDiscountCommand discountPercents) {
+        return ResponseEntity.status(OK).body(productService.setDiscountProduct(id, discountPercents.getDiscountPercents()));
     }
 
     @Operation(
