@@ -13,5 +13,6 @@ import java.util.Optional;
 @Repository
 public interface CartRepository extends JpaRepository<ItemInCart, Long> {
     boolean existsByUserAndProduct(User user, Product product);
-    List<ItemInCart> findAllByUser(User user);
+    List<ItemInCart> getAllByUser(User user);
+    void deleteAllByUser(User user);
 }
