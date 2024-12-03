@@ -36,7 +36,7 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User user;
+    private User farmer;
 
     @ManyToMany(mappedBy = "wishlist")
     private Set<User> inWishlists = new HashSet<>();
