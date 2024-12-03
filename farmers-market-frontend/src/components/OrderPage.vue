@@ -317,7 +317,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 0;
-  min-height: 100vh;
+  min-height: 50vh;
   overflow-x: hidden;
   width: 100%;
   height: max-content;
@@ -443,7 +443,7 @@ onMounted(async () => {
     transform 0.3s ease,
     box-shadow 0.3s ease;
 }
-.product-content{
+.product-content {
   display: flex;
   justify-content: space-between;
   width: 100%;
@@ -561,6 +561,6 @@ onMounted(async () => {
 .footer {
   margin: 0;
   background-color: #fff;
-  padding: 20px;
+  padding-top: 20px;
 }
 </style>

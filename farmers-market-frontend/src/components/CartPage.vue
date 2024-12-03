@@ -20,15 +20,7 @@
               <template #header> </template>
               <template #list="slotProps">
                 <div class="flex flex-col order-container">
-
                   <div v-for="product in cartProducts" :key="product.productId">
-
-                    <template>
-                      <div class="card flex justify-center">
-                        <Checkbox v-model="checked" binary />
-                      </div>
-                    </template>
-
                     <div
                       class="flex flex-col sm:flex-row sm:items-center p-6 gap-4 product-container"
                       :class="{
@@ -36,41 +28,50 @@
                       }"
                     >
                       <div class="md:w-40 relative product-image-title-container">
-                        <img
-                          class="block xl:block mx-auto rounded w-full product-image"
-                          :src="getBase64Image(product.imageBase64, product.imageType)"
-                          :alt="product.productTitle"
-                        />
+                        <div class="selector-image-container">
+                          <div class="card flex justify-center product-check-box">
+                            <Checkbox v-model="checked" binary />
+                          </div>
+                          <img
+                            class="block xl:block mx-auto rounded w-full product-image"
+                            :src="getBase64Image(product.imageBase64, product.imageType)"
+                            :alt="product.productTitle"
+                          />
+                        </div>
+
                         <div
                           class="absolute bg-black/70 rounded-border title-description-quantity-container"
                           style="left: 4px; top: 4px"
                         >
                           <div>
                             <h3 class="product-title-text">{{ product.productTitle }}</h3>
-                            <p  class="product-paraghaph-text">{{ product.productDescription }}</p>
+                            <p class="product-paraghaph-text">{{ product.productDescription }}</p>
                           </div>
 
                           <div class="card flex flex-wrap gap-4 quantity-trash-container">
-                            <div class="flex-auto ">
-                                <InputNumber
-                                  class="quantity-selector"
-                                  v-model="product.quantity"
-                                  inputId="horizontal-buttons"
-                                  showButtons
-                                  buttonLayout="horizontal"
-                                  :step="1"
-                                  mode="decimal"
-                                  fluid
-                                >
-                                  <template #incrementbuttonicon>
-                                    <span class="pi pi-plus" />
-                                  </template>
-                                  <template #decrementbuttonicon>
-                                    <span class="pi pi-minus" />
-                                  </template>
-                                </InputNumber>                              
+                            <div class="flex-auto quantity-container">
+                              <InputNumber
+                                class="quantity-selector"
+                                v-model="product.quantity"
+                                inputId="horizontal-buttons"
+                                showButtons
+                                buttonLayout="horizontal"
+                                :step="1"
+                                mode="decimal"
+                                fluid
+                              >
+                                <template #incrementbuttonicon>
+                                  <span class="pi pi-plus" />
+                                </template>
+                                <template #decrementbuttonicon>
+                                  <span class="pi pi-minus" />
+                                </template>
+                              </InputNumber>
                             </div>
-                            <i class="pi pi-trash" @click="removeItemFromCart(product.productId)"></i>
+                            <i
+                              class="pi pi-trash"
+                              @click="removeItemFromCart(product.productId)"
+                            ></i>
                           </div>
                         </div>
 
@@ -127,11 +128,12 @@ import Tag from 'primevue/tag'
 import 'primeicons/primeicons.css'
 import 'primeicons/primeicons.css'
 import InputNumber from 'primevue/inputnumber'
+import Checkbox from 'primevue/checkbox'
 
 const productQuantity = ref(1)
 const cartProducts = ref([])
 const value = ref(null)
-const checked = ref(false)
+const checked = ref(true)
 
 const getSeverity = (product) => {
   switch (product.inventoryStatus) {
@@ -163,21 +165,30 @@ onMounted(async () => {
   try {
     const response = await axiosInstance.get('/cart')
     cartProducts.value = response.data
-    console.log(cartProducts.value)
+    console.log(cartProducts.value.id)
   } catch (err) {
     console.error('Failed to fetch Cart Products', err)
   }
 })
 
 const removeItemFromCart = async (id) => {
-  try {
-    const response = await axiosInstance.delete(`/cart/${id}`);
-    alert(response.data.message); // Alert or any user feedback you want to show
-  } catch (error) {
-    console.error('Error removing item from cart:', error);
-    alert('Failed to remove item from cart. Please try again.');
+  if (!cartProducts.value.id || !quantity.value) {
+    alert('Invalid product or quantity')
+    return
   }
-};
+
+  const itemInCart = {
+    productId: product.value.id,
+    quantity: quantity.value,
+  }
+  try {
+    const response = await axiosInstance.delete(`/cart/${id}`)
+    alert(response.data.message)
+  } catch (error) {
+    console.error('Error removing item from cart:', error)
+    alert('Failed to remove item from cart. Please try again.')
+  }
+}
 </script>
 
 <style scoped>
@@ -217,6 +228,32 @@ const removeItemFromCart = async (id) => {
   align-items: flex-start;
   gap: 1vw;
   position: relative;
+}
+@media (max-width: 425px) {
+  .main-container {
+    padding: 0;
+    /* display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; */
+  }
+  .main-orders-container {
+    display: flex;
+    flex-direction: column;
+  }
+  .title-text-cart {
+    font-size: 1.3rem;
+  }
+  .product-image-title-container {
+    display: flex;
+    flex-direction: column;
+  }
+  .product-title-text {
+    font-size: 10px;
+  }
+  /* .product-image{
+    width: 100px;
+  } */
 }
 .home-text {
   color: #8e90a7;
@@ -298,17 +335,21 @@ const removeItemFromCart = async (id) => {
 .promo-code-text i {
   font-size: 0.8rem;
 }
+.product-check-box {
+  width: min-content;
+}
 .product-image {
   width: 7vw;
+  height: 10vh;
+  object-fit: cover;
   max-width: 10vw;
-  height: auto;
   border-radius: 10px;
 }
-.product-title-text{
+.product-title-text {
   font-weight: 700;
   font-size: 1.7rem;
 }
-.product-paraghaph-text{
+.product-paraghaph-text {
   font-size: 0.8rem;
 }
 .title-description-quantity-container {
@@ -319,6 +360,11 @@ const removeItemFromCart = async (id) => {
 .product-image-title-container {
   display: flex;
   gap: 2vw;
+  align-items: flex-start;
+}
+.selector-image-container {
+  display: flex;
+  gap: 0.5vw;
 }
 .product-container {
   display: flex;
@@ -352,10 +398,13 @@ const removeItemFromCart = async (id) => {
   justify-content: space-between;
 }
 .quantity-selector {
-  width: 7vw;
+  width: 9rem;
+  min-width: 6rem;
   height: 2.5vh;
+  flex-shrink: 0;
 }
-.quantity-trash-container{
+
+.quantity-trash-container {
   display: flex;
   align-items: center;
   gap: 0.5vw;
@@ -371,10 +420,10 @@ const removeItemFromCart = async (id) => {
   font-size: 0.5rem;
   color: #000;
 }
-.pi-trash{
+.pi-trash {
   cursor: pointer;
 }
-.pi-trash:hover{
+.pi-trash:hover {
   color: rgb(186, 0, 0);
 }
 .footer {

@@ -1,173 +1,175 @@
 <template>
   <div class="home">
-  <Header class="navbar"></Header>
-  <Card
-    :style="{ position: 'absolute', top: '10vh', width: '80em', maxWidth: '95%', margin: '0 auto' }"
-  >
-    <template #content>
-      <div v-if="isLoading" class="loading-container">
-        <div class="loading-content" style="text-align: center; padding: 20px">
-          <ProgressSpinner
-            style="width: 80px; height: 80px"
-            strokeWidth="5"
-            animationDuration="1s"
-          />
-          <p style="margin-top: 20px; font-size: 1.3rem; font-weight: bold; color: #555">
-            Loading, please wait...
-          </p>
-        </div>
-      </div>
-
-      <div v-else-if="hasError" class="error-message">
-        <div class="error-content" style="text-align: center; padding: 20px">
-          <i class="pi pi-exclamation-circle" style="font-size: 3rem; color: #d9534f"></i>
-          <p style="margin-top: 15px; font-size: 1.3rem; font-weight: bold; color: #d9534f">
-            Oops! Something went wrong. Please try again later.
-          </p>
-          <Button
-            label="Go Back"
-            class="p-button-secondary"
-            icon="pi pi-arrow-left"
-            style="margin-top: 15px"
-            @click="$router.go(-1)"
-          />
-        </div>
-      </div>
-
-      <div v-else>
-        <div class="product-page">
-          <!-- Product Section -->
-          <div class="product-content">
-            <!-- Galleria Component -->
-            <div class="product-gallery">
-              <Galleria
-                :value="images"
-                :responsiveOptions="responsiveOptions"
-                :numVisible="5"
-                containerStyle="max-height: auto; margin:0%;"
-                :showItemNavigators="true"
-              >
-                <template #item="slotProps">
-                  <img
-                    :src="slotProps.item.itemImageSrc"
-                    :alt="slotProps.item.alt"
-                    class="gallery-image"
-                  />
-                </template>
-                <template #thumbnail="slotProps">
-                  <img
-                    :src="slotProps.item.thumbnailImageSrc"
-                    :alt="slotProps.item.alt"
-                    class="thumbnail-image"
-                  />
-                </template>
-              </Galleria>
-            </div>
-
-            <!-- Product Details -->
-            <div class="product-details">
-              <div class="product-name">{{ product.title || 'Product Name' }}</div>
-              <div class="product-cost">
-                <span v-if="product.discountPercents && product.discountPercents > 0">
-                  <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
-                    ${{ product.pricePerUnit }}
-                  </s>
-                  <span style="color: #007bff; font-size: 1.5rem">
-                    ${{
-                      product.pricePerUnit * ((100 - product.discountPercents) / 100).toFixed(2)
-                    }}
-                  </span>
-                </span>
-                <span v-else
-                  ><span style="color: #007bff; font-size: 1.5rem">
-                    ${{ product.pricePerUnit }}
-                  </span>
-                </span>
-              </div>
-
-              <div class="product-rating">
-                <Rating v-model="product.rating" :stars="5" readonly />
-                <span class="reviews">{{ product.reviewCount || 0 }} reviews</span>
-              </div>
-              <div class="product-quantity">Quantity:</div>
-              <p>Currently available {{ product.quantity }}</p>
-              <div class="quantity-selector">
-                <InputNumber
-                  v-model="quantity"
-                  showButtons
-                  buttonLayout="horizontal"
-                  :inputStyle="{ width: '5em' }"
-                  :min="1"
-                  :max="product.quantity"
-                >
-                  <template #incrementbuttonicon>
-                    <span class="pi pi-plus" />
-                  </template>
-                  <template #decrementbuttonicon>
-                    <span class="pi pi-minus" />
-                  </template>
-                </InputNumber>
-                <span class="unit-type">{{ product.unitType }}</span>
-              </div>
-              <div class="button-with-heart">
-                <Button
-                  class="add-to-cart-button"
-                  @click="addToCart"
-                  style="
-                    width: 12em;
-                    background-color: green;
-                    color: white;
-                    border: none;
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                  "
-                >
-                  Add to Cart
-                </Button>
-
-                <i
-                  :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
-                  style="
-                    font-size: 2.5rem;
-                    cursor: pointer;
-                    color: red;
-                    margin-left: 10px;
-                    vertical-align: middle;
-                  "
-                  @click="toggleWishlist"
-                  :title="product.isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'"
-                />
-              </div>
-            </div>
+    <Header class="navbar"></Header>
+    <Card
+      :style="{
+        position: 'absolute',
+        top: '10vh',
+        width: '80em',
+        maxWidth: '95%',
+        margin: '0 auto',
+      }"
+    >
+      <template #content>
+        <div v-if="isLoading" class="loading-container">
+          <div class="loading-content" style="text-align: center; padding: 20px">
+            <ProgressSpinner
+              style="width: 80px; height: 80px"
+              strokeWidth="5"
+              animationDuration="1s"
+            />
+            <p style="margin-top: 20px; font-size: 1.3rem; font-weight: bold; color: #555">
+              Loading, please wait...
+            </p>
           </div>
         </div>
 
-        <!-- Tabs Section -->
-        <TabView>
-          <TabPanel header="Details">
-            <div class="tab-content">
-              <p>{{ product.description || 'No description' }}</p>
+        <div v-else-if="hasError" class="error-message">
+          <div class="error-content" style="text-align: center; padding: 20px">
+            <i class="pi pi-exclamation-circle" style="font-size: 3rem; color: #d9534f"></i>
+            <p style="margin-top: 15px; font-size: 1.3rem; font-weight: bold; color: #d9534f">
+              Oops! Something went wrong. Please try again later.
+            </p>
+            <Button
+              label="Go Back"
+              class="p-button-secondary"
+              icon="pi pi-arrow-left"
+              style="margin-top: 15px"
+              @click="$router.go(-1)"
+            />
+          </div>
+        </div>
+
+        <div v-else>
+          <div class="product-page">
+            <!-- Product Section -->
+            <div class="product-content">
+              <!-- Galleria Component -->
+              <div class="product-gallery">
+                <Galleria
+                  :value="images"
+                  :responsiveOptions="responsiveOptions"
+                  :numVisible="5"
+                  containerStyle="max-height: auto; margin:0%;"
+                  :showItemNavigators="true"
+                >
+                  <template #item="slotProps">
+                    <img
+                      :src="slotProps.item.itemImageSrc"
+                      :alt="slotProps.item.alt"
+                      class="gallery-image"
+                    />
+                  </template>
+                  <template #thumbnail="slotProps">
+                    <img
+                      :src="slotProps.item.thumbnailImageSrc"
+                      :alt="slotProps.item.alt"
+                      class="thumbnail-image"
+                    />
+                  </template>
+                </Galleria>
+              </div>
+
+              <!-- Product Details -->
+              <div class="product-details">
+                <div class="product-name">{{ product.title || 'Product Name' }}</div>
+                <div class="product-cost">
+                  <span v-if="product.discountPercents && product.discountPercents > 0">
+                    <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
+                      ${{ product.pricePerUnit }}
+                    </s>
+                    <span style="color: #007bff; font-size: 1.5rem">
+                      ${{
+                        product.pricePerUnit * ((100 - product.discountPercents) / 100).toFixed(2)
+                      }}
+                    </span>
+                  </span>
+                  <span v-else
+                    ><span style="color: #007bff; font-size: 1.5rem">
+                      ${{ product.pricePerUnit }}
+                    </span>
+                  </span>
+                </div>
+
+                <div class="product-rating">
+                  <Rating v-model="product.rating" :stars="5" readonly />
+                  <span class="reviews">{{ product.reviewCount || 0 }} reviews</span>
+                </div>
+                <div class="product-quantity">Quantity:</div>
+                <p>Currently available {{ product.quantity }}</p>
+                <div class="quantity-selector">
+                  <InputNumber
+                    v-model="quantity"
+                    showButtons
+                    buttonLayout="horizontal"
+                    :inputStyle="{ width: '5em' }"
+                    :min="1"
+                    :max="product.quantity"
+                  >
+                    <template #incrementbuttonicon>
+                      <span class="pi pi-plus" />
+                    </template>
+                    <template #decrementbuttonicon>
+                      <span class="pi pi-minus" />
+                    </template>
+                  </InputNumber>
+                  <span class="unit-type">{{ product.unitType }}</span>
+                </div>
+                <div class="button-with-heart">
+                  <Button
+                    class="add-to-cart-button"
+                    @click="addToCart"
+                    style="
+                      width: 12em;
+                      color: white;
+                      border: none;
+                      display: inline-flex;
+                      align-items: center;
+                      justify-content: center;
+                    "
+                  >
+                    {{ buttonText }}
+                  </Button>
+
+                  <i
+                    :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
+                    style="
+                      font-size: 2.5rem;
+                      cursor: pointer;
+                      color: red;
+                      margin-left: 10px;
+                      vertical-align: middle;
+                    "
+                    @click="toggleWishlist"
+                    :title="product.isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'"
+                  />
+                </div>
+              </div>
             </div>
-          </TabPanel>
+          </div>
 
-          <TabPanel header="Reviews">
-            <CustomerReviews :id="id" :review-type="'product'" />
-          </TabPanel>
+          <!-- Tabs Section -->
+          <TabView>
+            <TabPanel header="Details">
+              <div class="tab-content">
+                <p>{{ product.description || 'No description' }}</p>
+              </div>
+            </TabPanel>
 
-          <TabPanel header="Shipping">
-            <div class="tab-content">
-              <p>{{ product.shipping_info || 'Shipping information coming soon.' }}</p>
-            </div>
-          </TabPanel>
-        </TabView>
-      </div>
+            <TabPanel header="Reviews">
+              <CustomerReviews :id="id" :review-type="'product'" />
+            </TabPanel>
 
-    </template>
-
-  </Card>
+            <TabPanel header="Shipping">
+              <div class="tab-content">
+                <p>{{ product.shipping_info || 'Shipping information coming soon.' }}</p>
+              </div>
+            </TabPanel>
+          </TabView>
+        </div>
+      </template>
+    </Card>
   </div>
-
 </template>
 
 <script>
@@ -204,6 +206,7 @@ export default {
   },
   props: ['id'],
   setup(props) {
+     const buttonText = ref('Add to Cart'); 
     const product = ref({})
     const quantity = ref(1)
     const isAllReviewsLoaded = ref(false)
@@ -221,13 +224,17 @@ export default {
     const fetchProduct = async () => {
       try {
         const response = await axiosInstance.get(`/product/${props.id}/page`)
-        console.log(response)
         product.value = response.data
+        console.log(product.value)
 
         if (response.data.images && response.data.images.length > 0) {
           images.value = response.data.images.map((img) => ({
-            itemImageSrc: img.bytes.startsWith('data:image') ? img.bytes : `data:image/png;base64,${img.bytes}`,
-            thumbnailImageSrc: img.bytes.startsWith('data:image') ? img.bytes : `data:image/png;base64,${img.bytes}`,
+            itemImageSrc: img.bytes.startsWith('data:image')
+              ? img.bytes
+              : `data:image/png;base64,${img.bytes}`,
+            thumbnailImageSrc: img.bytes.startsWith('data:image')
+              ? img.bytes
+              : `data:image/png;base64,${img.bytes}`,
             alt: 'Product Image',
             title: 'Product Image',
           }))
@@ -246,43 +253,57 @@ export default {
     }
 
     const toggleWishlist = async () => {
-      if (!isLoggedIn.value) {
-        window.location.href = "/login";
-        return;
-      }
-
-      if (!product.value.id) return;
+      if (!product.value.id) return
       try {
         if (product.value.isInWishlist) {
-          await axiosInstance.delete(`/wishlist/${props.id}`);
+          await axiosInstance.delete(`/customer/wishlist/${props.id}`)
         } else {
-          await axiosInstance.post(`/wishlist/${props.id}`);
+          await axiosInstance.post(`/customer/wishlist/${props.id}`)
         }
-        product.value.isInWishlist = !product.value.isInWishlist;
+        product.value.isInWishlist = !product.value.isInWishlist
       } catch (error) {
         console.error(
           `Failed to ${product.value.isInWishlist ? 'remove' : 'add'} product to/from wishlist:`,
-          error.message
-        );
+          error.message,
+        )
       }
-    };
+    }
 
-    const addToCart = () => {
-      if (!isLoggedIn.value) {
+    const addToCart = async () => {
+      if (!product.value.id || !quantity.value) {
+        alert('Invalid product or quantity')
+        return
+      }
+          if (!isLoggedIn.value) {
         window.location.href = "/login";
         return;
       }
 
-      console.log(
-        `Added ${quantity.value} ${product.value.unitType} of ${product.value.title} to the cart.`
-      );
-    };
+      const itemInCart = {
+        productId: product.value.id,
+        quantity: quantity.value,
+      }
+
+      try {
+        const response = await axiosInstance.post('/cart', itemInCart)
+        console.log('Added to cart:', response.data)
+
+        buttonText.value = 'Item Added';
+        setTimeout(() => {
+          buttonText.value = 'Add to Cart'; 
+        }, 3000);
+
+      } catch (error) {
+        console.error('Error adding to cart:', error)
+      }
+    }
 
     onMounted(() => {
-      fetchProduct();
-    });
+      fetchProduct()
+    })
 
     return {
+      buttonText,
       product,
       quantity,
       images,
@@ -292,9 +313,9 @@ export default {
       isAllReviewsLoaded,
       addToCart,
       toggleWishlist,
-    };
+    }
   },
-};
+}
 </script>
 
 <style scoped>
@@ -403,7 +424,7 @@ export default {
 
 .add-to-cart-button {
   margin-top: 20px;
-  background-color: #007bff;
+  background-color: #169739;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -412,9 +433,8 @@ export default {
 }
 
 .add-to-cart-button:hover {
-  background-color: #0056b3;
+  background-color: #12752c;
 }
-
 
 .footer {
   text-align: center;
@@ -426,7 +446,7 @@ export default {
   font-size: 1rem;
   color: #333;
 }
-.home{
+.home {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
