@@ -20,7 +20,7 @@ public interface ItemInCartMapper {
     @Mapping(target = "pricePerUnit", source = "product.pricePerUnit")
 
     ItemInCartDTO mapToDTO(ItemInCart itemInCart);
-    List<ItemInCartDTO> mapToDTO(List<ItemInCart> itemInCart);
+    List<ItemInCartDTO> mapToDTOs(List<ItemInCart> itemInCart);
 
     @Mapping(target = "product", source = "product")
     @Mapping(target = "quantity", source = "quantity")

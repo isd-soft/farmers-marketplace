@@ -3,6 +3,7 @@ package com.example.isdfarmersmarket.web.controllers;
 import com.example.isdfarmersmarket.business.services.CartService;
 import com.example.isdfarmersmarket.web.commands.ItemInCartCommand;
 import com.example.isdfarmersmarket.web.dto.ItemInCartDTO;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,13 +24,14 @@ public class CartController {
 
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping
-    public Map<String,String> addToCard(ItemInCartCommand itemInCart) {
+    public Map<String, String> addToCard(@RequestBody @Valid ItemInCartCommand itemInCart) {
         cartService.addToCard(itemInCart);
         return Map.of("message", "Item added to your cart.");
     }
+
     @PreAuthorize("hasRole('CUSTOMER')")
     @DeleteMapping("/{id}")
-    public Map<String,String> removeFromCart(@PathVariable Long id) {
+    public Map<String, String> removeFromCart(@PathVariable Long id) {
         cartService.removeFromCard(id);
         return Map.of("message", "Item removed from your cart.");
     }

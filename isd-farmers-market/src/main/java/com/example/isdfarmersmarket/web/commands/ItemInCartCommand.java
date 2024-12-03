@@ -8,5 +8,5 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemInCartCommand {
     Long productId;
-    Float quantity;
+    int quantity;
 }

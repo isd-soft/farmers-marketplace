@@ -163,16 +163,26 @@ onMounted(async () => {
   try {
     const response = await axiosInstance.get('/cart')
     cartProducts.value = response.data
-    console.log(cartProducts.value)
+    console.log(cartProducts.value.id)
+
   } catch (err) {
     console.error('Failed to fetch Cart Products', err)
   }
 })
 
 const removeItemFromCart = async (id) => {
+  if (!cartProducts.value.id || !quantity.value) {
+        alert('Invalid product or quantity')
+        return
+      }
+
+      const itemInCart = {
+        productId: product.value.id,
+        quantity: quantity.value,
+      }
   try {
     const response = await axiosInstance.delete(`/cart/${id}`);
-    alert(response.data.message); // Alert or any user feedback you want to show
+    alert(response.data.message); 
   } catch (error) {
     console.error('Error removing item from cart:', error);
     alert('Failed to remove item from cart. Please try again.');
