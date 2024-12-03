@@ -3,7 +3,6 @@ import LoginPage from '@/components/LoginPage.vue'
 import HomePage from '@/components/HomePage.vue'
 import OrderPage from '@/components/OrderPage.vue'
 import CartPage from '@/components/CartPage.vue'
-import CreateProduct from '@/components/CreateProduct.vue'
 import ProductPage from "@/components/ProductPage.vue";
 import WishlistPage from "@/components/WishlistPage.vue";
 import CreateProduct from "@/components/CreateProduct.vue";

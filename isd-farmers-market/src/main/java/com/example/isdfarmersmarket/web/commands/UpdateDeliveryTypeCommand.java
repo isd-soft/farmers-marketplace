@@ -9,5 +9,5 @@ import java.math.BigDecimal;
 public class UpdateDeliveryTypeCommand {
     private Long id;
     private BigDecimal price;
-    private DeliveryTypes types;
+    private DeliveryTypes type;
 }
