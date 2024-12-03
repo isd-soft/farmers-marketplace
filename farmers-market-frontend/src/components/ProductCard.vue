@@ -114,6 +114,7 @@ export default {
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
   max-width: 387px;
+  vertical-align: central;
 }
 
 .product-card:hover {

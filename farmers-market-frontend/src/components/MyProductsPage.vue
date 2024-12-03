@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <Header class="navbar"></Header>
-    <div style="display: flex; flex-direction: row; justify-content: space-between; gap: 20px; width: 1200px">
+    <div style="width: calc(100% - 40px); max-width: 1200px;display: flex; flex-direction: row; justify-content: space-between; gap: 20px">
     <h1>My products</h1>
     <Button style="max-width: 200px; flex-grow: 1" @click="goToCreateProduct">Create new product</Button>
     </div>
@@ -285,7 +285,8 @@ body{
 }
 
 .products-table {
-   width: 1200px;
+  width: calc(100% - 40px);
+  max-width: 1200px;
    border-collapse: collapse;
    margin-top: 40px;
  }

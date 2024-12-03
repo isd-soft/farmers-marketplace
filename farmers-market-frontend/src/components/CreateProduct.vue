@@ -284,7 +284,8 @@ export default {
 .create-product-container {
   margin-left: 20px;
   margin-right: 20px;
-  width: 900px;
+  width: calc(100% - 40px);
+  max-width: 900px;
   display: flex;
   flex-direction: column;
   justify-content: center;

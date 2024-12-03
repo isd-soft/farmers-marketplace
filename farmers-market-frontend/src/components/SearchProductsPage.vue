@@ -188,17 +188,7 @@ import useVuelidate from "@vuelidate/core";
   padding: 0;
   box-sizing: border-box;
 }
-body{
-  position: relative;
-}
-.home{
-  padding-top: 1000px;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
 .main-container-products{
-  margin-top: 700px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -213,7 +203,8 @@ body{
   gap: 30px;
   margin-top: 30px;
   width:100%;
-  align-items: center;
+  justify-content: center;
+  align-content: start;
 }
 
 .search-products-input{
@@ -229,7 +220,8 @@ body{
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 30px;
+  row-gap: 20px;
+  column-gap: 30px;
   align-content: space-between;
 }
 .footer{
