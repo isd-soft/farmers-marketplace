@@ -3,6 +3,7 @@ package com.example.isdfarmersmarket.business.services;
 import com.example.isdfarmersmarket.business.mapper.ProductMapper;
 import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.models.Category;
 import com.example.isdfarmersmarket.dao.models.Image;
 import com.example.isdfarmersmarket.dao.models.Product;
@@ -151,7 +152,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductPageDTO getProductPageById(Long productId) {
-        JwtPrincipal principal = getPrincipal();
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
         var product = productRepository
                 .findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
@@ -173,9 +174,6 @@ public class ProductServiceImpl implements ProductService {
         Image image = new Image();
         image.setBytes(decodedBytes);
         return image;
-    }
-    private JwtPrincipal getPrincipal() {
-        return (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
 }

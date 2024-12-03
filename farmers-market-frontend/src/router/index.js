@@ -11,6 +11,7 @@ import OrderManagementPage from '@/components/OrderManagementPage.vue';
 import MyProductsPage from "@/components/MyProductsPage.vue";
 import UpdateProduct from "@/components/UpdateProduct.vue";
 import SettingsPage from '@/components/SettingsPage.vue';
+import MessagingPage from '@/components/MessagingPage.vue'
 
 const routes = [
   {
@@ -77,7 +78,11 @@ const routes = [
     path: '/ordermanagement',
     name: 'Order Management',
     component: OrderManagementPage,
-
+  },
+  {
+    path: '/messages',
+    name: 'Messages Page',
+    component: MessagingPage
   },
 ]
 
