@@ -75,7 +75,7 @@ public class CartServiceImpl implements CartService {
                 .findById(principal.getId())
                 .orElseThrow(EntityNotFoundException::new);
 
-        List<ItemInCart> itemsInCart = cartRepository.findAllByUser(authenticatedUser);
+        List<ItemInCart> itemsInCart = cartRepository.getAllByUser(authenticatedUser);
 
         return itemInCartMapper.mapToDTO(itemsInCart);
     }

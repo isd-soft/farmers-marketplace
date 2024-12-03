@@ -14,4 +14,5 @@ public class DeliveryTypeDTO {
     private BigDecimal price;
     private DeliveryTypes type;
     private User farmer;
+    private Boolean existsForUser;
 }
