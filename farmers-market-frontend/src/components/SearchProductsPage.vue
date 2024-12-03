@@ -24,6 +24,19 @@
       />
       <label for="product-category">Category</label>
     </FloatLabel>
+      <FloatLabel variant="on">
+        <Select
+          id="product-sort"
+          v-if="categories.length > 0"
+          v-model="sortBy"
+          :options="sortOptions"
+          optionLabel="label"
+          optionValue="value"
+          @change="fetchProducts"
+          class="search-products-input"
+        />
+        <label for="product-sort">Sort by</label>
+      </FloatLabel>
     </div>
     <div class="products-grid">
       <ProductCard
@@ -43,7 +56,7 @@
   </div>
 </template>
 <script>
-import {ref, onMounted, watch} from "vue";
+import {ref, onMounted, watch, computed} from "vue";
   import axiosInstance from "@/utils/axiosInstance.js";
   import Header from "@/components/Header.vue";
   import Footer from "@/components/Footer.vue";
@@ -51,6 +64,8 @@ import {ref, onMounted, watch} from "vue";
   import ProductCard from "@/components/ProductCard.vue";
   import {useRoute} from "vue-router";
   import Paginator from 'primevue/paginator';
+import {maxLength, minLength, required} from "@vuelidate/validators";
+import useVuelidate from "@vuelidate/core";
   export default {
     name: 'SearchProducts',
     components: {
@@ -60,6 +75,7 @@ import {ref, onMounted, watch} from "vue";
       Select,
       Paginator
     },
+
     setup() {
       const products = ref([])
       const categories = ref([])
@@ -69,9 +85,37 @@ import {ref, onMounted, watch} from "vue";
       const currentPage = ref(0);
       const pageSize = ref(6);
       const totalRecords = ref(0);
+      const sortOptions = ref([
+        { label: "Sort by", value: null },
+        { label: "Price Asc", value: "price_asc" },
+        { label: "Price Desc", value: "price_desc" },
+        { label: "Rating Asc", value: "rating_asc" },
+        { label: "Rating Desc", value: "rating_desc" },
+      ]);
+      const sortBy = ref()
       const fetchProducts = async () => {
+        let sort = "";
+        let dir = "";
         try {
-          let url = `/product?search=${searchQ.value}&page=${currentPage.value}&size=${pageSize.value}`;
+          switch (sortBy.value){
+            case "price_asc":
+              sort = "pricePerUnit"
+              dir = "ASC"
+              break;
+            case "price_desc":
+              sort = "pricePerUnit"
+              dir = "DESC"
+              break;
+            case "rating_asc":
+              sort = "rating"
+              dir = "ASC"
+              break;
+            case "rating_desc":
+              sort = "rating"
+              dir = "DESC"
+              break;
+          }
+          let url = `/product?search=${searchQ.value}&page=${currentPage.value}&size=${pageSize.value}&sort=${sort},${dir}`;
           if (category.value) {
             url += `&category=${category.value}`;
           }
@@ -132,6 +176,8 @@ import {ref, onMounted, watch} from "vue";
         pageSize,
         totalRecords,
         currentPage,
+        sortOptions,
+        sortBy,
       }
     },
   }

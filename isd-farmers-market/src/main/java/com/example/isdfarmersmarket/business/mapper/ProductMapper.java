@@ -21,7 +21,6 @@ public interface ProductMapper {
     default Page<CompactProductDTO> mapToCompactProductsDTO(Page<Product> products, Set<Product> wishlist) {
         return products.map(product -> {
             CompactProductDTO compactProductDTO = this.mapToProductInWishlistDTO(product);
-            // Проверяем, есть ли продукт в вишлисте пользователя
             if (wishlist.contains(product)) {
                 compactProductDTO.setIsInWishlist(true);
             } else {

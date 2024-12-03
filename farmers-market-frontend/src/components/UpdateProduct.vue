@@ -8,15 +8,17 @@
         <FloatLabel variant="on">
           <InputText
             id="product-desc"
-            v-model="description"
+            v-model="productToSave.description"
             required
             class="create-product-input"
           />
           <label for="product-desc">Description</label>
         </FloatLabel>
+        <span v-if="v$.description.$error" class="error-message">
+        Product description is required and must be between 1 and 1000 characters</span>
         <FloatLabel variant="on">
           <Select
-            v-model="unitType"
+            v-model="productToSave.unitType"
             :options="unitTypes"
             optionLabel="label"
             option-value="value"
@@ -25,29 +27,34 @@
           />
           <label for="product-unit-type">Unit Type</label>
         </FloatLabel>
+        <span v-if="v$.unitType.$error" class="error-message">
+        Product unit type is required</span>
 
         <FloatLabel variant="on">
           <InputNumber
             id="product-price"
-            v-model="price"
+            v-model="productToSave.pricePerUnit"
             required
             min="1"
             class="create-product-input"
           />
           <label for="product-price">Price</label>
         </FloatLabel>
+        <span v-if="v$.pricePerUnit.$error" class="error-message">
+        Product price is required and must be minimum 1</span>
 
         <FloatLabel variant="on">
           <InputNumber
             id="product-quantity"
-            v-model="quantity"
+            v-model="productToSave.quantity"
             required
             min="0"
             class="create-product-input"
           />
           <label for="product-price">Quantity</label>
         </FloatLabel>
-
+        <span v-if="v$.quantity.$error" class="error-message">
+        Product quantity is required and must be minimum 0</span>
         <div>
           <label for="file-uploader" class="file-uploader">
             <input
@@ -85,9 +92,9 @@
   </div>
 </template>
 <script>
-import { ref, onMounted } from "vue";
-import { required, maxLength, minLength, minValue, maxValue } from "@vuelidate/validators";
+import { ref, onMounted, computed, reactive } from "vue";
 import useVuelidate from "@vuelidate/core";
+import { minLength, required, maxLength, minValue} from "@vuelidate/validators"
 import Header from "./Header.vue";
 import Footer from "../components/Footer.vue";
 import axios from "axios";
@@ -97,7 +104,6 @@ import FloatLabel from "primevue/floatlabel";
 import InputNumber from "primevue/inputnumber";
 import Select from "primevue/select";
 import router from "@/router/index.js";
-import noPhotoImg from "@/assets/noPhoto.png";
 
 export default {
   name: "EditProduct",
@@ -112,15 +118,22 @@ export default {
   props: ['id'],
   setup(props) {
     const product = ref({})
-    const title = ref("");
-    const description = ref("");
-    const price = ref();
-    const quantity = ref();
-    const unitType = ref();
     const unitTypes = ref([]);
     const selectedFiles = ref([]);
 
-
+    const productToSave = reactive({
+      description: "",
+      unitType: null,
+      pricePerUnit: null,
+      quantity: null,
+    });
+    const rules = computed(() => ({
+      description: { required, minLength: minLength(1), maxLength: maxLength(1000) },
+      unitType: { required },
+      pricePerUnit: { required, minValue: minValue(1) },
+      quantity: { required, minValue: minValue(0) },
+    }));
+    const v$ = useVuelidate(rules, product);
     const handleFileChange = async (event) => {
       const files = event.target.files;
       if (!files) return;
@@ -168,10 +181,10 @@ export default {
         console.log(response)
         product.value = response.data;
 
-        description.value = product.value.description;
-        price.value = product.value.pricePerUnit;
-        quantity.value = product.value.quantity;
-        unitType.value = product.value.unitType;
+        productToSave.description = product.value.description;
+        productToSave.pricePerUnit = product.value.pricePerUnit;
+        productToSave.quantity = product.value.quantity;
+        productToSave.unitType = product.value.unitType;
 
         if (product.value.images && Array.isArray(product.value.images)) {
           selectedFiles.value = product.value.images.map((image) => ({
@@ -182,6 +195,17 @@ export default {
         }
       } catch (error) {
         console.error('Failed to load product:', error.message)
+      }
+      try {
+        const response = await axiosInstance.get(`/current-user/`);
+        const currentUser = response.data;
+        if (!currentUser || !product || currentUser.id !== product.value.user.id) {
+          console.log('Redirecting: user is not the owner of the product');
+          await router.push(`/`);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error.response?.data || error.message);
+        await router.push(`/`);
       }
       try {
         const response = await axiosInstance.get("/unit-types");
@@ -201,46 +225,41 @@ export default {
 
     const handleEditProduct = async (event) => {
       event.preventDefault();
-      try {
-        console.log("Preparing images for submission...");
-        const imagesBase64 = selectedFiles.value.map((file) => file.base64);
-        console.log("Images Base64:", imagesBase64);
+      await v$.value.$validate();
+        if(!v$.value.$error) {
+          try {
+            console.log("Preparing images for submission...");
+            const imagesBase64 = selectedFiles.value.map((file) => file.base64);
+            console.log("Images Base64:", imagesBase64);
 
-        console.log("Submitting product data...");
-        const response = await axiosInstance.put(`/product/update/${props.id}`, {
-          title: title.value,
-          description: description.value,
-          unitType: unitType.value,
-          pricePerUnit: price.value,
-          quantity: quantity.value,
-          imagesBase64: imagesBase64,
-        });
+            console.log("Submitting product data...");
+            const response = await axiosInstance.put(`/product/update/${props.id}`, {
+              imagesBase64: imagesBase64,
+              ...productToSave,
+            });
 
-        console.log("Product updated successfully:", response.data);
-        const createdProductId = response.data.id;
-        await router.push(`/product/${createdProductId}`);
-      } catch (error) {
-        console.error("Error updating product:", error.response?.data || error.message);
-        alert(
-          "Updating product failed: " +
-          (error.response?.data?.message || error.message)
-        );
-      }
+            console.log("Product updated successfully:", response.data);
+            const createdProductId = response.data.id;
+            await router.push(`/product/${createdProductId}`);
+          } catch (error) {
+            console.error("Error updating product:", error.response?.data || error.message);
+            alert(
+              "Updating product failed: " +
+              (error.response?.data?.message || error.message)
+            );
+          }
+        }
     };
 
     return {
       product,
-      description,
-      unitType,
+      productToSave,
       unitTypes,
-      price,
-      quantity,
       selectedFiles,
       handleFileChange,
       removeFile,
       handleEditProduct,
-      v$: useVuelidate(),
-
+      v$,
     };
   },
 };

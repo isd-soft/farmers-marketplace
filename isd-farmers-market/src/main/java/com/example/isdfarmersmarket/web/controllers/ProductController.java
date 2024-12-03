@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class ProductController {
             summary = "Create a product",
             description = "This endpoint allows creating a product with images"
     )
+    @PreAuthorize("hasRole('FARMER')")
     @PostMapping(value = "/create")
     public ResponseEntity<ProductDTO> createProduct(@RequestBody CreateProductCommand createProductCommand) {
         return ResponseEntity.status(CREATED).body(productService.createProduct(createProductCommand));
@@ -37,10 +39,12 @@ public class ProductController {
     @Operation(
             description = "This endpoint is used to update a product"
     )
+    @PreAuthorize("hasRole('FARMER')")
     @PutMapping(value = "/update/{id}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody UpdateProductCommand updateProductCommand) {
         return ResponseEntity.status(OK).body(productService.updateProduct(id, updateProductCommand));
     }
+    @PreAuthorize("hasRole('FARMER')")
     @PutMapping(value = "/discount/{id}")
     public ResponseEntity<ProductDTO> setDiscountProduct(@PathVariable Long id, @RequestBody ProductDiscountCommand discountPercents) {
         return ResponseEntity.status(OK).body(productService.setDiscountProduct(id, discountPercents.getDiscountPercents()));
@@ -49,6 +53,7 @@ public class ProductController {
     @Operation(
             description = "This endpoint is used to delete a product"
     )
+    @PreAuthorize("hasRole('FARMER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ProductDTO> deleteProduct(@PathVariable Long id) {
         return ResponseEntity.status(OK).body(productService.deleteProduct(id));
@@ -66,6 +71,7 @@ public class ProductController {
         return ResponseEntity.status(OK).body(productService.getAllProducts(category, search, pageable));
     }
     @GetMapping("/management")
+    @PreAuthorize("hasRole('FARMER')")
     public ResponseEntity<Page<CompactProductDTO>> getCurrentUserProducts(Pageable pageable) {
         return ResponseEntity.status(OK).body(productService.getCurrentUserProducts(pageable));
     }
