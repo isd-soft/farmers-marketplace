@@ -210,7 +210,6 @@ export default {
           await router.push(`/`);
         }
       } catch (error) {
-        console.error("Error fetching user data:", error.response?.data || error.message);
         await router.push(`/`);
       }
       try {
@@ -237,7 +236,6 @@ export default {
           console.error("Unexpected categories format:", categoriesResponse.data);
         }
       } catch (error) {
-        console.error("Error loading unit types or categories:", error);
       }
     });
     const handleNewProduct = async (event) => {

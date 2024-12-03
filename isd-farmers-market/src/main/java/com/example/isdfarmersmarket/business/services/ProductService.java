@@ -24,7 +24,7 @@ public interface ProductService {
     Page<CompactProductDTO> getAllProducts(Long category, String search, Pageable pageable);
     Page<CompactProductDTO> getCurrentUserProducts(Pageable pageable);
     ProductDTO getProductById(Long id);
-    PageResponseDTO<ProductReviewDTO> getProductReviews(Long id, int page, int pageSize);
+    PageResponseDTO<ProductReviewDTO> getProductReviews(Long id, Pageable pageable);
     void updateProductRating(Product product);
 
     ProductPageDTO getProductPageById(Long id);

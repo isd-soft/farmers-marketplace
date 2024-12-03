@@ -1,17 +1,18 @@
 <template>
   <div class="home">
     <Header class = "navbar"></Header>
+    <div class="main-container-products">
     <div class="search-filters">
-    <FloatLabel variant="on">
+    <FloatLabel variant="on" class="search-products-input">
       <InputText
         id="product-desc"
         v-model="searchQ"
-        class="search-products-input"
+        class="search-products-input-inner"
         @input="fetchProducts"
       />
       <label for="product-desc">Search</label>
     </FloatLabel>
-    <FloatLabel variant="on">
+    <FloatLabel variant="on" class="search-products-input">
       <Select
         id="product-category"
         v-if="categories.length > 0"
@@ -20,11 +21,11 @@
         optionLabel="label"
         optionValue="value"
         @change="fetchProducts"
-        class="search-products-input"
+        class="search-products-input-inner"
       />
       <label for="product-category">Category</label>
-    </FloatLabel>
-      <FloatLabel variant="on">
+    </FloatLabel >
+      <FloatLabel variant="on" class="search-products-input">
         <Select
           id="product-sort"
           v-if="categories.length > 0"
@@ -33,7 +34,7 @@
           optionLabel="label"
           optionValue="value"
           @change="fetchProducts"
-          class="search-products-input"
+          class="search-products-input-inner"
         />
         <label for="product-sort">Sort by</label>
       </FloatLabel>
@@ -52,6 +53,7 @@
       :first="currentPage * pageSize"
       @page="onPageChange"
     />
+    </div>
   <Footer class = "footer"></Footer>
   </div>
 </template>
@@ -124,7 +126,6 @@ import useVuelidate from "@vuelidate/core";
           products.value = response.data.content;
           totalRecords.value = response.data.totalElements;
         } catch (error) {
-          console.error('Failed to load products:', error.message)
         }
       }
       const fetchCategories = async () => {
@@ -141,7 +142,6 @@ import useVuelidate from "@vuelidate/core";
           }
           console.log("Categories:", categories.value);
         } catch (error) {
-          console.error('Failed to load categories:', error.message)
         }
       }
       const onPageChange = (event) => {
@@ -183,40 +183,59 @@ import useVuelidate from "@vuelidate/core";
   }
 </script>
 <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 body{
-  display: block !important;
+  position: relative;
 }
 .home{
+  padding-top: 1000px;
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding-top: 100px;
+}
+.main-container-products{
+  margin-top: 700px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-width: 1200px;
+  width: calc(100% - 40px);
   margin-left: 20px;
   margin-right: 20px;
-  align-items: center;
 }
 .products-grid {
-  width: 1200px;
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)) !important;
-  gap: 20px;
-  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+  width:100%;
+  align-items: center;
+}
+
+.search-products-input{
+  flex-grow: 1 !important;
+}
+.search-products-input-inner{
+  min-width: 280px;
+  max-width: none;
+  width: 100%;
+}
+.search-filters{
+  width:100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 30px;
+  align-content: space-between;
 }
 .footer{
   text-align: center;
   padding: 10px;
   margin-top: 50px;
   bottom: 0;
-}
-.search-products-input{
-  width:100%;
-  min-width: 300px;
-}
-.search-filters{
-  flex-grow: 1;
-  display: flex;
-  flex-direction: row;
-  width: 1200px;
-  gap: 20px;
 }
 </style>

@@ -16,7 +16,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
@@ -70,7 +69,7 @@ public class ProductServiceImpl implements ProductService {
                 .pricePerUnit(createProductCommand.getPricePerUnit())
                 .quantity(createProductCommand.getQuantity())
                 .category(category)
-                .user(creator)
+                .farmer(creator)
                 .images(new HashSet<>(images)).build();
         productRepository.save(product);
         if (creator != null) {
@@ -152,8 +151,10 @@ public class ProductServiceImpl implements ProductService {
         JwtPrincipal principal = getPrincipal();
         Set<Product> wishlist = new HashSet<>();
         if (principal != null) {
-            User user = userRepository.findById(principal.getId()).orElseThrow();
-            wishlist = user.getWishlist();
+            User user = userRepository.findById(principal.getId()).orElse(null);
+            if(user!=null) {
+                wishlist = user.getWishlist();
+            }
         }
         return productMapper.mapToCompactProductsDTO(products, wishlist);
     }
@@ -179,13 +180,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponseDTO<ProductReviewDTO> getProductReviews(Long productId, int page, int pageSize) {
+    public PageResponseDTO<ProductReviewDTO> getProductReviews(Long productId, Pageable pageable) {
         Product product = productRepository
                 .findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
         var reviewsPage = productReviewRepository
-                .findAllByProductOrderByCreatedDateDesc(product, PageRequest.of(page, pageSize));
+                .findAllByProductOrderByCreatedDateDesc(product, pageable);
         var totalReviews = reviewsPage.getTotalElements();
         var content = reviewsPage
                 .getContent()
@@ -193,7 +194,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(reviewMapper::mapWithoutProductDetails)
                 .toList();
 
-        return new PageResponseDTO<>(content, totalReviews, page, pageSize);
+        return new PageResponseDTO<>(content,totalReviews);
     }
 
     @Override
@@ -250,6 +251,6 @@ public class ProductServiceImpl implements ProductService {
         }
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new RuntimeException("Product not found"));
-            return product.getUser().equals(currentUser);
+            return product.getFarmer().equals(currentUser);
         }
 }

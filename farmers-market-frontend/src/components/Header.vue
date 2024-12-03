@@ -72,7 +72,6 @@ const fetchCategories = async () => {
 
       items.value = [{label: 'Categories', items: categoryItems}, ...items.value];
     } catch (error) {
-      console.error('Error fetching categories:', error);
     }
 };
 const fetchUserData = async () => {
@@ -87,7 +86,6 @@ const fetchUserData = async () => {
       });
     }
   } catch (error) {
-    console.error("Error fetching user data:", error.response?.data || error.message);
   }
 };
 

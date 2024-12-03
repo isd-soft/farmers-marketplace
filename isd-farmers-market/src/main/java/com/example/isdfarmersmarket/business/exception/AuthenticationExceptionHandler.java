@@ -1,5 +1,6 @@
 package com.example.isdfarmersmarket.business.exception;
 
+import com.example.isdfarmersmarket.dao.enums.AuthError;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.*;
 import io.jsonwebtoken.MalformedJwtException;
 import org.springframework.http.HttpStatus;
@@ -15,51 +16,30 @@ import javax.naming.AuthenticationException;
 @RestControllerAdvice
 public class AuthenticationExceptionHandler {
 
+    @ExceptionHandler({EmailAlreadyExistsException.class, RoleAlreadyExistsException.class,
+            RoleDoesntExistException.class, UsernameNotFoundException.class,
+            PasswordsDoNotMatchException.class, InvalidCredentialsException.class,
+            MalformedJwtException.class, AccessDeniedException.class,
+            BadCredentialsException.class, AuthenticationException.class})
+    public ProblemDetail handleException(Exception ex) {
+        AuthError authError = switch (ex) {
+            case EmailAlreadyExistsException e -> AuthError.EMAIL_ALREADY_EXISTS;
+            case RoleAlreadyExistsException e -> AuthError.ROLE_ALREADY_EXISTS;
+            case RoleDoesntExistException e -> AuthError.ROLE_DOESNT_EXIST;
+            case UsernameNotFoundException e -> AuthError.USERNAME_NOT_FOUND;
+            case PasswordsDoNotMatchException e -> AuthError.PASSWORDS_DO_NOT_MATCH;
+            case InvalidCredentialsException e -> AuthError.INVALID_CREDENTIALS;
+            case MalformedJwtException e -> AuthError.MALFORMED_JWT;
+            case AccessDeniedException e -> AuthError.ACCESS_DENIED;
+            case BadCredentialsException e -> AuthError.BAD_CREDENTIALS;
+            case AuthenticationException e -> AuthError.AUTHENTICATION_FAILED;
+            default -> AuthError.UNEXPECTED_JWT_ERROR;
+        };
 
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ProblemDetail handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
-    }
-    @ExceptionHandler(RoleAlreadyExistsException.class)
-    public ProblemDetail handleRoleAlreadyExists(RoleAlreadyExistsException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
-    }
-    @ExceptionHandler(RoleDoesntExistException.class)
-    public ProblemDetail handleRoleDoesntExists(RoleDoesntExistException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-    }
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ProblemDetail handleUsernameNotFound(UsernameNotFoundException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-    }
-
-    @ExceptionHandler(PasswordsDoNotMatchException.class)
-    public ProblemDetail handlePasswordsDoNotMatch(PasswordsDoNotMatchException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-    }
-
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ProblemDetail handleInvalidCredentials(InvalidCredentialsException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        return buildProblemDetail(authError);
     }
 
-    @ExceptionHandler(MalformedJwtException.class)
-    public ProblemDetail handleMalformedJwtException(MalformedJwtException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ProblemDetail handleAuthorizationDenied(AccessDeniedException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public ProblemDetail handleBadCredentials(BadCredentialsException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    public ProblemDetail handleAuthenticationFailed(AuthenticationException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    private ProblemDetail buildProblemDetail(AuthError authError) {
+        return ProblemDetail.forStatusAndDetail(authError.getHttpStatus(), authError.getMessage());
     }
 }

@@ -212,7 +212,6 @@ export default {
         products.value = response.data.content;
         totalRecords.value = response.data.totalElements;
       } catch (error) {
-        console.error('Failed to load products:', error.message)
       }
     }
     const onPageChange = (event) => {
@@ -227,7 +226,6 @@ export default {
           await router.push(`/`);
         }
       } catch (error) {
-        console.error("Error fetching user data:", error.response?.data || error.message);
         await router.push(`/`);
       }
     };

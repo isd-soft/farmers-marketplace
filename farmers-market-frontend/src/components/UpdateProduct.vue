@@ -199,12 +199,11 @@ export default {
       try {
         const response = await axiosInstance.get(`/current-user/`);
         const currentUser = response.data;
-        if (!currentUser || !product || currentUser.id !== product.value.user.id) {
+        if (!currentUser || !product || currentUser.id !== product.value.farmer.id) {
           console.log('Redirecting: user is not the owner of the product');
           await router.push(`/`);
         }
       } catch (error) {
-        console.error("Error fetching user data:", error.response?.data || error.message);
         await router.push(`/`);
       }
       try {
@@ -219,7 +218,6 @@ export default {
           console.error("Unexpected unit types format:", response.data);
         }
       } catch (error) {
-        console.error("Error loading unit types or categories:", error);
       }
     });
 

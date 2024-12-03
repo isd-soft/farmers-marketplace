@@ -1,79 +1,88 @@
 package com.example.isdfarmersmarket.business.services.order;
 
+//import com.example.isdfarmersmarket.business.listeners.OrderConfirmedListener;
+import com.example.isdfarmersmarket.business.mapper.ItemInCartMapper;
+import com.example.isdfarmersmarket.business.mapper.ItemInOrderMapper;
 import com.example.isdfarmersmarket.business.mapper.OrderMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
 import com.example.isdfarmersmarket.dao.models.*;
-import com.example.isdfarmersmarket.dao.repositories.OrderRepository;
-import com.example.isdfarmersmarket.dao.repositories.ProductRepository;
-import com.example.isdfarmersmarket.dao.repositories.UserRepository;
-import com.example.isdfarmersmarket.web.commands.order.CreateOrderCommand;
+import com.example.isdfarmersmarket.dao.repositories.*;
 import com.example.isdfarmersmarket.web.commands.order.UpdateOrderCommand;
 import com.example.isdfarmersmarket.web.dto.ItemInOrderDTO;
 import com.example.isdfarmersmarket.web.dto.OrderDTO;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderServiceImpl implements OrderService {
-    private final OrderRepository orderRepository;
-    private final ProductRepository productRepository;
-    private final UserRepository userRepository;
-    private final OrderMapper orderMapper;
-    private static final String ORDER_FIND_FAILED_BY_ID = "Order with the specified user id not found";
+    OrderRepository orderRepository;
+    ProductRepository productRepository;
+    UserRepository userRepository;
+    ItemInOrderRepository itemInOrderRepository;
+    CartRepository cartRepository;
+    OrderMapper orderMapper;
+    ItemInCartMapper itemInCartMapper;
+    ItemInOrderMapper itemInOrderMapper;
+    String ORDER_FIND_FAILED_BY_ID = "Order with the specified user id not found";
+//    private final OrderConfirmedListener orderConfirmedListener;
 
     @Override
     @Transactional
-    public OrderDTO createOrder(CreateOrderCommand createOrderCommand) {
-        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public List<OrderDTO> createOrders() {
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + principal.getId()));
 
-        Order order = Order.builder()
-                .id(createOrderCommand.getOrderId())
-                .user(user)
-                .orderStatus(createOrderCommand.getOrderStatus())
-                .totalPrice(BigDecimal.ZERO)
-                .createdDate(LocalDateTime.now())
-                .build();
+        List<ItemInCart> itemsInCart = cartRepository.getAllByUser(user);
+        List<ItemInOrder> itemsInOrder = itemInCartMapper.mapToItemInOrder(itemsInCart);
 
-        Set<ItemInOrder> items = createOrderCommand.getProductsId().stream()
-                .map(productItem -> {
-                    Product product = productRepository.findById(productItem.getId())
-                            .orElseThrow(() -> new EntityNotFoundException("Product not found with ID: " + productItem.getId()));
+        Map<Long, List<ItemInOrder>> groupedByFarmer = itemsInOrder.stream()
+                .collect(Collectors.groupingBy(item -> item.getProduct().getFarmer().getId()));
 
-                    ItemInOrder item = new ItemInOrder();
-                    item.setProduct(product);
-                    item.setPricePerUnit(product.getPricePerUnit());
-                    item.setQuantity(productItem.getQuantity());
-                    item.setOrder(order);
+        List<Order> orders = groupedByFarmer.entrySet().stream()
+                .map(entry -> {
+                    Long farmerId = entry.getKey();
+                    List<ItemInOrder> items = entry.getValue();
 
-                    return item;
+                    BigDecimal totalPrice = items.stream()
+                            .map(item -> item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())))
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    Order order = Order.builder()
+                            .customer(user)
+                            .farmer(userRepository.findById(farmerId)
+                                    .orElseThrow(() -> new EntityNotFoundException("Farmer not found with ID: " + farmerId)))
+                            .orderStatus(OrderStatus.PENDING)
+                            .totalPrice(totalPrice)
+                            .createdDate(LocalDateTime.now())
+                            .build();
+
+                    orderRepository.save(order);
+
+                    items.forEach(item -> item.setOrder(order));
+                    itemInOrderRepository.saveAll(items);
+
+                    return order;
                 })
-                .collect(Collectors.toSet());
+                .toList();
 
-
-        order.setProducts(items);
-
-        BigDecimal totalPrice = items.stream()
-                .map(item -> item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        order.setTotalPrice(totalPrice);
-
-        return orderMapper.map(orderRepository.save(order));
+        cartRepository.deleteAllByUser(user);
+        return orderMapper.mapOrders(orders);
     }
 
 
@@ -84,6 +93,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_FIND_FAILED_BY_ID));
 
         order.setOrderStatus(OrderStatus.valueOf(updateOrderCommand.getOrderStatus().toUpperCase()));
+//        orderConfirmedListener.handleOnConfirmedOrder(order);
         return orderMapper.map(orderRepository.save(order));
     }
 
@@ -109,47 +119,25 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderDTO> getAllOrders() {
-        List<Order> orders = orderRepository.findAll();
-
-        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userRepository.findById(principal.getId())
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+        User authenticatedUser = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + principal.getId()));
 
+//           List<Order> orders = orderRepository.getAllByUser(authenticatedUser);
+        List<Order> orders = orderRepository.findAll();
 
         return orders.stream()
                 .map(order -> {
-                    Set<ItemInOrderDTO> itemInOrderDTOs = order.getProducts().stream()
-                            .map(itemInOrder -> {
-                                Product product =itemInOrder.getProduct();
-
-                                Optional<Image> firstImage = product.getImages().stream().findFirst();
-                                String imageBase64 = convertImageToBase64(firstImage);
-
-                                return ItemInOrderDTO.builder()
-                                        .productId(product.getId())
-                                        .productTitle(product.getTitle())
-                                        .productDescription(product.getDescription())
-                                        .quantity(itemInOrder.getQuantity())
-                                        .pricePerUnit(itemInOrder.getPricePerUnit())
-                                        .imageBase64(imageBase64)
-                                        .reviewCount(product.getReviewCount())
-                                        .rating(product.getRating())
-                                        .build();
-                            }).collect(Collectors.toSet());
+                    List<ItemInOrderDTO> itemInOrderDTOs = itemInOrderMapper.mapOrders(order.getItemsInOrder().stream().toList());
 
                     return OrderDTO.builder()
                             .id(order.getId())
                             .orderStatus(order.getOrderStatus().name())
-                            .userId(user.getId())
+                            .userId(authenticatedUser.getId())
                             .totalPrice(order.getTotalPrice())
-                            .products(itemInOrderDTOs)
+                            .products(itemInOrderDTOs.stream().collect(Collectors.toSet()))
                             .createdDate(order.getCreatedDate())
                             .build();
-                })
-                .collect(Collectors.toList());
-    }
-
-    private String convertImageToBase64(Optional<Image> image) {
-        return image.map(img -> Base64.getEncoder().encodeToString(img.getBytes())).orElse(null);
+                }).toList();
     }
 }
