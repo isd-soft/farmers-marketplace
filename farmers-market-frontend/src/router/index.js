@@ -6,7 +6,6 @@ import CartPage from '@/components/CartPage.vue'
 import CreateProduct from '@/components/CreateProduct.vue'
 import ProductPage from "@/components/ProductPage.vue";
 import WishlistPage from "@/components/WishlistPage.vue";
-import CreateProduct from "@/components/CreateProduct.vue";
 import UserPage from "@/components/UserPage.vue";
 import SearchProductsPage from "@/components/SearchProductsPage.vue";
 import OrderManagementPage from '@/components/OrderManagementPage.vue';

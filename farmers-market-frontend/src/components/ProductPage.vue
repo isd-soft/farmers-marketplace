@@ -253,42 +253,54 @@ export default {
     }
 
     const toggleWishlist = async () => {
-      if (!isLoggedIn.value) {
-        window.location.href = "/login";
-        return;
-      }
-
-      if (!product.value.id) return;
+      if (!product.value.id) return
       try {
         if (product.value.isInWishlist) {
-          await axiosInstance.delete(`/wishlist/${props.id}`);
+          await axiosInstance.delete(`/customer/wishlist/${props.id}`)
         } else {
-          await axiosInstance.post(`/wishlist/${props.id}`);
+          await axiosInstance.post(`/customer/wishlist/${props.id}`)
         }
-        product.value.isInWishlist = !product.value.isInWishlist;
+        product.value.isInWishlist = !product.value.isInWishlist
       } catch (error) {
         console.error(
           `Failed to ${product.value.isInWishlist ? 'remove' : 'add'} product to/from wishlist:`,
-          error.message
-        );
+          error.message,
+        )
       }
-    };
+    }
 
-    const addToCart = () => {
-      if (!isLoggedIn.value) {
-        window.location.href = "/login";
-        return;
-      }
-      
+    const addToCart = async () => {
       if (!product.value.id || !quantity.value) {
         alert('Invalid product or quantity')
         return
       }
+          if (!isLoggedIn.value) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const itemInCart = {
+        productId: product.value.id,
+        quantity: quantity.value,
+      }
+
+      try {
+        const response = await axiosInstance.post('/cart', itemInCart)
+        console.log('Added to cart:', response.data)
+
+        buttonText.value = 'Item Added';
+        setTimeout(() => {
+          buttonText.value = 'Add to Cart'; 
+        }, 3000);
+
+      } catch (error) {
+        console.error('Error adding to cart:', error)
+      }
     }
 
     onMounted(() => {
-      fetchProduct();
-    });
+      fetchProduct()
+    })
 
     return {
       buttonText,
@@ -301,9 +313,9 @@ export default {
       isAllReviewsLoaded,
       addToCart,
       toggleWishlist,
-    };
+    }
   },
-};
+}
 </script>
 
 <style scoped>

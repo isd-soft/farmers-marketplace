@@ -34,6 +34,7 @@ public class CartServiceImpl implements CartService {
     ItemInCartMapper itemInCartMapper;
 
     @Override
+    @Transactional
     public ItemInCartDTO addToCart(ItemInCartCommand itemInCartCommand) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         User user = userRepository.findById(principal.getId())
