@@ -40,6 +40,6 @@ public class AuthenticationExceptionHandler {
     }
 
     private ProblemDetail buildProblemDetail(AuthError authError) {
-        return ProblemDetail.forStatusAndDetail(authError.getHttpStatus(), authError.getMessage());
+        return ProblemDetail.forStatusAndDetail(authError.getHttpStatus(), authError.name());
     }
 }

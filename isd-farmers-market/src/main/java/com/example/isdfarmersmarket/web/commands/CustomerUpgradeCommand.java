@@ -6,7 +6,7 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserUpgradeCommand {
+public class CustomerUpgradeCommand {
     String address;
     String description;
 }

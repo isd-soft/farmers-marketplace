@@ -1,6 +1,6 @@
 package com.example.isdfarmersmarket.web.controllers;
 
-import com.example.isdfarmersmarket.business.services.CartService;
+import com.example.isdfarmersmarket.business.services.interfaces.CartService;
 import com.example.isdfarmersmarket.web.commands.ItemInCartCommand;
 import com.example.isdfarmersmarket.web.dto.ItemInCartDTO;
 import lombok.AccessLevel;
@@ -23,17 +23,18 @@ public class CartController {
 
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping
-    public Map<String,String> addToCard(ItemInCartCommand itemInCart) {
-        cartService.addToCard(itemInCart);
-        return Map.of("message", "Item added to your cart.");
+    public ResponseEntity<ItemInCartDTO> addToCard(ItemInCartCommand itemInCart) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(cartService.addToCart(itemInCart));
     }
     @PreAuthorize("hasRole('CUSTOMER')")
     @DeleteMapping("/{id}")
-    public Map<String,String> removeFromCart(@PathVariable Long id) {
-        cartService.removeFromCard(id);
-        return Map.of("message", "Item removed from your cart.");
+    public ResponseEntity<ItemInCartDTO> removeFromCart(@PathVariable Long id) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(cartService.removeFromCart(id));
     }
-
     @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping
     public ResponseEntity<List<ItemInCartDTO>> getAllFromCart() {
@@ -41,5 +42,4 @@ public class CartController {
                 .status(HttpStatus.OK)
                 .body(cartService.getAllCartItems());
     }
-
 }

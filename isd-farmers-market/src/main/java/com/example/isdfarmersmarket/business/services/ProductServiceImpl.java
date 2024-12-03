@@ -3,6 +3,7 @@ package com.example.isdfarmersmarket.business.services;
 import com.example.isdfarmersmarket.business.mapper.ProductMapper;
 import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.models.Category;
 import com.example.isdfarmersmarket.dao.models.Image;
 import com.example.isdfarmersmarket.dao.models.Product;
@@ -24,9 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-
 import java.util.*;
-
 
 
 @Service
@@ -45,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductDTO createProduct(CreateProductCommand createProductCommand) {
-        JwtPrincipal principal = getPrincipal();
+        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User creator = userRepository.findById(principal.getId()).orElse(null);
         List<Image> images = new ArrayList<>();
         if (createProductCommand.getImagesBase64() != null && !createProductCommand.getImagesBase64().isEmpty()) {
@@ -148,7 +147,7 @@ public class ProductServiceImpl implements ProductService {
                 .where(StringUtils.isBlank(search) ? null : ProductSpecification.titleOrDescLike(search))
                 .and((category == null || category == 0L) ? null : ProductSpecification.categoryIs(category));
         Page<Product> products = productRepository.findAll(filters, pageable);
-        JwtPrincipal principal = getPrincipal();
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
         Set<Product> wishlist = new HashSet<>();
         if (principal != null) {
             User user = userRepository.findById(principal.getId()).orElse(null);
@@ -158,12 +157,12 @@ public class ProductServiceImpl implements ProductService {
         }
         return productMapper.mapToCompactProductsDTO(products, wishlist);
     }
-
     @Override
     @Transactional
     public Page<CompactProductDTO> getCurrentUserProducts(Pageable pageable) {
-        JwtPrincipal principal = getPrincipal();
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
         Long creator = principal.getId();
+        Map<String, Object> response = new HashMap<>();
         Specification<Product> filters = Specification.
                 where((creator == null || creator == 0L) ? null : ProductSpecification.creatorIs(creator));
         return productMapper.mapToCompactProductsDTO(productRepository.findAll(filters, pageable));
@@ -179,44 +178,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public PageResponseDTO<ProductReviewDTO> getProductReviews(Long productId, Pageable pageable) {
-        Product product = productRepository
-                .findById(productId)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-
-        var reviewsPage = productReviewRepository
-                .findAllByProductOrderByCreatedDateDesc(product, pageable);
-        var totalReviews = reviewsPage.getTotalElements();
-        var content = reviewsPage
-                .getContent()
-                .stream()
-                .map(reviewMapper::mapWithoutProductDetails)
-                .toList();
-
-        return new PageResponseDTO<>(content,totalReviews);
-    }
-
-    @Override
-    @Transactional
-    public void updateProductRating(Product product) {
-        ReviewStatsDTO reviewStatsDTO = productReviewRepository
-                .findReviewStatsByProduct(product);
-
-        product.setRating(reviewStatsDTO
-                .getAverageRating()
-                .floatValue());
-        product.setReviewCount(reviewStatsDTO
-                .getReviewCount()
-                .intValue());
-
-        productRepository.save(product);
-    }
-
-    @Override
     @Transactional
     public ProductPageDTO getProductPageById(Long productId) {
-        JwtPrincipal principal = getPrincipal();
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
         var product = productRepository
                 .findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
@@ -239,12 +203,8 @@ public class ProductServiceImpl implements ProductService {
         return image;
     }
 
-    private JwtPrincipal getPrincipal() {
-        return (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
-
     private boolean isProductOwner(Long productId) {
-        JwtPrincipal principal = getPrincipal();
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
         User currentUser = null;
         if (principal != null) {
             currentUser = userRepository.findById(principal.getId()).orElseThrow();
