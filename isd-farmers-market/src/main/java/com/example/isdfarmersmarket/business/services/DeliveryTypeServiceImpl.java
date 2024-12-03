@@ -20,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +36,7 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
     @Transactional
     public DeliveryTypeDTO createDeliveryType(CreateDeliveryTypeCommand createDeliveryTypeCommand) {
         BigDecimal price = createDeliveryTypeCommand.getPrice();
-        DeliveryTypes deliveryTypes = createDeliveryTypeCommand.getTypes();
+        DeliveryTypes deliveryTypes = createDeliveryTypeCommand.getType();
         JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User farmer = userRepository.findByEmail(principal.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Farmer with this email doesn't exist"));
@@ -49,21 +51,20 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
     @Override
     @Transactional
     public DeliveryTypeDTO updateDeliveryType(UpdateDeliveryTypeCommand updateDeliveryTypeCommand) {
-        DeliveryTypeFarmer existingDeliveryType =
-                deliveryTypeRepository.getDeliveryTypeFarmerById(updateDeliveryTypeCommand.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Delivery type with the specified id not found"));
         JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long id = updateDeliveryTypeCommand.getId();
-        BigDecimal price = updateDeliveryTypeCommand.getPrice();
-        DeliveryTypes deliveryTypes = updateDeliveryTypeCommand.getTypes();
-        DeliveryTypeFarmer deliveryTypeFarmer = DeliveryTypeFarmer.builder()
-                .id(id).price(price).type(deliveryTypes).farmer(existingDeliveryType.getFarmer())
-                .build();
-        if (!existingDeliveryType.getFarmer().getEmail().equals(principal.getEmail())) {
-            throw new IllegalArgumentException("You can't update other people's delivery types");
-        }
-        deliveryTypeRepository.save(deliveryTypeFarmer);
-        return daoMapper.map(deliveryTypeFarmer);
+        User farmer = userRepository.findByEmail(principal.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Farmer with this email doesn't exist"));
+
+        System.out.println(principal.getEmail());
+        System.out.println(updateDeliveryTypeCommand.getType());
+
+        DeliveryTypeFarmer existingDeliveryType =
+                deliveryTypeRepository.findByFarmerEmailAndType(principal.getEmail(), updateDeliveryTypeCommand.getType())
+                .orElseThrow();
+
+        existingDeliveryType.setPrice(updateDeliveryTypeCommand.getPrice());
+        deliveryTypeRepository.save(existingDeliveryType);
+        return daoMapper.map(existingDeliveryType);
     }
 
     @Override
@@ -83,7 +84,32 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
     @Override
     @Transactional(readOnly = true)
     public List<DeliveryTypeDTO> getAllDeliveryType() {
-        List<DeliveryTypeFarmer> deliveryTypeFarmerList = deliveryTypeRepository.findAll();
-        return daoMapper.mapDeliveryTypes(deliveryTypeFarmerList);
+        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User farmer = userRepository.findByEmail(principal.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Farmer with this email doesn't exist"));
+
+        List<DeliveryTypes> allDeliveryTypes = List.of(DeliveryTypes.values());
+        List<DeliveryTypeFarmer> deliveryTypesForUser = deliveryTypeRepository.findByFarmerEmail(farmer.getEmail());
+        List<DeliveryTypeDTO> result = new ArrayList<>(deliveryTypesForUser.stream()
+                .map(deliveryTypeFarmer -> {
+                    DeliveryTypeDTO dto = daoMapper.map(deliveryTypeFarmer);
+                    dto.setExistsForUser(true);
+                    return dto;
+                })
+                .toList());
+
+        for (DeliveryTypes types: allDeliveryTypes) {
+            boolean exists = deliveryTypesForUser.stream()
+                    .anyMatch(deliveryTypeFarmer -> deliveryTypeFarmer.getType() == types);
+
+            if (!exists) {
+                DeliveryTypeDTO newDeliveryTypeDTO = new DeliveryTypeDTO();
+                newDeliveryTypeDTO.setType(types);
+                newDeliveryTypeDTO.setPrice(BigDecimal.ZERO);
+                newDeliveryTypeDTO.setExistsForUser(false);
+                result.add(newDeliveryTypeDTO);
+            }
+        }
+        return result;
     }
 }
