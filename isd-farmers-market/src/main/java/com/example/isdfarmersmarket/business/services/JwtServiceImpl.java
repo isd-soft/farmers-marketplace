@@ -1,7 +1,6 @@
 package com.example.isdfarmersmarket.business.services;
 
-import com.example.isdfarmersmarket.business.security.JwtPrincipal;
-import com.example.isdfarmersmarket.dao.enums.ERole;
+import com.example.isdfarmersmarket.business.services.interfaces.JwtService;
 import com.example.isdfarmersmarket.dao.models.Role;
 import com.example.isdfarmersmarket.dao.models.User;
 import io.jsonwebtoken.*;
@@ -13,21 +12,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Slf4j
-public class JwtService {
+public class JwtServiceImpl implements JwtService {
 
     @Value("${jwt.secret}")
     String secret;
@@ -81,6 +77,7 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
     public String extractTokenFromHeader(String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             return authorizationHeader.substring(7);

@@ -1,6 +1,6 @@
 package com.example.isdfarmersmarket.business.security;
 
-import com.example.isdfarmersmarket.business.services.UserService;
+import com.example.isdfarmersmarket.business.services.UserServiceImpl;
 import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +31,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final UserService userService;
+    private final UserServiceImpl userService;
     private final Filter jwtAuthenticationFilter;
 
     @Bean
