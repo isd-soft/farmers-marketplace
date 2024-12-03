@@ -2,8 +2,8 @@ package com.example.isdfarmersmarket.business.services;
 
 import com.example.isdfarmersmarket.business.mapper.ItemInCartMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.services.interfaces.CartService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
-import com.example.isdfarmersmarket.dao.models.Image;
 import com.example.isdfarmersmarket.dao.models.ItemInCart;
 import com.example.isdfarmersmarket.dao.models.Product;
 import com.example.isdfarmersmarket.dao.models.User;
@@ -12,8 +12,6 @@ import com.example.isdfarmersmarket.dao.repositories.ProductRepository;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
 import com.example.isdfarmersmarket.web.commands.ItemInCartCommand;
 import com.example.isdfarmersmarket.web.dto.ItemInCartDTO;
-import com.example.isdfarmersmarket.web.dto.ItemInOrderDTO;
-import com.example.isdfarmersmarket.web.dto.OrderDTO;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
@@ -21,13 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,8 +32,7 @@ public class CartServiceImpl implements CartService {
     ItemInCartMapper itemInCartMapper;
 
     @Override
-    @Transactional
-    public void addToCard(ItemInCartCommand itemInCartCommand) {
+    public ItemInCartDTO addToCart(ItemInCartCommand itemInCartCommand) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(EntityNotFoundException::new);
@@ -48,42 +40,43 @@ public class CartServiceImpl implements CartService {
                 .findById(itemInCartCommand.getProductId())
                 .orElseThrow(EntityNotFoundException::new);
 
-        if (cartRepository.existsByUserAndProduct(user, product)) {
+        if(cartRepository.existsByUserAndProduct(user, product)) {
             throw new EntityExistsException("Item already exists");
         }
         ItemInCart newItemInCart = itemInCartMapper.mapToEntity(itemInCartCommand);
         newItemInCart.setUser(user);
         newItemInCart.setProduct(product);
         cartRepository.save(newItemInCart);
+        return itemInCartMapper.mapToDTO(newItemInCart);
     }
 
     @Override
-    @Transactional
-    public void removeFromCard(Long id) {
+    public ItemInCartDTO removeFromCart(Long id) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
-        ItemInCart cartToRemove = cartRepository
-                .findById(id)
-                .orElseThrow(EntityNotFoundException::new);
         User authenticatedUser = userRepository
                 .findById(principal.getId())
                 .orElseThrow(EntityNotFoundException::new);
-        if (!cartToRemove.getUser().equals(authenticatedUser)) {
+
+        ItemInCart cartToRemove = cartRepository
+                .findById(id)
+                .orElseThrow(EntityNotFoundException::new);
+
+        if (!cartToRemove.getUser().equals(authenticatedUser)){
             throw new AccessDeniedException("test");
         }
         cartRepository.delete(cartToRemove);
-    }
 
+        return itemInCartMapper.mapToDTO(cartToRemove);
+    }
     @Override
-    @Transactional(readOnly = true)
     public List<ItemInCartDTO> getAllCartItems() {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         User authenticatedUser = userRepository
                 .findById(principal.getId())
                 .orElseThrow(EntityNotFoundException::new);
 
-        List<ItemInCart> itemsInCart = cartRepository.getAllByUser(authenticatedUser);
-        return itemsInCart.stream()
-                .map(item -> itemInCartMapper.mapToDTO(item))
-                .toList();
+        List<ItemInCart> itemsInCart = cartRepository.findAllByUser(authenticatedUser);
+
+        return itemInCartMapper.mapToDTO(itemsInCart);
     }
 }

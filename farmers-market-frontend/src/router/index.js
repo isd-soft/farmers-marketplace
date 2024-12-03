@@ -6,12 +6,14 @@ import CartPage from '@/components/CartPage.vue'
 import CreateProduct from '@/components/CreateProduct.vue'
 import ProductPage from "@/components/ProductPage.vue";
 import WishlistPage from "@/components/WishlistPage.vue";
+import CreateProduct from "@/components/CreateProduct.vue";
 import UserPage from "@/components/UserPage.vue";
 import SearchProductsPage from "@/components/SearchProductsPage.vue";
 import OrderManagementPage from '@/components/OrderManagementPage.vue';
 import MyProductsPage from "@/components/MyProductsPage.vue";
 import UpdateProduct from "@/components/UpdateProduct.vue";
 import SettingsPage from '@/components/SettingsPage.vue';
+import MessagingPage from '@/components/MessagingPage.vue'
 
 const routes = [
   {
@@ -76,16 +78,23 @@ const routes = [
     path: '/product',
     name: 'SearchProducts',
     component: SearchProductsPage,
+
   },
   {
     path: '/product/management',
     name: 'MyProductsPage',
     component: MyProductsPage,
+
   },
   {
     path: '/ordermanagement',
     name: 'Order Management',
     component: OrderManagementPage,
+  },
+  {
+    path: '/messages',
+    name: 'Messages Page',
+    component: MessagingPage
   },
 ]
 

@@ -71,15 +71,6 @@ public class ProductController {
         return ResponseEntity.status(OK).body(productService.getProductById(id));
     }
     @Operation(
-            description = "This endpoint is used to get product reviews by id"
-    )
-    @GetMapping("/{productId}/reviews")
-    public ResponseEntity<PageResponseDTO<ProductReviewDTO>> getProductReviews(
-            Pageable pageable,
-            @PathVariable Long productId) {
-        return ResponseEntity.status(OK).body(productService.getProductReviews(productId, pageable));
-    }
-    @Operation(
             description = "This endpoint is used to get a detailed product page by ID"
     )
     @GetMapping("/{productId}/page")
