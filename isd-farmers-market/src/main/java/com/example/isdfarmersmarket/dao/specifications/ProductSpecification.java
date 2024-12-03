@@ -17,7 +17,7 @@ public class ProductSpecification {
     }
     public static Specification<Product> creatorIs(Long userId) {
         return (root, query, builder) ->
-                builder.equal(root.get("user").get("id"), userId);
+                builder.equal(root.get("farmer").get("id"), userId);
     }
 
 }

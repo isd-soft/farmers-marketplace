@@ -5,7 +5,7 @@ const axiosInstance = axios.create({
   baseURL: "http://localhost:8080",
   headers: {
     "Content-Type": "application/json",
-    "Accept": "application/json", 
+    "Accept": "application/json",
   },
   withCredentials: true,
 });
@@ -84,12 +84,12 @@ export const getUserId = () => {
   if (accessToken) {
     try {
       const decodedToken = jwtDecode(accessToken);
-      return decodedToken.sub || decodedToken.userId; 
+      return decodedToken.sub || decodedToken.userId;
     } catch (error) {
       console.error("Error decoding token:", error);
     }
   }
-  return null; 
+  return null;
 };
 
 

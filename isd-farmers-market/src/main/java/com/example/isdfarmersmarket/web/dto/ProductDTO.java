@@ -1,14 +1,11 @@
 package com.example.isdfarmersmarket.web.dto;
 
 import com.example.isdfarmersmarket.dao.enums.UnitType;
-import com.example.isdfarmersmarket.dao.models.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -22,7 +19,7 @@ public class ProductDTO {
     private int discountPercents;
     private int quantity;
     private CategoryDTO category;
-    private UserProfileDTO user;
+    private UserProfileDTO farmer;
     private Float rating;
     private Integer reviewCount;
     private String unitTypeShort;

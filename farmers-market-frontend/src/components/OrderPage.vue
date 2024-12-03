@@ -108,6 +108,7 @@
                             <Button
                               class="heart-button wishlist-icon"
                               outlined
+
                               :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
                               @click="toggleWishlist(product)"
                               :title="
@@ -142,7 +143,7 @@
                           >
                           <div class="flex flex-row-reverse md:flex-row gap-2 buttons-container">
                             <!-- <div class="wishlist-container">
-                        
+
                             </div> -->
                             <!-- icon="pi pi-heart" -->
 
@@ -481,7 +482,7 @@ onMounted(async () => {
 /* .stars {
   display: inline-block;
   font-size: 20px;
-  color: #ffd700; /* Gold color for the stars 
+  color: #ffd700; /* Gold color for the stars
 }
 
 .star {
@@ -489,23 +490,23 @@ onMounted(async () => {
   width: 20px;
   height: 20px;
   background-size: cover;
-  background-image: url('path_to_your_star_image.svg'); /* Full star image 
+  background-image: url('path_to_your_star_image.svg'); /* Full star image
 }
 
-/* Full star - 100% gold 
-/* Full star - 100% gold 
+/* Full star - 100% gold
+/* Full star - 100% gold
 .star.full {
-  background-image: url('@/assets/star_full.svg'); /* Adjust path based on your project 
+  background-image: url('@/assets/star_full.svg'); /* Adjust path based on your project
 }
 
-/* Half star - 50% gold 
+/* Half star - 50% gold
 .star.half {
-  background-image: url('@/assets/star_half.svg'); /* Adjust path based on your project 
+  background-image: url('@/assets/star_half.svg'); /* Adjust path based on your project
 }
 
-/* Empty star - transparent or gray 
+/* Empty star - transparent or gray
 .star.empty {
-  background-image: url('@/assets/star_empty.svg'); /* Adjust path based on your project 
+  background-image: url('@/assets/star_empty.svg'); /* Adjust path based on your project
 }  */
 
 .stars-container {
