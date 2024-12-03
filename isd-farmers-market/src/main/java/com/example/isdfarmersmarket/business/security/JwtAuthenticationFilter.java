@@ -1,6 +1,6 @@
 package com.example.isdfarmersmarket.business.security;
 
-import com.example.isdfarmersmarket.business.services.JwtService;
+import com.example.isdfarmersmarket.business.services.JwtServiceImpl;
 import com.example.isdfarmersmarket.dao.enums.AuthError;
 import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +33,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     ObjectMapper mapper;
-    JwtService jwtService;
+    JwtServiceImpl jwtService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -64,18 +64,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void sendJwtErrorResponse(HttpServletResponse response, Exception ex) throws IOException {
-        String message;
+        AuthError error;
         HttpStatus status = HttpStatus.UNAUTHORIZED;
 
-        message = switch (ex) {
-            case ExpiredJwtException e -> AuthError.TOKEN_EXPIRED.getMessage();
-            case UnsupportedJwtException e -> AuthError.UNSUPPORTED_JWT.getMessage();
-            case MalformedJwtException e -> AuthError.MALFORMED_JWT.getMessage();
-            case SignatureException e -> AuthError.SIGNATURE_VALIDATION_FAILED.getMessage();
-            default -> AuthError.UNEXPECTED_JWT_ERROR.getMessage();
+        error = switch (ex) {
+            case ExpiredJwtException e -> AuthError.TOKEN_EXPIRED;
+            case UnsupportedJwtException e -> AuthError.UNSUPPORTED_JWT;
+            case MalformedJwtException e -> AuthError.MALFORMED_JWT;
+            case SignatureException e -> AuthError.SIGNATURE_VALIDATION_FAILED;
+            default -> AuthError.UNEXPECTED_JWT_ERROR;
         };
 
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, message);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, error.name());
         response.setStatus(status.value());
         response.setContentType("application/json");
         response.getWriter().write(mapper.writeValueAsString(problemDetail));
@@ -98,6 +98,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
-
 
 }

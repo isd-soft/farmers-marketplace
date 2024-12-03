@@ -187,6 +187,8 @@ import ProgressSpinner from 'primevue/progressspinner'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import CustomerReviews from '@/components/CustomerReviews.vue'
+import { isLoggedIn } from '@/shared/authState.js'
+
 export default {
   name: 'ProductPage',
   components: {
@@ -251,52 +253,42 @@ export default {
     }
 
     const toggleWishlist = async () => {
-      if (!product.value.id) return
+      if (!isLoggedIn.value) {
+        window.location.href = "/login";
+        return;
+      }
+
+      if (!product.value.id) return;
       try {
         if (product.value.isInWishlist) {
-          await axiosInstance.delete(`/customer/wishlist/${props.id}`)
+          await axiosInstance.delete(`/wishlist/${props.id}`);
         } else {
-          await axiosInstance.post(`/customer/wishlist/${props.id}`)
+          await axiosInstance.post(`/wishlist/${props.id}`);
         }
-        product.value.isInWishlist = !product.value.isInWishlist
+        product.value.isInWishlist = !product.value.isInWishlist;
       } catch (error) {
         console.error(
           `Failed to ${product.value.isInWishlist ? 'remove' : 'add'} product to/from wishlist:`,
-          error.message,
-        )
+          error.message
+        );
       }
-    }
+    };
 
-    const addToCart = async () => {
+    const addToCart = () => {
+      if (!isLoggedIn.value) {
+        window.location.href = "/login";
+        return;
+      }
+      
       if (!product.value.id || !quantity.value) {
         alert('Invalid product or quantity')
         return
       }
-
-      const itemInCart = {
-        productId: product.value.id,
-        quantity: quantity.value,
-      }
-
-      try {
-        const response = await axiosInstance.post('/cart', itemInCart)
-        alert(response.data.message)
-        console.log('Added to cart:', response.data)
-
-        buttonText.value = 'Item Added';
-        setTimeout(() => {
-          buttonText.value = 'Add to Cart'; 
-        }, 3000);
-
-      } catch (error) {
-        console.error('Error adding to cart:', error)
-        alert(error.response?.data?.message || 'Failed to add item to cart. Please try again.')
-      }
     }
 
     onMounted(() => {
-      fetchProduct()
-    })
+      fetchProduct();
+    });
 
     return {
       buttonText,
@@ -309,9 +301,9 @@ export default {
       isAllReviewsLoaded,
       addToCart,
       toggleWishlist,
-    }
+    };
   },
-}
+};
 </script>
 
 <style scoped>

@@ -3,7 +3,9 @@ package com.example.isdfarmersmarket.business.services;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException;
 import com.example.isdfarmersmarket.business.mapper.ItemInCartMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.services.interfaces.CartService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
+import com.example.isdfarmersmarket.dao.models.Image;
 import com.example.isdfarmersmarket.dao.models.ItemInCart;
 import com.example.isdfarmersmarket.dao.models.Product;
 import com.example.isdfarmersmarket.dao.models.User;
@@ -32,8 +34,7 @@ public class CartServiceImpl implements CartService {
     ItemInCartMapper itemInCartMapper;
 
     @Override
-    @Transactional
-    public void addToCard(ItemInCartCommand itemInCartCommand) {
+    public ItemInCartDTO addToCart(ItemInCartCommand itemInCartCommand) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException(principal.getId(), User.class));
@@ -41,18 +42,19 @@ public class CartServiceImpl implements CartService {
                 .findById(itemInCartCommand.getProductId())
                 .orElseThrow(() -> new EntityNotFoundException(itemInCartCommand.getProductId(), Product.class));
 
-        if (cartRepository.existsByUserAndProduct(user, product)) {
+        if(cartRepository.existsByUserAndProduct(user, product)) {
             throw new EntityExistsException("Item already exists");
         }
         ItemInCart newItemInCart = itemInCartMapper.mapToEntity(itemInCartCommand);
         newItemInCart.setUser(user);
         newItemInCart.setProduct(product);
         cartRepository.save(newItemInCart);
+        return itemInCartMapper.mapToDTO(newItemInCart);
     }
 
     @Override
     @Transactional
-    public ItemInCartDTO removeFromCard(Long id) {
+    public ItemInCartDTO removeFromCart(Long id) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         ItemInCart cartToRemove = cartRepository
                 .findById(id)
@@ -79,5 +81,4 @@ public class CartServiceImpl implements CartService {
         List<ItemInCart> itemsInCart = cartRepository.getAllByUser(authenticatedUser);
         return itemInCartMapper.mapToDTOs(itemsInCart);
     }
-
 }

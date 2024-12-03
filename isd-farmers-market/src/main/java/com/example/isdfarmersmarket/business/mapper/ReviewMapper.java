@@ -12,7 +12,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 
-@Mapper(componentModel = "spring", uses = {UserMapper.class, ProductMapper.class})
+@Mapper(componentModel = "spring", uses = {UserProfileMapper.class, ProductMapper.class})
 public interface ReviewMapper {
 
     @Mapping(source = "creator", target = "creator")

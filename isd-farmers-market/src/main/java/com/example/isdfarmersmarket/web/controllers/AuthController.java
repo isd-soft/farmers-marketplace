@@ -1,12 +1,11 @@
 package com.example.isdfarmersmarket.web.controllers;
 
-import com.example.isdfarmersmarket.business.services.AuthService;
-import com.example.isdfarmersmarket.business.services.JwtService;
+import com.example.isdfarmersmarket.business.services.AuthServiceImpl;
+import com.example.isdfarmersmarket.business.services.JwtServiceImpl;
 import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.web.commands.UpdatePasswordCommand;
 import com.example.isdfarmersmarket.web.commands.UserLoginCommand;
 import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
-import com.example.isdfarmersmarket.web.commands.UserUpgradeCommand;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -15,8 +14,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -29,8 +26,8 @@ import static org.springframework.http.HttpStatus.OK;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class AuthController {
-    AuthService authService;
-    JwtService jwtService;
+    AuthServiceImpl authService;
+    JwtServiceImpl jwtService;
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> userRegister(@RequestBody UserRegisterCommand registerRequestDTO) {
@@ -42,7 +39,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody UserLoginCommand userLoginCommand) {
         User user = authService.authenticate(userLoginCommand.getEmail(), userLoginCommand.getPassword());
-        String refreshToken = authService.generateRefreshToken(user.getUsername());
+        String refreshToken = authService.generateRefreshToken(user.getId());
         String accessToken = authService.generateAccessToken(refreshToken);
 
         return ResponseEntity.ok(Map.of(
