@@ -87,7 +87,6 @@
     <Footer class="footer"></Footer>
   </div>
 </template>
-
 <script>
 import { ref, onMounted } from 'vue'
 import axiosInstance from '@/utils/axiosInstance.js'
@@ -119,6 +118,7 @@ export default {
     const user = ref({})
     const productReviews = ref([])
     const farmerReviews = ref([])
+    const currentPage = ref(0);
     const newProductReview = ref({ customerId: props.id, rating: 0, content: '' })
     const newFarmerReview = ref({ customerId: props.id, rating: 0, content: '' })
     const isAllProductReviewsLoaded = ref(false)
@@ -138,10 +138,12 @@ export default {
     const fetchProductReviews = async (page = 0, pageSize = 5) => {
       try {
         const response = await axiosInstance.get(`customer/${props.id}/reviews/product`, {
-          params: { page, pageSize },
+          params: { page, size: pageSize },
         })
-        if (response.data.length < pageSize) isAllProductReviewsLoaded.value = true
-        productReviews.value.push(...response.data)
+        productReviews.value.push(...response.data.content)
+        if (productReviews.value.length >= response.data.totalElements) {
+          isAllProductReviewsLoaded.value = true
+        }
       } catch (error) {
         console.error('Failed to fetch product reviews:', error)
       }
@@ -150,14 +152,17 @@ export default {
     const fetchFarmerReviews = async (page = 0, pageSize = 5) => {
       try {
         const response = await axiosInstance.get(`customer/${props.id}/reviews/farmer`, {
-          params: { page, pageSize },
+          params: { page, size: pageSize },
         })
-        if (response.data.length < pageSize) isAllFarmerReviewsLoaded.value = true
-        farmerReviews.value.push(...response.data)
+        farmerReviews.value.push(...response.data.content)
+        if (farmerReviews.value.length >= response.data.totalElements) {
+          isAllFarmerReviewsLoaded.value = true
+        }
       } catch (error) {
         console.error('Failed to fetch farmer reviews:', error)
       }
     }
+
 
     const submitProductReview = async () => {
       try {

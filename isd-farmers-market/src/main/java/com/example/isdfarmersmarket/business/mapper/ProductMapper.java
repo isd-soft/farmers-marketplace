@@ -14,11 +14,14 @@ public interface ProductMapper {
     ProductDTO map(Product product);
 
     @Mapping(target = "image", expression = "java(imageMapper.map(product.getImages().stream().findFirst().orElse(null)))")
+    @Mapping(target = "unitTypeShort", expression = "java(product.getUnitType().getShortName())")
     CompactProductDTO mapToProductInWishlistDTO(Product product);
     @Mapping(target = "image", expression = "java(imageMapper.map(product.getImages().stream().findFirst().orElse(null)))")
+    @Mapping(target = "unitTypeShort", expression = "java(product.getUnitType().getShortName())")
     List<CompactProductDTO> mapToCompactProductsDTO(List<Product> product);
 
     ProductPageDTO mapToProductPage(Product product);
+    @Mapping(target = "unitTypeShort", expression = "java(product.getUnitType().getShortName())")
     List<ProductDTO> mapProducts(List<Product> products);
 
 

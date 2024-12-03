@@ -2,12 +2,15 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginPage from '@/components/LoginPage.vue'
 import HomePage from '@/components/HomePage.vue'
 import OrderPage from '@/components/OrderPage.vue'
+import CartPage from '@/components/CartPage.vue'
+import CreateProduct from '@/components/CreateProduct.vue'
 import ProductPage from "@/components/ProductPage.vue";
 import WishlistPage from "@/components/WishlistPage.vue";
-import CreateProduct from "@/components/CreateProduct.vue";
 import UserPage from "@/components/UserPage.vue";
 import SearchProductsPage from "@/components/SearchProductsPage.vue";
 import OrderManagementPage from '@/components/OrderManagementPage.vue';
+import MyProductsPage from "@/components/MyProductsPage.vue";
+import UpdateProduct from "@/components/UpdateProduct.vue";
 import SettingsPage from '@/components/SettingsPage.vue';
 
 const routes = [
@@ -40,8 +43,18 @@ const routes = [
   },
   {
     path: '/orders',
-    name: 'Orders',
+    name: 'OrderPage',
     component: OrderPage,
+  },
+  {
+    path: '/cart',
+    name: 'CartPage',
+    component: CartPage,
+  },
+  {
+    path: '/ordermanagement',
+    name: 'Order Management',
+    component: OrderManagementPage,
   },
   {
     path: '/settings',
@@ -54,16 +67,25 @@ const routes = [
     component: CreateProduct,
   },
   {
+    path: '/product/update/:id',
+    name: 'EditProduct',
+    component: UpdateProduct,
+    props: true,
+  },
+  {
     path: '/product',
     name: 'SearchProducts',
     component: SearchProductsPage,
-
+  },
+  {
+    path: '/product/management',
+    name: 'MyProductsPage',
+    component: MyProductsPage,
   },
   {
     path: '/ordermanagement',
     name: 'Order Management',
     component: OrderManagementPage,
-
   },
 ]
 

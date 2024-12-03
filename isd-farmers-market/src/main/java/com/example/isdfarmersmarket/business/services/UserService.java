@@ -9,6 +9,7 @@ import com.example.isdfarmersmarket.web.dto.UserProfileDTO;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -40,15 +41,15 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    public List<UserProfileDTO> getAllUsers(Integer page, Integer pageSize) {
-        return userRepository.findAll(PageRequest.of(page, pageSize))
+    public List<UserProfileDTO> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable)
                 .stream()
                 .map(userProfileMapper::map)
                 .toList();
     }
 
-    public List<UserProfileDTO> searchUsersByFullName(String fullName, Integer page, Integer pageSize) {
-        return userRepository.findByFullNameContaining(fullName, PageRequest.of(page, pageSize))
+    public List<UserProfileDTO> searchUsersByFullName(String fullName, Pageable pageable) {
+        return userRepository.findByFullNameContaining(fullName, pageable)
                 .stream()
                 .map(userProfileMapper::map)
                 .toList();

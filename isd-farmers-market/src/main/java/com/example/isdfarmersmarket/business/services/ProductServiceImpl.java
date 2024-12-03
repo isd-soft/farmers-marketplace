@@ -15,20 +15,14 @@ import com.example.isdfarmersmarket.web.dto.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-
 import java.util.*;
-import java.util.stream.Collectors;
-
 
 
 @Service
@@ -47,6 +41,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductDTO createProduct(CreateProductCommand createProductCommand) {
+        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User creator = userRepository.findById(principal.getId()).orElse(null);
         List<Image> images = new ArrayList<>();
         if (createProductCommand.getImagesBase64() != null && !createProductCommand.getImagesBase64().isEmpty()) {
             createProductCommand.getImagesBase64().forEach(file -> {
@@ -59,7 +55,7 @@ public class ProductServiceImpl implements ProductService {
                 images.add(image);
             });
         }
-        images.forEach(image -> {imageRepository.save(image);});
+        imageRepository.saveAll(images);
         Category category = categoryRepository.getCategoryById(createProductCommand.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException(CATEGORY_FIND_FAILED_BY_ID));
         Product product = Product.builder()
@@ -69,17 +65,29 @@ public class ProductServiceImpl implements ProductService {
                 .pricePerUnit(createProductCommand.getPricePerUnit())
                 .quantity(createProductCommand.getQuantity())
                 .category(category)
+                .farmer(creator)
                 .images(new HashSet<>(images)).build();
-        Product savedProduct = productRepository.save(product);
-        images.forEach(image -> {image.setProduct(savedProduct);});
-        return productMapper.map(savedProduct);
+        productRepository.save(product);
+        if(creator!=null) {
+            creator.getMyProducts().add(product);
+            userRepository.save(creator);
+        }
+        images.forEach(image -> {image.setProduct(product);});
+        return productMapper.map(product);
     }
 
     @Override
     @Transactional
-    public ProductDTO updateProduct(Long id, UpdateProductCommand updateProductCommand,
-                                    Set<MultipartFile> files, Set<Long> imagesToDeleteId) {
-        Set<Image> images = new HashSet<>();
+    public ProductDTO updateProduct(Long id, UpdateProductCommand updateProductCommand) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
+        product.setDescription(updateProductCommand.getDescription());
+        product.setUnitType(updateProductCommand.getUnitType());
+        product.setPricePerUnit(updateProductCommand.getPricePerUnit());
+        product.setQuantity(updateProductCommand.getQuantity());
+        product.getImages().clear();
+
+        List<Image> images = new ArrayList<>();
         if (updateProductCommand.getImagesBase64() != null && !updateProductCommand.getImagesBase64().isEmpty()) {
             updateProductCommand.getImagesBase64().forEach(file -> {
                 Image image = null;
@@ -88,24 +96,12 @@ public class ProductServiceImpl implements ProductService {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+                image.setProduct(product);
                 images.add(image);
             });
         }
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
-        Category category = categoryRepository.getCategoryById(updateProductCommand.getCategoryId())
-                .orElseThrow(() -> new EntityNotFoundException(CATEGORY_FIND_FAILED_BY_ID));
-        product.setTitle(updateProductCommand.getTitle());
-        product.setDescription(updateProductCommand.getDescription());
-        product.setUnitType(updateProductCommand.getUnitType());
-        product.setPricePerUnit(updateProductCommand.getPricePerUnit());
-        product.setDiscountPercents(updateProductCommand.getDiscountPercents());
-        product.setQuantity(updateProductCommand.getQuantity());
-        product.setCategory(category);
-        product.setImages(images);
-        if (imagesToDeleteId != null && !imagesToDeleteId.isEmpty()) {
-            imagesToDeleteId.forEach(imageId -> imageRepository.deleteById(imageId));
-        }
+        imageRepository.saveAll(images);
+        images.forEach(image -> {product.getImages().add(image);});
         return productMapper.map(product);
     }
 
@@ -128,6 +124,18 @@ public class ProductServiceImpl implements ProductService {
         response.put("totalElements", productRepository.count(filters));
         return response;
     }
+    @Override
+    @Transactional
+    public Map<String, Object> getCurrentUserProducts(Pageable pageable) {
+        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long creator = principal.getId();
+        Map<String, Object> response = new HashMap<>();
+        Specification<Product> filters = Specification.
+                where((creator == null || creator == 0L) ? null : ProductSpecification.creatorIs(creator));
+        response.put("content",productMapper.mapToCompactProductsDTO(productRepository.findAll(filters, pageable).stream().toList()));
+        response.put("totalElements", productRepository.count(filters));
+        return response;
+    }
 
     @Override
     @Transactional
@@ -137,16 +145,15 @@ public class ProductServiceImpl implements ProductService {
         ProductDTO productDTO = productMapper.map(product);
         return productDTO;
     }
-
     @Override
     @Transactional(readOnly = true)
-    public PageResponseDTO<ProductReviewDTO> getProductReviews(Long productId, int page, int pageSize) {
+    public PageResponseDTO<ProductReviewDTO> getProductReviews(Long productId, Pageable pageable) {
         Product product = productRepository
                 .findById(productId)
                 .orElseThrow(()->new EntityNotFoundException("Product not found"));
 
         var reviewsPage = productReviewRepository
-                .findAllByProductOrderByCreatedDateDesc(product, PageRequest.of(page, pageSize));
+                .findAllByProductOrderByCreatedDateDesc(product, pageable);
         var totalReviews = reviewsPage.getTotalElements();
         var content = reviewsPage
                 .getContent()
@@ -154,7 +161,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(reviewMapper::mapWithoutProductDetails)
                 .toList();
 
-        return new PageResponseDTO<>(content, totalReviews, page, pageSize);
+        return new PageResponseDTO<>(content,totalReviews);
     }
 
     @Override

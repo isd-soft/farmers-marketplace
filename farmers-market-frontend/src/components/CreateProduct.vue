@@ -13,6 +13,7 @@
         />
         <label for="product-title">Title</label>
       </FloatLabel>
+
       <FloatLabel variant="on">
         <InputText
           id="product-desc"

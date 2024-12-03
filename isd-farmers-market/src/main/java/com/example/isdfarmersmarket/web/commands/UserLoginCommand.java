@@ -1,9 +1,12 @@
 package com.example.isdfarmersmarket.web.commands;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserLoginCommand {
-    private String email;
-    private String password;
+    String email;
+    String password;
 }
