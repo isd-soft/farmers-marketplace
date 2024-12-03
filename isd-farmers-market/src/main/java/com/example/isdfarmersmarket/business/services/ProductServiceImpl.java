@@ -16,13 +16,11 @@ import com.example.isdfarmersmarket.web.dto.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
@@ -68,7 +66,7 @@ public class ProductServiceImpl implements ProductService {
                 .pricePerUnit(createProductCommand.getPricePerUnit())
                 .quantity(createProductCommand.getQuantity())
                 .category(category)
-                .user(creator)
+                .farmer(creator)
                 .images(new HashSet<>(images)).build();
         productRepository.save(product);
         if(creator!=null) {
