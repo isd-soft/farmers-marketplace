@@ -21,7 +21,7 @@ public class ItemInOrder {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
-    private float quantity;
+    private int quantity;
 
     @Column(name = "price_per_unit")
     private BigDecimal pricePerUnit;

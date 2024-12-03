@@ -38,7 +38,7 @@ public class Order {
     private BigDecimal totalPrice;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<ItemInOrder> products = new HashSet<>();
+    private Set<ItemInOrder> itemsInOrder = new HashSet<>();
 
     @Column(name="created_date", columnDefinition = "TimeStamp")
     private LocalDateTime createdDate = LocalDateTime.now();

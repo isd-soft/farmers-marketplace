@@ -1,6 +1,8 @@
 package com.example.isdfarmersmarket.web.dto;
 
 import lombok.*;
+import lombok.experimental.FieldDefaults;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -12,11 +14,12 @@ import java.util.Set;
 @Getter
 @Setter
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderDTO {
-    private Long id;
-    private String orderStatus;
-    private Long userId;
-    private BigDecimal totalPrice;
-    private Set<ItemInOrderDTO> products = new HashSet<>();
-    private LocalDateTime createdDate = LocalDateTime.now();
+    Long id;
+    String orderStatus;
+    Long userId;
+    BigDecimal totalPrice;
+    Set<ItemInOrderDTO> products = new HashSet<>();
+    LocalDateTime createdDate = LocalDateTime.now();
 }
