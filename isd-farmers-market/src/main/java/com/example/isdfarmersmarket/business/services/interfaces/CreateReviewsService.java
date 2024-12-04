@@ -4,7 +4,7 @@ import com.example.isdfarmersmarket.web.commands.FarmerReviewCommand;
 import com.example.isdfarmersmarket.web.commands.ProductReviewCommand;
 import com.example.isdfarmersmarket.web.dto.*;
 
-public interface ReviewCommandService {
+public interface CreateReviewsService {
 
     FarmerReviewDTO rateFarmer(FarmerReviewCommand farmerReviewCommand);
 
