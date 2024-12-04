@@ -1,6 +1,7 @@
 package com.example.isdfarmersmarket.business.services.order;
 
 //import com.example.isdfarmersmarket.business.listeners.OrderConfirmedListener;
+
 import com.example.isdfarmersmarket.business.mapper.ItemInCartMapper;
 import com.example.isdfarmersmarket.business.mapper.ItemInOrderMapper;
 import com.example.isdfarmersmarket.business.mapper.OrderMapper;
@@ -37,7 +38,6 @@ public class OrderServiceImpl implements OrderService {
     OrderMapper orderMapper;
     ItemInCartMapper itemInCartMapper;
     ItemInOrderMapper itemInOrderMapper;
-    String ORDER_FIND_FAILED_BY_ID = "Order with the specified user id not found";
 //    private final OrderConfirmedListener orderConfirmedListener;
 
     @Override
@@ -46,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
 
         User user = userRepository.findById(principal.getId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + principal.getId()));
+                .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(principal.getId(), User.class));
 
         List<ItemInCart> itemsInCart = cartRepository.getAllByUser(user);
         List<ItemInOrder> itemsInOrder = itemInCartMapper.mapToItemInOrder(itemsInCart);
@@ -66,7 +66,7 @@ public class OrderServiceImpl implements OrderService {
                     Order order = Order.builder()
                             .customer(user)
                             .farmer(userRepository.findById(farmerId)
-                                    .orElseThrow(() -> new EntityNotFoundException("Farmer not found with ID: " + farmerId)))
+                                    .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(farmerId, Order.class)))
                             .orderStatus(OrderStatus.PENDING)
                             .totalPrice(totalPrice)
                             .createdDate(LocalDateTime.now())
@@ -90,7 +90,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderDTO updateOrder(Long id, UpdateOrderCommand updateOrderCommand) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_FIND_FAILED_BY_ID));
+                .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(id, Order.class));
 
         order.setOrderStatus(OrderStatus.valueOf(updateOrderCommand.getOrderStatus().toUpperCase()));
 //        orderConfirmedListener.handleOnConfirmedOrder(order);
@@ -102,7 +102,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderDTO deleteOrder(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_FIND_FAILED_BY_ID));
+                .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(id, Order.class));
         orderRepository.delete(order);
         return orderMapper.map(order);
     }
@@ -111,7 +111,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderDTO getOrderById(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_FIND_FAILED_BY_ID));
+                .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(id, Order.class));
 
         return orderMapper.map(order);
     }
@@ -121,8 +121,7 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderDTO> getAllOrders() {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         User authenticatedUser = userRepository.findById(principal.getId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + principal.getId()));
-
+                .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(principal.getId(), User.class));
 //           List<Order> orders = orderRepository.getAllByUser(authenticatedUser);
         List<Order> orders = orderRepository.findAll();
 

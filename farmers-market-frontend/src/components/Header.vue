@@ -29,14 +29,14 @@
 <script setup>
 import {ref, onMounted, watch, computed} from 'vue';
 import { isLoggedIn } from '@/shared/authState';
-import axiosInstance from '@/utils/axiosInstance';
+import axiosInstance, {getUserId} from '@/utils/axiosInstance';
 import Menubar from 'primevue/menubar';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import {useRoute, useRouter} from "vue-router";
 
 const searchQ = ref('');
-
+let currentUser = null;
 const items = ref([
   { label: 'Deals' },
   { label: "What's New" },
@@ -72,8 +72,21 @@ const fetchCategories = async () => {
 
       items.value = [{label: 'Categories', items: categoryItems}, ...items.value];
     } catch (error) {
-      console.error('Error fetching categories:', error);
     }
+};
+const fetchUserData = async () => {
+  try {
+    const response = await axiosInstance.get(`/current-user/`);
+    currentUser = response.data;
+    if (currentUser.isFarmer) {
+      accountMenu.value[0].items.unshift({
+        label: 'Products',
+        icon: 'pi pi-clipboard',
+        command: () => goToMyProducts(),
+      });
+    }
+  } catch (error) {
+  }
 };
 
 const goHome = () => {
@@ -86,6 +99,9 @@ const goToLogin = () => {
 
 const goToCart = () => {
   window.location.href = '/cart';
+};
+const goToMyProducts = () => {
+  window.location.href = '/product/management';
 };
 
 const goToOrders = () => {
@@ -117,6 +133,8 @@ watch(isLoggedIn, (newValue) => {
 });
 
 onMounted(() => {
+
+  fetchUserData();
   if("!isSearchPage") {
     fetchCategories();
   }

@@ -7,70 +7,74 @@
       <FloatLabel variant="on">
         <InputText
           id="product-title"
-          v-model="title"
-          required
+          v-model="product.title"
           class="create-product-input"
         />
         <label for="product-title">Title</label>
       </FloatLabel>
+      <span v-if="v$.title.$error" class="error-message">
+        Product title is required and must be between 1 and 80 characters</span>
 
       <FloatLabel variant="on">
         <InputText
           id="product-desc"
-          v-model="description"
-          required
+          v-model="product.description"
           class="create-product-input"
         />
         <label for="product-desc">Description</label>
       </FloatLabel>
+      <span v-if="v$.description.$error" class="error-message">
+        Product description is required and must be between 1 and 1000 characters</span>
 
       <FloatLabel variant="on">
         <Select
           id="product-category"
           v-if="categories.length > 0"
-          v-model="category"
+          v-model="product.categoryId"
           :options="categories"
           optionLabel="label"
           optionValue="value"
-          required
           class="create-product-input"
         />
         <label for="product-category">Category</label>
       </FloatLabel>
+      <span v-if="v$.categoryId.$error" class="error-message">
+        Product category is required</span>
 
       <FloatLabel variant="on">
         <Select
-          v-model="unitType"
+          v-model="product.unitType"
           :options="unitTypes"
           optionLabel="label"
           option-value="value"
-          required
           class="create-product-input"
         />
         <label for="product-unit-type">Unit Type</label>
       </FloatLabel>
+      <span v-if="v$.unitType.$error" class="error-message">
+        Product unit type is required</span>
 
       <FloatLabel variant="on">
         <InputNumber
           id="product-price"
-          v-model="price"
-          required
-          min="1"
+          v-model="product.pricePerUnit"
           class="create-product-input"
         />
         <label for="product-price">Price</label>
       </FloatLabel>
+      <span v-if="v$.pricePerUnit.$error" class="error-message">
+        Product price is required and must be minimum 1</span>
 
       <FloatLabel variant="on">
         <InputNumber
           id="product-quantity"
-          v-model="quantity"
-          required
-          min="0"
+          v-model="product.quantity"
           class="create-product-input"
         />
         <label for="product-price">Quantity</label>
       </FloatLabel>
+      <span v-if="v$.quantity.$error" class="error-message">
+        Product quantity is required and must be minimum 0</span>
 
       <div>
         <label for="file-uploader" class="file-uploader">
@@ -110,9 +114,9 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
-import { required, maxLength, minLength, minValue, maxValue } from "@vuelidate/validators";
+import {ref, onMounted, computed, reactive} from "vue";
 import useVuelidate from "@vuelidate/core";
+import { minLength, required, maxLength, minValue} from "@vuelidate/validators"
 import Header from "./Header.vue";
 import Footer from "../components/Footer.vue";
 import axios from "axios";
@@ -134,15 +138,29 @@ export default {
     Footer
   },
   setup() {
-    const title = ref("");
-    const description = ref("");
-    const price = ref();
-    const quantity = ref();
-    const unitType = ref();
-    const unitTypes = ref([]);
-    const category = ref();
-    const categories = ref([]);
+    const product = reactive({
+      title: "",
+      description: "",
+      unitType: null,
+      pricePerUnit: null,
+      quantity: null,
+      categoryId: null,
+    });
     const selectedFiles = ref([]);
+    const unitTypes = ref([]);
+    const categories = ref([]);
+    let currentUser = null;
+
+    const rules = computed(() => ({
+      title: { required, minLength: minLength(1), maxLength: maxLength(80) },
+      description: { required, minLength: minLength(1), maxLength: maxLength(1000) },
+      unitType: { required },
+      pricePerUnit: { required, minValue: minValue(1) },
+      quantity: { required, minValue: minValue(0) },
+      categoryId: { required },
+    }));
+
+    const v$ = useVuelidate(rules, product);
 
     const handleFileChange = async (event) => {
       const files = event.target.files;
@@ -180,11 +198,20 @@ export default {
         const reader = new FileReader();
         reader.onload = (e) => resolve(e.target.result);
         reader.onerror = (e) => reject(e);
-        reader.readAsDataURL(file); // Convert file to Base64
+        reader.readAsDataURL(file);
       });
     };
 
     onMounted(async () => {
+      try {
+        const response = await axiosInstance.get(`/current-user/`);
+        currentUser = response.data;
+        if (!currentUser.isFarmer) {
+          await router.push(`/`);
+        }
+      } catch (error) {
+        await router.push(`/`);
+      }
       try {
         const response = await axiosInstance.get("/unit-types");
         if (Array.isArray(response.data)) {
@@ -209,55 +236,45 @@ export default {
           console.error("Unexpected categories format:", categoriesResponse.data);
         }
       } catch (error) {
-        console.error("Error loading unit types or categories:", error);
       }
     });
-
     const handleNewProduct = async (event) => {
       event.preventDefault();
-      try {
-        console.log("Preparing images for submission...");
-        const imagesBase64 = selectedFiles.value.map((file) => file.base64);
-        console.log("Images Base64:", imagesBase64);
+      await v$.value.$validate();
+      if(!v$.value.$error) {
+        try {
+          console.log("Preparing images for submission...");
+          const imagesBase64 = selectedFiles.value.map((file) => file.base64);
+          console.log("Images Base64:", imagesBase64);
 
-        console.log("Submitting product data...");
-        const response = await axiosInstance.post("/product/create", {
-          title: title.value,
-          description: description.value,
-          unitType: unitType.value,
-          pricePerUnit: price.value,
-          quantity: quantity.value,
-          categoryId: category.value,
-          imagesBase64: imagesBase64,
-        });
+          console.log("Submitting product data...");
+          const response = await axiosInstance.post("/product/create", {
+            imagesBase64: imagesBase64,
+            ...product,
+          });
 
-        console.log("Product created successfully:", response.data);
-        const createdProductId = response.data.id;
-        await router.push(`/product/${createdProductId}`);
-      } catch (error) {
-        console.error("Error creating product:", error.response?.data || error.message);
-        alert(
-          "Creating new product failed: " +
-          (error.response?.data?.message || error.message)
-        );
+          console.log("Product created successfully:", response.data);
+          const createdProductId = response.data.id;
+          await router.push(`/product/${createdProductId}`);
+        } catch (error) {
+          console.error("Error creating product:", error.response?.data || error.message);
+          alert(
+            "Creating new product failed: " +
+            (error.response?.data?.message || error.message)
+          );
+        }
       }
     };
 
     return {
-      title,
-      description,
-      category,
+      product,
       categories,
-      unitType,
       unitTypes,
-      price,
-      quantity,
-      selectedFiles,
       handleFileChange,
       removeFile,
       handleNewProduct,
-      v$: useVuelidate(),
-
+      v$,
+      selectedFiles,
     };
   },
 };
@@ -267,7 +284,8 @@ export default {
 .create-product-container {
   margin-left: 20px;
   margin-right: 20px;
-  width: 900px;
+  width: calc(100% - 40px);
+  max-width: 900px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -343,5 +361,9 @@ export default {
 }
 .create-product-main-text{
 text-align: center;
+}
+.error-message {
+  color: red;
+  font-size: 0.9rem;
 }
 </style>

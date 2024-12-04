@@ -48,4 +48,10 @@ public class GlobalExceptionHandler {
         ErrorDetails errorDetails = new ErrorDetails(LocalDate.now(), ex.getMessage());
         return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(errorDetails);
     }
+
+    @ExceptionHandler(com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException.class)
+    public ResponseEntity<ErrorDetails> handleEmailSendingException(com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException ex) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDate.now(), "Entity[" + ex.getAClass().getSimpleName() + "] with id=" + ex.getId() + " not found!");
+        return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(errorDetails);
+    }
 }
