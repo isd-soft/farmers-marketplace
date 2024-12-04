@@ -365,7 +365,7 @@ export default {
   overflow-x: hidden;
   overflow-y: auto;
   width: 100%;
-  padding-top: 100px;
+  padding-top: 130px;
   justify-content: center;
 }
 
@@ -432,6 +432,5 @@ export default {
   text-align: center;
   padding: 10px;
   bottom: 0;
-  margin-top: auto;
 }
 </style>

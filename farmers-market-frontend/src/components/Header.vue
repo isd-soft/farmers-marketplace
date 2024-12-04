@@ -125,24 +125,30 @@ onMounted(() => {
 
 
 <style scoped>
+.navbar {
+  display: flex;
+  justify-content: center; /* Centers the Menubar horizontally */
+  align-items: center;
+  width: 100%;
+  height: 80px; /* Set a height to align properly */
+}
+
 .menubar {
   display: flex;
-  align-items: center;
   background-color: white;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
+  border-color: white;
+  width: 100%; /* Full width */
+  max-width: 80%; /* Limit the width of the Menubar */
   z-index: 1000;
   border-radius: 0;
   height: 80px;
+  justify-content: center; /* Ensures that the content is centered */
 }
 
 .menubar img.logo {
   width: 60px;
   height: auto;
   cursor: pointer;
-  margin-left: 40px;
   margin-right: 50px;
 }
 
@@ -181,7 +187,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 15px;
-  margin-right: 40px;
 }
 
 .menubar-item {
