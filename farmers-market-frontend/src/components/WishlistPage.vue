@@ -85,7 +85,7 @@ import Card from 'primevue/card'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
 import Header from '@/components/Header.vue'
-import noPhotoImg from '@/assets/noPhoto.png'  // Importing the fallback image
+import noPhotoImg from '@/assets/noPhoto.png'
 
 export default {
   name: 'WishlistPage',
@@ -96,7 +96,7 @@ export default {
 
     const fetchWishlist = async () => {
       try {
-        const response = await axiosInstance.get('customer/wishlist')
+        const response = await axiosInstance.get('/wishlist')
         wishlist.value = response.data
         console.log(wishlist.value)
       } catch (error) {
@@ -110,7 +110,7 @@ export default {
 
     const removeFromWishlist = async (id) => {
       try {
-        await axiosInstance.delete(`customer/wishlist/${id}`)
+        await axiosInstance.delete(`/wishlist/${id}`)
         wishlist.value = wishlist.value.filter((product) => product.id !== id)
       } catch (error) {
         console.error('Error removing item from wishlist:', error)
@@ -126,10 +126,11 @@ export default {
       wishlist,
       discountedPrice,
       removeFromWishlist,
-      noPhotoImg,  // Make the fallback image available in the template
+      noPhotoImg,
     }
   },
 }
+
 </script>
 
 <style scoped>

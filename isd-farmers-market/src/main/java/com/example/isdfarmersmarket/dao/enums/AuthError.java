@@ -11,25 +11,24 @@ import org.springframework.http.HttpStatus;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum AuthError {
     // JWT Exceptions
-    REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "The refresh token is invalid or expired."),
-    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "Token has expired."),
-    UNSUPPORTED_JWT(HttpStatus.BAD_REQUEST, "JWT token is unsupported."),
-    MALFORMED_JWT(HttpStatus.BAD_REQUEST, "JWT token is malformed."),
-    SIGNATURE_VALIDATION_FAILED(HttpStatus.UNAUTHORIZED, "JWT token signature validation failed."),
-    UNEXPECTED_JWT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected JWT exception."),
+    REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED),
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED),
+    UNSUPPORTED_JWT(HttpStatus.BAD_REQUEST),
+    MALFORMED_JWT(HttpStatus.BAD_REQUEST),
+    SIGNATURE_VALIDATION_FAILED(HttpStatus.UNAUTHORIZED),
+    UNEXPECTED_JWT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR),
 
     // Controller Handled Exceptions
-    AUTHENTICATED_USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "Authenticated user not found."),
-    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Invalid username or password."),
-    EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "Email already exists."),
-    ROLE_ALREADY_EXISTS(HttpStatus.CONFLICT, "Role already exists."),
-    ROLE_DOESNT_EXIST(HttpStatus.NOT_FOUND, "Role doesn't exist."),
-    USERNAME_NOT_FOUND(HttpStatus.NOT_FOUND, "Username not found."),
-    PASSWORDS_DO_NOT_MATCH(HttpStatus.BAD_REQUEST, "Passwords do not match."),
-    ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access denied."),
-    BAD_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Bad credentials."),
-    AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED, "Authentication failed.");
+    AUTHENTICATED_USER_NOT_FOUND(HttpStatus.UNAUTHORIZED),
+    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED),
+    EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT),
+    ROLE_ALREADY_EXISTS(HttpStatus.CONFLICT),
+    ROLE_DOESNT_EXIST(HttpStatus.NOT_FOUND),
+    USERNAME_NOT_FOUND(HttpStatus.NOT_FOUND),
+    PASSWORDS_DO_NOT_MATCH(HttpStatus.BAD_REQUEST),
+    ACCESS_DENIED(HttpStatus.FORBIDDEN),
+    BAD_CREDENTIALS(HttpStatus.UNAUTHORIZED),
+    AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED);
 
     HttpStatus httpStatus;
-    String message;
 }

@@ -29,11 +29,9 @@ public class DeliveryTypeController {
                 .body(deliveryTypeService.createDeliveryType(createDeliveryTypeCommand));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping()
     public ResponseEntity<DeliveryTypeDTO> updateDeliveryType(
-            @PathVariable Long id,
             @RequestBody @Valid UpdateDeliveryTypeCommand updateDeliveryTypeCommand) {
-        updateDeliveryTypeCommand.setId(id);
         return ResponseEntity.status(OK)
                 .body(deliveryTypeService.updateDeliveryType(updateDeliveryTypeCommand));
     }

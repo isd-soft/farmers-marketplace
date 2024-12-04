@@ -79,27 +79,43 @@
                           :alt="product.productTitle"
                         />
                         <div
-                          class="absolute bg-black/70 rounded-border title-description-rating-container"
+                          class="absolute bg-black/70 rounded-border product-content"
                           style="left: 4px; top: 4px"
                         >
-                          <div>
-                            <h2>{{ product.productTitle }}</h2>
-                            <p>{{ product.productDescription }}</p>
+                          <div class="title-description-rating-container">
+                            <div>
+                              <h2>{{ product.productTitle }}</h2>
+                              <p>{{ product.productDescription }}</p>
+                            </div>
+
+                            <div :class="'stars-container'">
+                              <span
+                                :key="i"
+                                v-for="i in 5"
+                                @click="onStarClick($event, i)"
+                                :class="['p-rating-icon', iconClass(i)]"
+                                :style="{ '--full': i === intPart + 1 ? full : '100%' }"
+                              ></span>
+                              <span class="text-surface-900 font-medium text-sm">{{
+                                product.rating
+                              }}</span>
+                              <!-- <Rating v-model="product.rating" :stars="5" :cancel="false" :readonly="true" />
+                                <span class="text-surface-900 font-medium text-sm">{{ product.rating }}</span> -->
+                            </div>
                           </div>
 
-                          <div :class="'stars-container'">
-                            <span
-                              :key="i"
-                              v-for="i in 5"
-                              @click="onStarClick($event, i)"
-                              :class="['p-rating-icon', iconClass(i)]"
-                              :style="{ '--full': i === intPart + 1 ? full : '100%' }"
-                            ></span>
-                            <span class="text-surface-900 font-medium text-sm">{{
-                              product.rating
-                            }}</span>
-                            <!-- <Rating v-model="product.rating" :stars="5" :cancel="false" :readonly="true" />
-                                <span class="text-surface-900 font-medium text-sm">{{ product.rating }}</span> -->
+                          <div>
+                            <Button
+                              class="heart-button wishlist-icon"
+                              outlined
+
+                              :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
+                              @click="toggleWishlist(product)"
+                              :title="
+                                product.isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'
+                              "
+                            >
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -126,10 +142,14 @@
                             >{{ order.totalPrice }} MDL</span
                           >
                           <div class="flex flex-row-reverse md:flex-row gap-2 buttons-container">
-                            <Button icon="pi pi-heart" class="heart-button" outlined></Button>
+                            <!-- <div class="wishlist-container">
+
+                            </div> -->
+                            <!-- icon="pi pi-heart" -->
+
                             <Button
-                              icon="pi pi-shopping-cart"
-                              label="Update Order"
+                              icon="pi pi-user-edit"
+                              label="Update Order Status"
                               :disabled="order.id === 'OUTOFSTOCK'"
                               class="flex-auto md:flex-initial whitespace-nowrap update-button"
                             ></Button>
@@ -258,6 +278,23 @@ function onStarClick(event, i) {
   modelValue.value = i
 }
 
+const toggleWishlist = async (product) => {
+  if (!product.id) return
+
+  try {
+    if (product.isInWishlist) {
+      await axiosInstance.delete(`/customer/wishlist/${product.id}`)
+    } else {
+      await axiosInstance.post(`/customer/wishlist/${product.id}`)
+    }
+    product.isInWishlist = !product.isInWishlist
+  } catch (error) {
+    console.error(
+      `Failed to ${product.isInWishlist ? 'remove' : 'add'} product to/from wishlist:`,
+      error.message,
+    )
+  }
+}
 onMounted(async () => {
   //onmounted when page loades, display the method inside, async waits for the request
   try {
@@ -280,7 +317,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 0;
-  min-height: 100vh;
+  min-height: 50vh;
   overflow-x: hidden;
   width: 100%;
   height: max-content;
@@ -349,10 +386,11 @@ onMounted(async () => {
   padding: 30px;
   height: max-content;
   min-width: max-content;
+  width: 55%;
 }
 .order-status-fitering-container {
+  width: 15%;
   position: relative;
-  width: 15vw;
   display: flex;
   flex-direction: column;
   gap: 2.5vh;
@@ -374,7 +412,9 @@ onMounted(async () => {
 }
 
 .product-image {
+  width: 10vw;
   max-width: 10vw;
+  height: auto;
   border-radius: 10px;
 }
 
@@ -390,8 +430,8 @@ onMounted(async () => {
 }
 .product-container {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: center;
   gap: 2vh;
   padding: 3vh 3vh;
   border-radius: 15px;
@@ -403,8 +443,29 @@ onMounted(async () => {
     transform 0.3s ease,
     box-shadow 0.3s ease;
 }
-.card {
+.product-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem;
 }
+/* .heart-button {
+  border: none;
+  background: transparent;
+}
+
+.heart-button .pi {
+  font-size: 1.5rem;
+  color: #ff6b6b;
+}
+
+.heart-button.heart-selected .pi {
+  color: #ff0000;
+}
+
+.heart-button:hover .pi {
+  color: #ff4040;
+} */
 .order-container {
   margin-top: 2vh;
   display: flex;
@@ -421,7 +482,7 @@ onMounted(async () => {
 /* .stars {
   display: inline-block;
   font-size: 20px;
-  color: #ffd700; /* Gold color for the stars 
+  color: #ffd700; /* Gold color for the stars
 }
 
 .star {
@@ -429,23 +490,23 @@ onMounted(async () => {
   width: 20px;
   height: 20px;
   background-size: cover;
-  background-image: url('path_to_your_star_image.svg'); /* Full star image 
+  background-image: url('path_to_your_star_image.svg'); /* Full star image
 }
 
-/* Full star - 100% gold 
-/* Full star - 100% gold 
+/* Full star - 100% gold
+/* Full star - 100% gold
 .star.full {
-  background-image: url('@/assets/star_full.svg'); /* Adjust path based on your project 
+  background-image: url('@/assets/star_full.svg'); /* Adjust path based on your project
 }
 
-/* Half star - 50% gold 
+/* Half star - 50% gold
 .star.half {
-  background-image: url('@/assets/star_half.svg'); /* Adjust path based on your project 
+  background-image: url('@/assets/star_half.svg'); /* Adjust path based on your project
 }
 
-/* Empty star - transparent or gray 
+/* Empty star - transparent or gray
 .star.empty {
-  background-image: url('@/assets/star_empty.svg'); /* Adjust path based on your project 
+  background-image: url('@/assets/star_empty.svg'); /* Adjust path based on your project
 }  */
 
 .stars-container {
@@ -489,15 +550,17 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   text-align: right;
+  align-items: flex-end;
   gap: 2vh;
 }
 .buttons-container {
   display: flex;
+  align-items: flex-end;
   gap: 1vw;
 }
 .footer {
   margin: 0;
   background-color: #fff;
-  padding: 20px;
+  padding-top: 20px;
 }
 </style>

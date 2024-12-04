@@ -1,5 +1,9 @@
 package com.example.isdfarmersmarket.web.controllers;
 
+import com.example.isdfarmersmarket.business.services.UserServiceImpl;
+import com.example.isdfarmersmarket.dao.enums.SearchUserByRoleParams;
+import com.example.isdfarmersmarket.web.commands.CustomerUpgradeCommand;
+import com.example.isdfarmersmarket.web.dto.PageResponseDTO;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.UserService;
 import com.example.isdfarmersmarket.web.commands.UpdateUserCommand;
@@ -10,6 +14,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -25,26 +31,30 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor
 public class UserController {
 
-    UserService userService;
+    UserServiceImpl userService;
 
     @GetMapping("/{id}")
-    public UserProfileDTO getUserProfile(@PathVariable Long id) {
-        return userService.getUserById(id);
+    public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable Long id) {
+        UserProfileDTO userProfile = userService.getUserById(id);
+        return ResponseEntity.ok(userProfile);
     }
-
-    @GetMapping
-    public List<UserProfileDTO> getAllUsers(Pageable pageable) {
-        return userService.getAllUsers(pageable);
-    }
-
     @GetMapping("/search")
-    public List<UserProfileDTO> searchUsersByFullName(@RequestParam String fullName, Pageable pageable) {
-        return userService.searchUsersByFullName(fullName, pageable);
+    public ResponseEntity<PageResponseDTO<UserProfileDTO>> searchUsers(
+            @RequestParam(required = false) String fullName,
+            @RequestParam(required = false) SearchUserByRoleParams roleParams,
+            Pageable pageable
+    ) {
+        PageResponseDTO<UserProfileDTO> users = userService.searchUsers(fullName, roleParams, pageable);
+        return ResponseEntity.ok(users);
     }
     @PutMapping()
     public ResponseEntity<UpdateUserDTO> updateUser(@RequestBody @Valid UpdateUserCommand updateUserCommand) {
         return ResponseEntity.status(OK).body(userService.updateUser(updateUserCommand));
     }
 
-
+    @PostMapping("/upgrade-to-farmer")
+    public ResponseEntity<UserProfileDTO> upgradeToFarmer(@RequestBody CustomerUpgradeCommand command) {
+        UserProfileDTO upgradedUser = userService.upgradeToFarmer(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(upgradedUser);
+    }
 }

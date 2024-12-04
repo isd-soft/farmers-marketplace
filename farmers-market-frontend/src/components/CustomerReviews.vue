@@ -79,7 +79,11 @@ export default {
 
     const fetchReviews = async () => {
       try {
-        const response = await axiosInstance.get(`/${props.reviewType}/${props.id}/reviews`, {
+        const reviewEndpoint = props.reviewType === 'product'
+          ? `/reviews/products/${props.id}`
+          : `/reviews/farmers/${props.id}`;
+
+        const response = await axiosInstance.get(reviewEndpoint, {
           params: { page: currentPage.value, size: pageSize.value },
         })
         reviews.value.push(...response.data.content)
@@ -90,6 +94,7 @@ export default {
         console.error('Failed to load reviews:', error.message)
       }
     }
+
 
     const loadMoreReviews = () => {
       currentPage.value += 1
@@ -102,7 +107,11 @@ export default {
         return
       }
       try {
-        const response = await axiosInstance.post(`customer/review/${props.reviewType}`, newReview.value)
+        const reviewEndpoint = props.reviewType === 'product'
+          ? `/reviews/products`
+          : `/reviews/farmers`;
+
+        const response = await axiosInstance.post(reviewEndpoint, newReview.value)
         reviews.value.unshift(response.data)
         newReview.value = {
           [`${props.reviewType}Id`]: props.id,
@@ -113,6 +122,7 @@ export default {
         console.error('Failed to submit review:', error.message)
       }
     }
+
 
     onMounted(() => {
       fetchReviews()

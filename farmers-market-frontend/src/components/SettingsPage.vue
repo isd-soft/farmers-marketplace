@@ -1,12 +1,12 @@
 <template>
   <div class="settings-page">
     <Header class="navbar"></Header>
-    <main class="main-content">
+    <div class="main-content">
       <div>
         <h1 class="p-card-title">User Settings</h1>
       </div>
 
-      <!-- Password (Edit Mode) -->
+      <div class="settings-content">
       <Card class="custom-card">
         <template #content>
           <div v-if="!isLoading">
@@ -142,7 +142,53 @@
           <Button label="Save Changes" icon="pi pi-save" @click="savePassword" class="save-button"></Button>
         </template>
       </Card>
-    </main>
+
+      <div v-if="user.isFarmer">
+        <div>
+          <h1 class="p-card-title">Delivery Types</h1>
+        </div>
+        <Card class="custom-card">
+          <template #content>
+            <DataTable
+            v-model:editingRows="editingRows"
+            :value="fetchedDeliveryTypes"
+            editMode="row"
+            dataKey="type"
+            @row-edit-save="onRowEditSave"
+                :pt="{
+                    column: {
+                        bodycell: ({ state }) => ({
+                            style:  state['d_editing']&&'padding-top: 0.75rem; padding-bottom: 0.75rem'
+                        })
+                    }
+                }"
+            >
+              <Column field="type" header="Shipping Type" style="width: 30%;">
+              </Column>
+
+              <Column field="price" header="Price">
+                <template #editor="{ data, field }">
+                  <InputText v-model="data[field]" :disabled="!data.existsForUser" fluid />
+                </template>
+              </Column>
+
+              <Column field="existsForUser" header="Availability" style="width: 10%;">
+                <template #body="{ data }">
+                  <Checkbox v-model="data.existsForUser" :binary="true" disabled />
+                </template>
+                <template #editor="{ data }">
+                  <Checkbox v-model="data.existsForUser" :binary="true" />
+                </template>
+              </Column>
+
+              <!-- Row Editor -->
+              <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:center"></Column>
+            </DataTable>
+          </template>
+        </Card>
+      </div>
+    </div>
+  </div>
     <Footer class="footer"></Footer>
   </div>
 </template>
@@ -151,6 +197,9 @@
 import Card from "primevue/card";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Checkbox from 'primevue/checkbox';
 import Header from "./Header.vue";
 import Footer from "../components/Footer.vue";
 import axiosInstance from "@/utils/axiosInstance";
@@ -162,6 +211,9 @@ import { reactive, computed } from "vue";
 export default {
   name: "SettingsPage",
   components: {
+    DataTable,
+    Column,
+    Checkbox,
     Header,
     Footer,
     Button,
@@ -247,14 +299,52 @@ export default {
       editProfile: false,
       editPassword: false,
       userId: null,
+      deliveryTypes: [
+        { name: "Courier", value: "COURIER"},
+        { name: "Post", value: "POSTAL"},
+        { name: "Pick-up", value: "PICKUP"},
+      ],
+      fetchedDeliveryTypes: [],
+      deliveryInputs: {},
+      editingRows: [],
     };
   },
 
   created() {
     this.fetchUserData();
+    this.fetchDeliveryTypes();
   },
 
   methods: {
+    async onRowEditSave(event) {
+      const { newData, index } = event;
+      const { id, type, price, existsForUser } = newData;
+
+      try {
+        if (existsForUser) {
+          const payload = { type, price };
+          if(!id) {
+            const response = await axiosInstance.post('/deliverytypes', payload);
+            const updatedData = { ...newData };
+            updatedData.id = response.data.id;
+            this.fetchedDeliveryTypes[index] = updatedData;
+          } else {
+            await axiosInstance.put('/deliverytypes', payload);
+            this.fetchedDeliveryTypes[index] = newData;
+          }
+        } else if (id) {
+          await axiosInstance.delete(`/deliverytypes/${id}`);
+          const updatedData = { ...newData };
+          delete updatedData.id;
+          updatedData.price = 0;
+          this.fetchedDeliveryTypes[index] = updatedData;
+        } console.log(this.fetchedDeliveryTypes);
+      } catch (error) {
+        console.error(error);
+      }
+
+    },
+
     toggleEditProfile() {
       if (!this.editProfile) {
         Object.assign(this.user, { ...this.user });
@@ -262,6 +352,15 @@ export default {
       }
       this.editProfile = !this.editProfile;
     },
+
+    async fetchDeliveryTypes() {
+        try {
+          const response = await axiosInstance.get('/deliverytypes');
+          this.fetchedDeliveryTypes = response.data;
+        } catch (error) {
+          console.error(error.message);
+        }
+      },
 
     async fetchUserData() {
       this.isLoading = true;
@@ -353,28 +452,40 @@ export default {
 </script>
 
 <style scoped>
+.p-card-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0 auto;
+  text-align: center;
+}
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 .error-message {
   color: red;
   font-size: 0.9rem;
 }
 
 .settings-page {
-  font-family: var(--font-family, 'Nunito', 'Helvetica', Arial, sans-serif);
-  color: var(--text-color, #495057);
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   overflow-x: hidden;
-  overflow-y: auto;
   width: 100%;
-  padding-top: 130px;
-  justify-content: center;
+  height: max-content;
 }
 
 .main-content {
-  flex: 1;
+  position: relative;
+  margin-top: 100px;
+  margin-bottom: 30px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 20px;
+  justify-content: flex-end;
+  width: 100%;
+  height: max-content;
 }
 
 .profile {
@@ -403,7 +514,7 @@ export default {
 }
 
 .custom-card {
-  width: 800px;
+  width: 80vh;
   padding: 20px;
   margin: 20px auto;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -429,8 +540,8 @@ export default {
 }
 
 .footer {
-  text-align: center;
-  padding: 10px;
-  bottom: 0;
+  margin: 0;
+  background-color: #fff;
+  padding: 20px;
 }
 </style>

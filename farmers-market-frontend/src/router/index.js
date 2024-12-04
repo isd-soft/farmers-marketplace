@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginPage from '@/components/LoginPage.vue'
 import HomePage from '@/components/HomePage.vue'
 import OrderPage from '@/components/OrderPage.vue'
+import CartPage from '@/components/CartPage.vue'
 import ProductPage from "@/components/ProductPage.vue";
 import WishlistPage from "@/components/WishlistPage.vue";
 import CreateProduct from "@/components/CreateProduct.vue";
@@ -11,6 +12,8 @@ import OrderManagementPage from '@/components/OrderManagementPage.vue';
 import MyProductsPage from "@/components/MyProductsPage.vue";
 import UpdateProduct from "@/components/UpdateProduct.vue";
 import SettingsPage from '@/components/SettingsPage.vue';
+import MessagingPage from '@/components/MessagingPage.vue'
+import ServerInfoPage from '@/components/ServerInfoPage.vue'
 import PerformancePage from '@/components/PerformancePage.vue';
 
 const routes = [
@@ -43,8 +46,18 @@ const routes = [
   },
   {
     path: '/orders',
-    name: 'Orders',
+    name: 'OrderPage',
     component: OrderPage,
+  },
+  {
+    path: '/cart',
+    name: 'CartPage',
+    component: CartPage,
+  },
+  {
+    path: '/ordermanagement',
+    name: 'Order Management',
+    component: OrderManagementPage,
   },
   {
     path: '/settings',
@@ -76,6 +89,16 @@ const routes = [
     path: '/ordermanagement',
     name: 'Order Management',
     component: OrderManagementPage,
+  },
+  {
+    path: '/messages',
+    name: 'Messages Page',
+    component: MessagingPage
+  },
+  {
+    path: '/server-info',
+    name: 'Server Info Page',
+    component: ServerInfoPage,
   },
   {
     path: '/performance',

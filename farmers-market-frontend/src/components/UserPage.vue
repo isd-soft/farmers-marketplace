@@ -11,11 +11,53 @@
       <h1 class="user-name">{{ user.firstName + ' ' + user.lastName }}</h1>
 
       <!-- Display rating and review count only if the user is a farmer -->
-      <div v-if="user.isFarmer" class="user-rating" >
+      <div v-if="user.isFarmer" class="user-rating">
         <Rating v-model="user.rating" readonly :stars="5" />
         <p>Based on {{ user.reviewCount }} Reviews</p>
       </div>
     </div>
+
+    <Button
+      v-if="user.isFarmer&&user.canMessage"
+      label="Send Message"
+      icon="pi pi-envelope"
+      class="p-button-rounded p-button-success"
+      @click="showDialog = true"
+    />
+
+    <Dialog
+      header="Send a Message"
+      v-model:visible="showDialog"
+      :modal="true"
+      :closable="true"
+      style="width: 30vw"
+    >
+      <div>
+        <textarea
+          v-model="messageContent"
+          placeholder="Write your message here..."
+          class="p-inputtextarea p-component"
+          rows="5"
+          style="width: 100%; margin-bottom: 1rem;"
+        ></textarea>
+
+        <div class="dialog-footer" style="text-align: right;">
+          <Button
+            label="Send"
+            icon="pi pi-check"
+            class="p-button-success"
+            @click="sendMessage"
+            style="margin-right: 0.5rem;"
+          />
+          <Button
+            label="Cancel"
+            icon="pi pi-times"
+            class="p-button-secondary"
+            @click="showDialog = false"
+          />
+        </div>
+      </div>
+    </Dialog>
 
     <div>
       <div v-if="user.isFarmer === true">
@@ -28,10 +70,18 @@
               <h2>Product Reviews</h2>
               <div v-if="productReviews.length > 0">
                 <ul class="review-list">
-                  <li v-for="review in productReviews" :key="review.id" class="review-item">
+                  <li
+                    v-for="review in productReviews"
+                    :key="review.id"
+                    class="review-item"
+                  >
                     <Card>
                       <template #content>
-                        <Rating v-model="review.rating" :readOnly="true" :stars="5" />
+                        <Rating
+                          v-model="review.rating"
+                          :readOnly="true"
+                          :stars="5"
+                        />
                         <p>{{ review.content }}</p>
                         <p><strong>Product:</strong> {{ review.product.title }}</p>
                       </template>
@@ -50,16 +100,23 @@
               </div>
             </div>
           </TabPanel>
-
           <TabPanel header="Farmer Reviews">
             <div class="reviews-panel">
               <h2>Farmer Reviews</h2>
               <div v-if="farmerReviews.length > 0">
                 <ul class="review-list">
-                  <li v-for="review in farmerReviews" :key="review.id" class="review-item">
+                  <li
+                    v-for="review in farmerReviews"
+                    :key="review.id"
+                    class="review-item"
+                  >
                     <Card>
                       <template #content>
-                        <Rating v-model="review.rating" :readOnly="true" :stars="5" />
+                        <Rating
+                          v-model="review.rating"
+                          :readOnly="true"
+                          :stars="5"
+                        />
                         <p>{{ review.content }}</p>
                         <p>
                           <strong>Farmer:</strong> {{ review.farmer.firstName }}
@@ -88,18 +145,19 @@
   </div>
 </template>
 <script>
-import { ref, onMounted } from 'vue'
-import axiosInstance from '@/utils/axiosInstance.js'
-import Card from 'primevue/card'
-import Rating from 'primevue/rating'
-import TabView from 'primevue/tabview'
-import TabPanel from 'primevue/tabpanel'
-import Button from 'primevue/button'
-import farmerAvatar from '@/assets/noPhoto.png'
-import customerAvatar from '@/assets/noPhoto.png'
-import CustomerReviews from '@/components/CustomerReviews.vue'
-import Header from '@/components/Header.vue'
-import Footer from '@/components/Footer.vue'
+import { ref, onMounted } from 'vue';
+import axiosInstance from '@/utils/axiosInstance.js';
+import Card from 'primevue/card';
+import Rating from 'primevue/rating';
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
+import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
+import farmerAvatar from '@/assets/noPhoto.png';
+import customerAvatar from '@/assets/noPhoto.png';
+import CustomerReviews from '@/components/CustomerReviews.vue';
+import Header from '@/components/Header.vue';
+import Footer from '@/components/Footer.vue';
 
 export default {
   name: 'UserPage',
@@ -112,18 +170,21 @@ export default {
     TabView,
     TabPanel,
     Button,
+    Dialog
   },
   props: ['id'],
   setup(props) {
     const user = ref({})
+    const currentUser = ref({});
     const productReviews = ref([])
     const farmerReviews = ref([])
-    const currentPage = ref(0);
     const newProductReview = ref({ customerId: props.id, rating: 0, content: '' })
     const newFarmerReview = ref({ customerId: props.id, rating: 0, content: '' })
     const isAllProductReviewsLoaded = ref(false)
     const isAllFarmerReviewsLoaded = ref(false)
     const loading = ref(true)
+    const messageContent = ref('');
+    const showDialog = ref(false);
 
     const fetchUser = async () => {
       try {
@@ -134,10 +195,23 @@ export default {
         console.error('Failed to fetch user:', error)
       }
     }
+    const sendMessage = async () => {
+      try {
+        await axiosInstance.post('/messaging/user', {
+          farmerId: user.value.id,
+          content: messageContent.value,
+        });
+        alert('Message sent successfully!');
+        showDialog.value = false;
+        messageContent.value = '';
+      } catch (error) {
+        console.error('Failed to send message:', error);
+      }
+    };
 
     const fetchProductReviews = async (page = 0, pageSize = 5) => {
       try {
-        const response = await axiosInstance.get(`customer/${props.id}/reviews/product`, {
+        const response = await axiosInstance.get(`/reviews/customers/${props.id}/product-reviews`, {
           params: { page, size: pageSize },
         })
         productReviews.value.push(...response.data.content)
@@ -148,10 +222,9 @@ export default {
         console.error('Failed to fetch product reviews:', error)
       }
     }
-
     const fetchFarmerReviews = async (page = 0, pageSize = 5) => {
       try {
-        const response = await axiosInstance.get(`customer/${props.id}/reviews/farmer`, {
+        const response = await axiosInstance.get(`/reviews/customers/${props.id}/farmer-reviews`, {
           params: { page, size: pageSize },
         })
         farmerReviews.value.push(...response.data.content)
@@ -163,11 +236,10 @@ export default {
       }
     }
 
-
     const submitProductReview = async () => {
       try {
         const response = await axiosInstance.post(
-          '/customer/review/product',
+          '/reviews/customers/product-reviews',
           newProductReview.value,
         )
         productReviews.value.unshift(response.data)
@@ -179,7 +251,7 @@ export default {
 
     const submitFarmerReview = async () => {
       try {
-        const response = await axiosInstance.post('/customer/review/farmer', newFarmerReview.value)
+        const response = await axiosInstance.post('/reviews/customers/farmer-reviews', newFarmerReview.value)
         farmerReviews.value.unshift(response.data)
         newFarmerReview.value = { customerId: props.id, rating: 0, content: '' }
       } catch (error) {
@@ -212,6 +284,9 @@ export default {
       newProductReview,
       newFarmerReview,
       loading,
+      showDialog,
+      messageContent,
+      sendMessage,
       isAllProductReviewsLoaded,
       isAllFarmerReviewsLoaded,
       farmerAvatar,
@@ -224,6 +299,7 @@ export default {
   },
 }
 </script>
+
 <style>
 .user-page {
   width: 80%;
