@@ -1,11 +1,10 @@
 package com.example.isdfarmersmarket.web.controllers;
 
-import com.example.isdfarmersmarket.business.services.interfaces.ReviewQueryService;
+import com.example.isdfarmersmarket.business.services.interfaces.GetReviewsService;
 import com.example.isdfarmersmarket.web.dto.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +13,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("reviews")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ReviewQueryController {
+public class GetReviewsController {
 
-    ReviewQueryService reviewQueryService;
+    GetReviewsService reviewQueryService;
 
     @GetMapping("/products/{productId}")
     public ResponseEntity<PageResponseDTO<ProductReviewDTO>> getProductReviews(

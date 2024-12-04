@@ -206,7 +206,7 @@ export default {
   },
   props: ['id'],
   setup(props) {
-     const buttonText = ref('Add to Cart'); 
+     const buttonText = ref('Add to Cart');
     const product = ref({})
     const quantity = ref(1)
     const isAllReviewsLoaded = ref(false)
@@ -256,9 +256,9 @@ export default {
       if (!product.value.id) return
       try {
         if (product.value.isInWishlist) {
-          await axiosInstance.delete(`/customer/wishlist/${props.id}`)
+          await axiosInstance.delete(`/wishlist/${props.id}`)
         } else {
-          await axiosInstance.post(`/customer/wishlist/${props.id}`)
+          await axiosInstance.post(`/wishlist/${props.id}`)
         }
         product.value.isInWishlist = !product.value.isInWishlist
       } catch (error) {
@@ -290,7 +290,7 @@ export default {
 
         buttonText.value = 'Item Added';
         setTimeout(() => {
-          buttonText.value = 'Add to Cart'; 
+          buttonText.value = 'Add to Cart';
         }, 3000);
 
       } catch (error) {
