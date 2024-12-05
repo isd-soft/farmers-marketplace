@@ -1,9 +1,12 @@
 package com.example.isdfarmersmarket.business.services.order;
 
+import com.example.isdfarmersmarket.business.events.OrderConfirmedEvent;
+import com.example.isdfarmersmarket.business.events.OrderPlacedEvent;
 import com.example.isdfarmersmarket.business.mapper.ItemInCartMapper;
 import com.example.isdfarmersmarket.business.mapper.ItemInOrderMapper;
 import com.example.isdfarmersmarket.business.mapper.OrderMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.services.EventPublisher;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
 import com.example.isdfarmersmarket.dao.models.*;
@@ -39,7 +42,7 @@ public class OrderServiceImpl implements OrderService {
     OrderMapper orderMapper;
     ItemInCartMapper itemInCartMapper;
     ItemInOrderMapper itemInOrderMapper;
-//    private final OrderConfirmedListener orderConfirmedListener;
+    EventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -94,7 +97,11 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(id, Order.class));
 
         order.setOrderStatus(OrderStatus.valueOf(updateOrderCommand.getOrderStatus().toUpperCase()));
-//        orderConfirmedListener.handleOnConfirmedOrder(order);
+
+        //OrderConfirmedEvent event = new OrderConfirmedEvent(this, order);
+        OrderPlacedEvent event = new OrderPlacedEvent(this, order);
+        eventPublisher.publishEvent(event);
+
         return orderMapper.map(orderRepository.save(order));
     }
 

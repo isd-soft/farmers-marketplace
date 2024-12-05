@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            margin-left: 20px;
+            color: #334155;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .email-header {
+            background-color: #179739;
+            padding: 10px;
+            text-align: center;
+            color: #fff;
+        }
+        .email-header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+        .email-body {
+            color: #333;
+            font-size: 16px;
+            padding: 10px 0;
+            margin-left: 20px;
+        }
+        .email-body h2 {
+            color: #179739;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .email-body ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .email-body ul li {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        .email-footer {
+            text-align: center;
+            background-color: #179739;
+            color: white;
+            padding: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="email-header">
+        <h1>Your Order Confirmation</h1>
+    </div>
+
+    <div class="email-body">
+        <h2>Thank you for your order, [[${firstName}]] [[${lastName}]]!</h2>
+        <p>Your order has been confirmed and is being processed. Below are the details:</p>
+
+        <ul>
+            <li><strong>Order Number:</strong> [[${orderId}]]</li>
+            <li><strong>Order Date:</strong> [[${orderDate}]]</li>
+            <li><strong>Total Price:</strong> $[[${totalPrice}]]</li>
+        </ul>
+
+        <h3>Products in Your Order:</h3>
+        <ul>
+            <th:block th:each="item : ${items}">
+                <li>
+                    [[${item.product.title}]] - Quantity: [[${item.quantity}]] - Price: $[[${item.pricePerUnit}]] - Total: $[[${item.totalPrice}]]
+                </li>
+            </th:block>
+        </ul>
+
+        <p>Thank you for shopping with us! You will receive further updates about your order as it is processed.</p>
+
+        <p>Best regards,<br>Farmers Market</p>
+    </div>
+
+    <div class="email-footer">
+        <p>&copy; 2024 Farmers Market. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>
