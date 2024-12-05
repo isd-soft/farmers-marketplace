@@ -5,6 +5,7 @@ import OrderPage from '@/components/OrderPage.vue'
 import CartPage from '@/components/CartPage.vue'
 import ProductPage from "@/components/ProductPage.vue";
 import WishlistPage from "@/components/WishlistPage.vue";
+import CreateProduct from "@/components/CreateProduct.vue";
 import UserPage from "@/components/UserPage.vue";
 import SearchProductsPage from "@/components/SearchProductsPage.vue";
 import OrderManagementPage from '@/components/OrderManagementPage.vue';
@@ -13,9 +14,9 @@ import UpdateProduct from "@/components/UpdateProduct.vue";
 import SettingsPage from '@/components/SettingsPage.vue';
 import MessagingPage from '@/components/MessagingPage.vue'
 import ScheduleOrder from "@/components/ScheduleOrder.vue";
-import CreateProduct from "@/components/CreateProduct.vue";
 import UpdateScheduledOrder from "@/components/UpdateScheduledOrder.vue";
 import MyScheduledOrders from "@/components/MyScheduledOrders.vue";
+import ServerInfoPage from '@/components/ServerInfoPage.vue'
 
 const routes = [
   {
@@ -114,6 +115,11 @@ const routes = [
     path: '/messages',
     name: 'Messages Page',
     component: MessagingPage
+  },
+  {
+    path: '/server-info',
+    name: 'Server Info Page',
+    component: ServerInfoPage,
   },
 ]
 
