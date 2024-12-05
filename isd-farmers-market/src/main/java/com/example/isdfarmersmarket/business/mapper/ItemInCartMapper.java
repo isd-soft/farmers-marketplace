@@ -3,7 +3,7 @@ package com.example.isdfarmersmarket.business.mapper;
 import com.example.isdfarmersmarket.dao.models.Image;
 import com.example.isdfarmersmarket.dao.models.ItemInCart;
 import com.example.isdfarmersmarket.dao.models.ItemInOrder;
-import com.example.isdfarmersmarket.web.commands.ItemInCartCommand;
+import com.example.isdfarmersmarket.web.commands.cart.AddItemInCartCommand;
 import com.example.isdfarmersmarket.web.dto.ItemInCartDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,7 +12,7 @@ import java.util.Base64;
 import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ItemInCartMapper {
-    ItemInCart mapToEntity(ItemInCartCommand itemInCartCommand);
+    ItemInCart mapToEntity(AddItemInCartCommand addItemInCartCommand);
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "productTitle", source = "product.title")
     @Mapping(target = "productDescription", source = "product.description")

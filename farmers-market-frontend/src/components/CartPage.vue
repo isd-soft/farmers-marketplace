@@ -42,14 +42,16 @@
                           :step="1"
                           mode="decimal"
                           fluid
+                          @input="updateCart(product)"
                         >
                           <template #incrementbuttonicon>
-                            <span class="pi pi-plus" />
+                            <span class="pi pi-plus"></span>
                           </template>
                           <template #decrementbuttonicon>
-                            <span class="pi pi-minus" />
+                            <span class="pi pi-minus"></span>
                           </template>
                         </InputNumber>
+
                         <p class="unit-type-text">{{ product.unitType }}</p>
                         <i class="pi pi-trash" @click="removeItemFromCart(product.id)"></i>
                       </div>
@@ -201,13 +203,40 @@ onMounted(async () => {
   }
 })
 
+// const updateCart = async (id) => {
+  // try {
+  //   console.log('dscd', id)
+  //   const response = await axios.put(`/cart/${product.id}`, {
+  //     quantity: product.quantity,
+  //   })
+  //   console.log('Cart updated:', response.data)
+  // } catch (error) {
+  //   console.error('Error updating cart:', error)
+  // }
+// }
+
+const updateCart = async (product) => {
+  if (!product.id) {
+    console.error('Invalid product for updateCart');
+    return;
+  }
+  try {
+    const response = await axiosInstance.put(`/cart/${product.id}`, {
+      quantity: product.quantity,
+    });
+    console.log('Cart updated:', response.data);
+  } catch (error) {
+    console.error('Error updating cart:', error);
+  }
+};
+
 const removeItemFromCart = async (id) => {
   console.log(id)
   if (!id) {
     alert('Invalid product')
     return
   }
-  loginValidation();
+  loginValidation()
   try {
     const response = await axiosInstance.delete(`/cart/${id}`)
     cartProducts.value = cartProducts.value.filter((p) => p.id !== id)
@@ -221,25 +250,38 @@ const removeItemFromCart = async (id) => {
   }
 }
 
+console.log(cartProducts.value)
 const addProductsToOrder = async () => {
-  loginValidation();
-  try {
-    itemInOrder={
-      productId: product.value.id,
-      productTitle: product.value.productTitle,
-      quantity: quantity.value,
-      pricePerUnit: product.value.pricePerUnit,
-      imageBase64: product.value.imageBase64,
-
-    }
-    console.log(itemInOrder)
-    const response = await axiosInstance.post(`/order`,itemInOrder)
-    cartProducts.value = cartProducts.value.filter((p) => p.id !== id)
-  } catch (error) {
+  if (cartProducts.value.length === 0) {
     toast.add({
       severity: 'error',
-      summary: 'Error',
-      detail: 'Failed to remove item from cart. Please try again.',
+      summary: 'Empty Cart',
+      detail: 'Your cart is empty. Add items before proceeding.',
+      life: 3000,
+    })
+    return
+  }
+  loginValidation()
+  try {
+    const response = await axiosInstance.post(`/order`)
+    cartProducts.value = []
+    buttonBuyFor.value = 'Buy for'
+
+    toast.add({
+      severity: 'success',
+      summary: 'Order Created',
+      detail: 'Your order has been successfully created!',
+      life: 3000,
+    })
+
+    console.log('Order Response', response.data)
+  } catch (error) {
+    console.error('Order Creation Failed', error)
+
+    toast.add({
+      severity: 'error',
+      summary: 'Order Creation Failed',
+      detail: 'An error occurred while creating your order. Please try again.',
       life: 3000,
     })
   }

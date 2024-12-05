@@ -14,6 +14,12 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemInOrder {
+    public ItemInOrder(Product product, int quantity, BigDecimal pricePerUnit) {
+        this.product = product;
+        this.quantity = quantity;
+        this.pricePerUnit = pricePerUnit;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_in_order_sequence")
     private Long id;

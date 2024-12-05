@@ -1,17 +1,17 @@
-package com.example.isdfarmersmarket.business.services;
+package com.example.isdfarmersmarket.business.services.cart;
 
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException;
 import com.example.isdfarmersmarket.business.mapper.ItemInCartMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
-import com.example.isdfarmersmarket.business.services.interfaces.CartService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.models.ItemInCart;
 import com.example.isdfarmersmarket.dao.models.Product;
 import com.example.isdfarmersmarket.dao.models.User;
-import com.example.isdfarmersmarket.dao.repositories.CartRepository;
+import com.example.isdfarmersmarket.dao.repositories.ItemInCartRepository;
 import com.example.isdfarmersmarket.dao.repositories.ProductRepository;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
-import com.example.isdfarmersmarket.web.commands.ItemInCartCommand;
+import com.example.isdfarmersmarket.web.commands.cart.AddItemInCartCommand;
+import com.example.isdfarmersmarket.web.commands.cart.UpdateItemInCartCommand;
 import com.example.isdfarmersmarket.web.dto.ItemInCartDTO;
 import jakarta.persistence.EntityExistsException;
 import lombok.AccessLevel;
@@ -27,28 +27,28 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CartServiceImpl implements CartService {
-    CartRepository cartRepository;
+    ItemInCartRepository itemInCartRepository;
     ProductRepository productRepository;
     UserRepository userRepository;
     ItemInCartMapper itemInCartMapper;
 
     @Override
     @Transactional
-    public ItemInCartDTO addToCart(ItemInCartCommand itemInCartCommand) {
+    public ItemInCartDTO addToCart(AddItemInCartCommand addItemInCartCommand) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException(principal.getId(), User.class));
         Product product = productRepository
-                .findById(itemInCartCommand.getProductId())
-                .orElseThrow(() -> new EntityNotFoundException(itemInCartCommand.getProductId(), Product.class));
+                .findById(addItemInCartCommand.getProductId())
+                .orElseThrow(() -> new EntityNotFoundException(addItemInCartCommand.getProductId(), Product.class));
 
-        if(cartRepository.existsByUserAndProduct(user, product)) {
+        if(itemInCartRepository.existsByUserAndProduct(user, product)) {
             throw new EntityExistsException("Item already exists");
         }
-        ItemInCart newItemInCart = itemInCartMapper.mapToEntity(itemInCartCommand);
+        ItemInCart newItemInCart = itemInCartMapper.mapToEntity(addItemInCartCommand);
         newItemInCart.setUser(user);
         newItemInCart.setProduct(product);
-        cartRepository.save(newItemInCart);
+        itemInCartRepository.save(newItemInCart);
         return itemInCartMapper.mapToDTO(newItemInCart);
     }
 
@@ -56,7 +56,7 @@ public class CartServiceImpl implements CartService {
     @Transactional
     public ItemInCartDTO removeFromCart(Long id) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
-        ItemInCart cartToRemove = cartRepository
+        ItemInCart cartToRemove = itemInCartRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(id, ItemInCart.class));
 
@@ -66,8 +66,18 @@ public class CartServiceImpl implements CartService {
         if (!cartToRemove.getUser().equals(authenticatedUser)) {
             throw new AccessDeniedException("test");
         }
-        cartRepository.delete(cartToRemove);
+        itemInCartRepository.delete(cartToRemove);
         return itemInCartMapper.mapToDTO(cartToRemove);
+    }
+
+    @Override
+    @Transactional
+    public ItemInCartDTO updateCart(Long id,UpdateItemInCartCommand updateItemInCartCommand){
+        ItemInCart itemInCart = itemInCartRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(id, ItemInCart.class));
+
+        itemInCart.setQuantity(updateItemInCartCommand.getQuantity());
+        return itemInCartMapper.mapToDTO(itemInCartRepository.save(itemInCart));
     }
 
     @Override
@@ -78,7 +88,7 @@ public class CartServiceImpl implements CartService {
                 .findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException(principal.getId(), User.class));
 
-        List<ItemInCart> itemsInCart = cartRepository.getAllByUser(authenticatedUser);
+        List<ItemInCart> itemsInCart = itemInCartRepository.getAllByUser(authenticatedUser);
         return itemInCartMapper.mapToDTOs(itemsInCart);
     }
 }

@@ -1,30 +1,32 @@
 package com.example.isdfarmersmarket.business.services.order;
 
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException;
 import com.example.isdfarmersmarket.business.mapper.ItemInCartMapper;
 import com.example.isdfarmersmarket.business.mapper.ItemInOrderMapper;
 import com.example.isdfarmersmarket.business.mapper.OrderMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
-import com.example.isdfarmersmarket.dao.models.*;
+import com.example.isdfarmersmarket.dao.models.ItemInCart;
+import com.example.isdfarmersmarket.dao.models.ItemInOrder;
+import com.example.isdfarmersmarket.dao.models.Order;
+import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.repositories.*;
-import com.example.isdfarmersmarket.dao.specifications.OrderSpecification;
 import com.example.isdfarmersmarket.web.commands.order.UpdateOrderCommand;
-import com.example.isdfarmersmarket.web.dto.ItemInOrderDTO;
 import com.example.isdfarmersmarket.web.dto.OrderDTO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +37,7 @@ public class OrderServiceImpl implements OrderService {
     ProductRepository productRepository;
     UserRepository userRepository;
     ItemInOrderRepository itemInOrderRepository;
-    CartRepository cartRepository;
+    ItemInCartRepository itemInCartRepository;
     OrderMapper orderMapper;
     ItemInCartMapper itemInCartMapper;
     ItemInOrderMapper itemInOrderMapper;
@@ -47,43 +49,39 @@ public class OrderServiceImpl implements OrderService {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
 
         User user = userRepository.findById(principal.getId())
-                .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(principal.getId(), User.class));
+                .orElseThrow(() -> new EntityNotFoundException(principal.getId(), User.class));
 
-        List<ItemInCart> itemsInCart = cartRepository.getAllByUser(user);
-        List<ItemInOrder> itemsInOrder = itemInCartMapper.mapToItemInOrder(itemsInCart);
-
+        List<ItemInCart> itemsInCart = itemInCartRepository.getAllByUser(user);
+        List<ItemInOrder> itemsInOrder = itemsInCart.stream()
+                .map(item -> new ItemInOrder(item.getProduct(), item.getQuantity(), item.getProduct().getPricePerUnit()))
+                .toList();
         Map<Long, List<ItemInOrder>> groupedByFarmer = itemsInOrder.stream()
                 .collect(Collectors.groupingBy(item -> item.getProduct().getFarmer().getId()));
 
-        List<Order> orders = groupedByFarmer.entrySet().stream()
-                .map(entry -> {
-                    Long farmerId = entry.getKey();
-                    List<ItemInOrder> items = entry.getValue();
+        groupedByFarmer.forEach((farmerId, items) -> {
+            BigDecimal totalPrice = new BigDecimal(0);
+            items.forEach(item -> {
+                item.setPricePerUnit(item.getProduct().getPricePerUnit().subtract(item.getProduct()
+                        .getPricePerUnit().multiply(BigDecimal.valueOf(item.getProduct().getDiscountPercents() / 100))));
+                item.getProduct().setQuantity(item.getProduct().getQuantity() - item.getQuantity());
+            });
 
-                    BigDecimal totalPrice = items.stream()
-                            .map(item -> item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())))
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            for (var item : items) {
+                totalPrice = totalPrice.add(item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())));
+            }
 
-                    Order order = Order.builder()
-                            .customer(user)
-                            .farmer(userRepository.findById(farmerId)
-                                    .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(farmerId, Order.class)))
-                            .orderStatus(OrderStatus.PENDING)
-                            .totalPrice(totalPrice)
-                            .createdDate(LocalDateTime.now())
-                            .build();
+            Order order = new Order(user, userRepository.findById(farmerId)
+                    .orElseThrow(() -> new EntityNotFoundException(farmerId, Order.class)),
+                    OrderStatus.PENDING,
+                    totalPrice);
 
-                    orderRepository.save(order);
+            orderRepository.save(order);
+            items.forEach(item -> item.setOrder(order));
+            itemInOrderRepository.saveAll(items);
+        });
 
-                    items.forEach(item -> item.setOrder(order));
-                    itemInOrderRepository.saveAll(items);
-
-                    return order;
-                })
-                .toList();
-
-        cartRepository.deleteAllByUser(user);
-        return orderMapper.mapOrders(orders);
+        itemInCartRepository.deleteAllByUser(user);
+        return Collections.emptyList();
     }
 
 
@@ -120,32 +118,35 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderDTO> getAllOrders() {
-        JwtPrincipal principal = SecurityUtils.getPrincipal();
-        User authenticatedUser = userRepository.findById(principal.getId())
-                .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(principal.getId(), User.class));
-//           List<Order> orders = orderRepository.getAllByUser(authenticatedUser);
-        List<Order> orders = orderRepository.findAll();
-
-        return orders.stream()
-                .map(order -> {
-                    List<ItemInOrderDTO> itemInOrderDTOs = itemInOrderMapper.mapOrders(order.getItemsInOrder().stream().toList());
-
-                    return OrderDTO.builder()
-                            .id(order.getId())
-                            .orderStatus(order.getOrderStatus().name())
-                            .userId(authenticatedUser.getId())
-                            .totalPrice(order.getTotalPrice())
-                            .products(itemInOrderDTOs.stream().collect(Collectors.toSet()))
-                            .createdDate(order.getCreatedDate())
-                            .build();
-                }).toList();
+//        JwtPrincipal principal = SecurityUtils.getPrincipal();
+//        User authenticatedUser = userRepository.findById(principal.getId())
+//                .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(principal.getId(), User.class));
+//
+//        List<Order> orders = orderRepository.findAllByCustomerId(authenticatedUser.getId());
+//
+//        return orders.stream()
+//                .map(order -> {
+//                    List<ItemInOrderDTO> itemInOrderDTOs = itemInOrderMapper.mapOrders(order.getItemsInOrder().stream().toList());
+//
+//                    OrderDTO orderDTO = orderMapper.map(order);
+//                    orderDTO.setUserId(authenticatedUser.getId());
+//                    orderDTO.setProducts(itemInOrderDTOs.stream().collect(Collectors.toSet()));
+//                }).toList();
+        return null;
     }
+
     @Transactional(readOnly = true)
     @Override
     public Page<OrderDTO> getCurrentUserOrders(Pageable pageable) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         Long customerId = principal.getId();
-        return orderRepository.findAllByCustomerId(customerId, pageable)
+        Page<OrderDTO> orderDTOPage = orderRepository.findAllByCustomerId(customerId, pageable)
                 .map(orderMapper::map);
+        orderDTOPage.forEach(orderDTO -> {
+            Order order = orderRepository.findById(orderDTO.getId()).orElseThrow();
+            Set<ItemInOrder> itemInOrders = order.getItemsInOrder();
+            orderDTO.setItemsInOrder(itemInOrderMapper.mapOrders(itemInOrders));
+        });
+        return orderDTOPage;
     }
 }

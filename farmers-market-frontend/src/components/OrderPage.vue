@@ -59,7 +59,7 @@
                       }"
                     >
                       <div
-                        v-for="(product, order) in order.products"
+                        v-for="(product, order) in order.itemsInOrder"
                         :key="product.id"
                         class="md:w-40 relative product-image-title-container"
                       >
@@ -288,8 +288,8 @@ const toggleWishlist = async (product) => {
 onMounted(async () => {
   //onmounted when page loades, display the method inside, async waits for the request
   try {
-    const response = await axiosInstance.get('/order') // Send request to server.
-    orders.value = response.data // Assign response data to orders.
+    const response = await axiosInstance.get('/order/management') // Send request to server.
+    orders.value = response.data.content // Assign response data to orders.
     console.log(orders.value)
   } catch (err) {
     console.error('Failed to fetch orders', err)

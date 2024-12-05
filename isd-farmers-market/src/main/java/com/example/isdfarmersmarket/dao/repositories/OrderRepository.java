@@ -20,4 +20,5 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
         long countOrdersByProductId(@Param("productId") Long productId);
 
         Page<Order> findAllByCustomerId(Long customerId, Pageable pageable);
+        List<Order> findAllByCustomerId(Long customerId);
 }
