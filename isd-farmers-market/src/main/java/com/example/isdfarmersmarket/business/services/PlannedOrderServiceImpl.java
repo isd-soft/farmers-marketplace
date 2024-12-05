@@ -33,7 +33,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PlannedOrderServiceImpl implements PlannedOrderService {
-    CartRepository cartRepository;
+    ItemInCartRepository itemInCartRepository;
     PlannedOrderRepository plannedOrderRepository;
     OrderRepository orderRepository;
     UserRepository userRepository;

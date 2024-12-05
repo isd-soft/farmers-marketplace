@@ -18,8 +18,8 @@ import java.util.Set;
 public class OrderDTO {
     Long id;
     String orderStatus;
-    Long userId;
+    UserProfileDTO customer;
     BigDecimal totalPrice;
-    Set<ItemInOrderDTO> products = new HashSet<>();
+    Set<ItemInOrderDTO> itemsInOrder = new HashSet<>();
     LocalDateTime createdDate = LocalDateTime.now();
 }

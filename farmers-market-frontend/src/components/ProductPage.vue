@@ -1,6 +1,7 @@
 <template>
   <div class="home">
     <Header class="navbar"></Header>
+    <Toast />
     <Card
       :style="{
         position: 'absolute',
@@ -119,6 +120,7 @@
                   <Button
                     class="add-to-cart-button"
                     @click="addToCart"
+                    severity="warn"
                     style="
                       width: 12em;
                       color: white;
@@ -193,6 +195,8 @@ import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import CustomerReviews from '@/components/CustomerReviews.vue'
 import { isLoggedIn } from '@/shared/authState.js'
+import Toast from 'primevue/toast'
+import { useToast } from 'primevue/usetoast'
 import router from "@/router/index.js";
 
 export default {
@@ -209,14 +213,15 @@ export default {
     Card,
     InputNumber,
     ProgressSpinner,
+    Toast,
   },
   props: ['id'],
   setup(props) {
-     const buttonText = ref('Add to Cart');
+    const buttonText = ref('Add to Cart')
     const product = ref({})
     const quantity = ref(1)
     const isAllReviewsLoaded = ref(false)
-
+    const toast = useToast()
     const images = ref([])
 
     const responsiveOptions = ref([
@@ -282,27 +287,48 @@ export default {
         alert('Invalid product or quantity')
         return
       }
-          if (!isLoggedIn.value) {
-        window.location.href = "/login";
-        return;
+      if (!isLoggedIn.value) {
+        window.location.href = '/login'
+        return
       }
 
       const itemInCart = {
         productId: product.value.id,
         quantity: quantity.value,
       }
-
       try {
         const response = await axiosInstance.post('/cart', itemInCart)
         console.log('Added to cart:', response.data)
 
-        buttonText.value = 'Item Added';
-        setTimeout(() => {
-          buttonText.value = 'Add to Cart';
-        }, 3000);
+        toast.add({
+          severity: 'success',
+          summary: 'Item Added to cart',
+          detail: 'This item was successfully added to cart.',
+          life: 4000,
+        })
 
+        buttonText.value = 'Item Added'
+        setTimeout(() => {
+          buttonText.value = 'Add to Cart'
+        }, 3000)
       } catch (error) {
         console.error('Error adding to cart:', error)
+
+        if (error.response && error.response.status === 409) {
+          toast.add({
+            severity: 'warn',
+            summary: 'Item Already in Cart',
+            detail: 'This item is already in your cart.',
+            life: 3000,
+          })
+        } else {
+          toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to add item to cart. Please try again later.',
+            life: 3000,
+          })
+        }
       }
     }
 
@@ -314,6 +340,7 @@ export default {
       buttonText,
       product,
       quantity,
+      toast,
       images,
       responsiveOptions,
       isLoading,

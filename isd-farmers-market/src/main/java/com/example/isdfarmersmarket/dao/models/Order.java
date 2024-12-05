@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name="orders")
+@Table(name = "orders")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -19,7 +19,7 @@ import java.util.Set;
 @Builder
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_sequence")
     private Long id;
 
     @Enumerated(EnumType.STRING)
@@ -34,14 +34,21 @@ public class Order {
     @JoinColumn(name = "farmer_id", nullable = false)
     private User farmer;
 
-    @Column(name="total_price", nullable = false)
+    @Column(name = "total_price", nullable = false)
     private BigDecimal totalPrice;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ItemInOrder> itemsInOrder = new HashSet<>();
 
-    @Column(name="created_date", columnDefinition = "TimeStamp")
+    @Column(name = "created_date", columnDefinition = "TimeStamp")
     private LocalDateTime createdDate = LocalDateTime.now();
+
+    public Order(User customer, User farmer, OrderStatus orderStatus, BigDecimal totalPrice) {
+        this.customer = customer;
+        this.farmer = farmer;
+        this.orderStatus = orderStatus;
+        this.totalPrice = totalPrice;
+    }
 
     @Override
     public boolean equals(Object o) {
