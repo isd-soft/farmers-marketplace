@@ -13,7 +13,6 @@ import com.example.isdfarmersmarket.dao.repositories.*;
 import com.example.isdfarmersmarket.web.commands.order.UpdateOrderCommand;
 import com.example.isdfarmersmarket.web.dto.ItemInOrderDTO;
 import com.example.isdfarmersmarket.web.dto.OrderDTO;
-import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

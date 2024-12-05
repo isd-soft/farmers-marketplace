@@ -15,7 +15,6 @@
     <FloatLabel variant="on" class="search-products-input">
       <Select
         id="product-category"
-        v-if="categories.length > 0"
         v-model="category"
         :options="categories"
         optionLabel="label"
@@ -28,7 +27,6 @@
       <FloatLabel variant="on" class="search-products-input">
         <Select
           id="product-sort"
-          v-if="categories.length > 0"
           v-model="sortBy"
           :options="sortOptions"
           optionLabel="label"
@@ -192,7 +190,7 @@ import useVuelidate from "@vuelidate/core";
   position: relative;
   display: flex;
   flex-direction: column;
-  max-width: 1200px;
+  max-width: 80%;
   width: calc(100% - 40px);
   margin-left: 20px;
   margin-right: 20px;

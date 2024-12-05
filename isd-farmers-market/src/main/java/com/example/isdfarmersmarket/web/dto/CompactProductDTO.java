@@ -21,4 +21,5 @@ public class CompactProductDTO {
     Boolean isInWishlist;
     private Float rating;
     private ImageDTO image;
+    private long orders;
 }

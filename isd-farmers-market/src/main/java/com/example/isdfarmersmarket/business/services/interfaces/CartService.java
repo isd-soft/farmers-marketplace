@@ -12,5 +12,4 @@ public interface CartService {
     ItemInCartDTO removeFromCart(Long id);
 
     List<ItemInCartDTO> getAllCartItems();
-
 }

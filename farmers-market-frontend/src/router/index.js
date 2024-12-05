@@ -12,6 +12,10 @@ import MyProductsPage from "@/components/MyProductsPage.vue";
 import UpdateProduct from "@/components/UpdateProduct.vue";
 import SettingsPage from '@/components/SettingsPage.vue';
 import MessagingPage from '@/components/MessagingPage.vue'
+import ScheduleOrder from "@/components/ScheduleOrder.vue";
+import CreateProduct from "@/components/CreateProduct.vue";
+import UpdateScheduledOrder from "@/components/UpdateScheduledOrder.vue";
+import MyScheduledOrders from "@/components/MyScheduledOrders.vue";
 
 const routes = [
   {
@@ -45,6 +49,23 @@ const routes = [
     path: '/orders',
     name: 'OrderPage',
     component: OrderPage,
+  },
+  {
+    path: '/schedule-order/:id',
+    name: 'ScheduleOrder',
+    component: ScheduleOrder,
+    props: true,
+  },
+  {
+    path: '/schedule-order/management',
+    name: 'MyScheduledOrders',
+    component: MyScheduledOrders,
+  },
+  {
+    path: '/schedule-order/update/:id',
+    name: 'UpdateScheduledOrder',
+    component: UpdateScheduledOrder,
+    props: true,
   },
   {
     path: '/cart',

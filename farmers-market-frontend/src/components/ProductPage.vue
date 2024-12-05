@@ -130,13 +130,18 @@
                   >
                     {{ buttonText }}
                   </Button>
+                  <Button
+                    label="Schedule"
+                    style="margin-left: 10px;"
+                    @click="scheduleProduct(product.id)"
+                  />
 
                   <i
                     :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
                     style="
                       font-size: 2.5rem;
                       cursor: pointer;
-                      color: red;
+                      color: #179739;
                       margin-left: 10px;
                       vertical-align: middle;
                     "
@@ -188,6 +193,7 @@ import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import CustomerReviews from '@/components/CustomerReviews.vue'
 import { isLoggedIn } from '@/shared/authState.js'
+import router from "@/router/index.js";
 
 export default {
   name: 'ProductPage',
@@ -206,7 +212,7 @@ export default {
   },
   props: ['id'],
   setup(props) {
-     const buttonText = ref('Add to Cart'); 
+     const buttonText = ref('Add to Cart');
     const product = ref({})
     const quantity = ref(1)
     const isAllReviewsLoaded = ref(false)
@@ -251,7 +257,9 @@ export default {
         isLoading.value = false
       }
     }
-
+    const scheduleProduct = (productId) => {
+      router.push(`/schedule-order/${productId}`);
+    }
     const toggleWishlist = async () => {
       if (!product.value.id) return
       try {
@@ -290,7 +298,7 @@ export default {
 
         buttonText.value = 'Item Added';
         setTimeout(() => {
-          buttonText.value = 'Add to Cart'; 
+          buttonText.value = 'Add to Cart';
         }, 3000);
 
       } catch (error) {
@@ -313,6 +321,7 @@ export default {
       isAllReviewsLoaded,
       addToCart,
       toggleWishlist,
+      scheduleProduct,
     }
   },
 }

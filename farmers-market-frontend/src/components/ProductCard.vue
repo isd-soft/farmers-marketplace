@@ -31,7 +31,7 @@
           </span>
         </div>
         <div class="product-icons">
-          <i class="pi pi-shopping-cart cart-icon icons"></i>
+          <i id="addToCart" @click="addToCart" class="pi pi-shopping-cart cart-icon icons" ></i>
           <i
             :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
             class="icons"
@@ -45,8 +45,9 @@
 </template>
 
 <script>
-import { computed } from "vue";
+import {computed, ref} from "vue";
 import axiosInstance from "@/utils/axiosInstance.js";
+import {isLoggedIn} from "@/shared/authState.js";
 
 export default {
   name: "ProductCard",
@@ -57,6 +58,7 @@ export default {
     },
   },
   setup(props) {
+    const quantity = props.product.quantity
     const toggleWishlist = async () => {
       if (!props.product.id) return;
       try {
@@ -75,6 +77,34 @@ export default {
         );
       }
     };
+    const addToCart = async () => {
+      if (!props.product.id || !quantity.value) {
+        alert('Invalid product or quantity')
+        return
+      }
+      if (!isLoggedIn.value) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const itemInCart = {
+        productId: props.product.id,
+        quantity: quantity.value,
+      }
+
+      try {
+        const response = await axiosInstance.post('/cart', itemInCart)
+        console.log('Added to cart:', response.data)
+
+        buttonText.value = 'Item Added';
+        setTimeout(() => {
+          buttonText.value = 'Add to Cart';
+        }, 3000);
+
+      } catch (error) {
+        console.error('Error adding to cart:', error)
+      }
+    }
 
     const discountedPrice = computed(() => {
       return (
@@ -86,6 +116,8 @@ export default {
     return {
       toggleWishlist,
       discountedPrice,
+      addToCart,
+      quantity,
     };
   },
   methods: {
@@ -109,8 +141,8 @@ export default {
   flex-direction: column;
   justify-content: space-between;
   background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
   max-width: 387px;
@@ -119,7 +151,7 @@ export default {
 
 .product-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 15px rgba(51, 65, 85, 0.3);
 }
 
 .image-container {

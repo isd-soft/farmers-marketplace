@@ -1,6 +1,6 @@
 package com.example.isdfarmersmarket.web.controllers;
 
-import com.example.isdfarmersmarket.business.services.CategoryService;
+import com.example.isdfarmersmarket.business.services.interfaces.CategoryService;
 import com.example.isdfarmersmarket.web.dto.CategoryDTO;
 import com.example.isdfarmersmarket.web.commands.CreateCategoryCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateCategoryCommand;

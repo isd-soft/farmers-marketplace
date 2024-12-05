@@ -1,5 +1,6 @@
 package com.example.isdfarmersmarket.business.services;
 
+import com.example.isdfarmersmarket.business.services.interfaces.CategoryService;
 import com.example.isdfarmersmarket.dao.models.Category;
 import com.example.isdfarmersmarket.dao.repositories.CategoryRepository;
 import com.example.isdfarmersmarket.business.mapper.DaoMapper;

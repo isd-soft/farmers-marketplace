@@ -19,17 +19,24 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
     private Long id;
+
     @Column(length = 80)
     private String title;
+
     @Column(length = 1000)
     private String description;
+
     @Column(name="unit_type")
     private UnitType unitType;
+
     @Column(name="price_per_unit")
     private BigDecimal pricePerUnit;
+
     @Column(name="discount_percents")
     private int discountPercents;
+
     private int quantity;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;

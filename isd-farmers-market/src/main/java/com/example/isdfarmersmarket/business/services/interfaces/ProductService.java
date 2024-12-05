@@ -1,18 +1,11 @@
-package com.example.isdfarmersmarket.business.services;
+package com.example.isdfarmersmarket.business.services.interfaces;
 
 
-import com.example.isdfarmersmarket.business.security.JwtPrincipal;
-import com.example.isdfarmersmarket.dao.models.Product;
 import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateProductCommand;
 import com.example.isdfarmersmarket.web.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public interface ProductService {
     ProductDTO createProduct(CreateProductCommand createProductCommand);

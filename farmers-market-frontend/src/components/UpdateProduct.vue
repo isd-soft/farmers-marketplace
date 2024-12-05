@@ -268,7 +268,7 @@ export default {
   margin-left: 20px;
   margin-right: 20px;
   width: calc(100% - 40px);
-  max-width: 900px;
+  max-width: 80%;
   display: flex;
   flex-direction: column;
   justify-content: center;
