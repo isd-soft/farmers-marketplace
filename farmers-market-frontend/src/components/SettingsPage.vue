@@ -504,6 +504,7 @@ export default {
   font-size: 2rem;
   font-weight: bold;
   margin: 0;
+  color: #334155;
 }
 
 .p-card-subtitle {
@@ -517,7 +518,7 @@ export default {
   width: 80vh;
   padding: 20px;
   margin: 20px auto;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
   font-family: inherit;
 }
 
@@ -541,7 +542,6 @@ export default {
 
 .footer {
   margin: 0;
-  background-color: #fff;
   padding: 20px;
 }
 </style>
