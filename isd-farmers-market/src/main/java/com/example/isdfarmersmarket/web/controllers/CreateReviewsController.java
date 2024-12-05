@@ -1,6 +1,6 @@
 package com.example.isdfarmersmarket.web.controllers;
 
-import com.example.isdfarmersmarket.business.services.interfaces.ReviewCommandService;
+import com.example.isdfarmersmarket.business.services.interfaces.CreateReviewsService;
 import com.example.isdfarmersmarket.web.commands.FarmerReviewCommand;
 import com.example.isdfarmersmarket.web.commands.ProductReviewCommand;
 import com.example.isdfarmersmarket.web.dto.FarmerReviewDTO;
@@ -19,9 +19,9 @@ import jakarta.validation.Valid;
 @RequestMapping("reviews")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ReviewCommandController {
+public class CreateReviewsController {
 
-    ReviewCommandService reviewCommandService;
+    CreateReviewsService reviewCommandService;
 
     @PreAuthorize("hasRole('CUSTOMER') and not hasRole('FARMER')")
     @PostMapping("/farmers")

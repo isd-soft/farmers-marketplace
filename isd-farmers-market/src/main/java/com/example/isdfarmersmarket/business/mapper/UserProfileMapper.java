@@ -32,7 +32,7 @@ public interface UserProfileMapper {
 
     default boolean canMessage(User user) {
         JwtPrincipal currentUser = SecurityUtils.getPrincipal();
-        return currentUser.getRoles().contains(ERole.CUSTOMER)
+        return !currentUser.getRoles().contains(ERole.FARMER)
                 && user.getRoles().stream()
                 .anyMatch(role -> role.getAuthority().equals(ERole.FARMER.name()));
     }
