@@ -19,7 +19,7 @@ import java.util.Set;
 @Builder
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_sequence")
     private Long id;
 
     @Enumerated(EnumType.STRING)

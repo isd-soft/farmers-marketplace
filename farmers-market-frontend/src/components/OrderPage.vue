@@ -2,16 +2,6 @@
   <div class="order">
     <Header class="navbar"></Header>
     <div class="main-container">
-      <div @click="goHome">
-        <div
-          class="home-text"
-          :class="{ 'green-color': isHovered }"
-          @mouseover="isHovered = true"
-          @mouseleave="isHovered = false"
-        >
-          Home
-        </div>
-      </div>
       <div class="main-orders-container">
         <div class="order-status-fitering-container">
           <div class="order-staus-icons">
@@ -85,7 +75,7 @@
                           <div class="title-description-rating-container">
                             <div>
                               <h2>{{ product.productTitle }}</h2>
-                              <p>{{ product.productDescription }}</p>
+                              <p class="product-description">{{ product.productDescription }}</p>
                             </div>
 
                             <div :class="'stars-container'">
@@ -421,8 +411,17 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 2vh
 }
-
+.product-description {
+  font-size: 0.9rem;
+  height: max-content;
+  max-width: 200px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
 .product-image-title-container {
   display: flex;
   gap: 2vw;

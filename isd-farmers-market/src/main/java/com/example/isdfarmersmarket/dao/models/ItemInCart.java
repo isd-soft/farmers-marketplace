@@ -13,7 +13,7 @@ import java.util.Objects;
 @NoArgsConstructor
 public class ItemInCart {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_in_cart_sequence")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

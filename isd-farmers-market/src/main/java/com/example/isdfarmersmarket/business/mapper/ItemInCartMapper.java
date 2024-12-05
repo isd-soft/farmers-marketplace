@@ -18,7 +18,9 @@ public interface ItemInCartMapper {
     @Mapping(target = "productDescription", source = "product.description")
     @Mapping(target = "imageBase64", expression = "java(convertImageToBase64(itemInCart.getProduct().getImages().stream().findFirst().orElse(null)))")
     @Mapping(target = "pricePerUnit", source = "product.pricePerUnit")
-
+    @Mapping(target = "totalProductQuantity", source = "product.quantity")
+    @Mapping(target = "discountPercents", source = "product.discountPercents")
+    @Mapping(target = "unitType", source = "product.unitType")
     ItemInCartDTO mapToDTO(ItemInCart itemInCart);
     List<ItemInCartDTO> mapToDTOs(List<ItemInCart> itemInCart);
 
