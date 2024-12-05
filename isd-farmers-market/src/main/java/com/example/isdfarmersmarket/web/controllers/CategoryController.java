@@ -1,6 +1,6 @@
 package com.example.isdfarmersmarket.web.controllers;
 
-import com.example.isdfarmersmarket.business.services.CategoryService;
+import com.example.isdfarmersmarket.business.services.CategoryServiceImpl;
 import com.example.isdfarmersmarket.web.commands.CreateCategoryCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateCategoryCommand;
 import com.example.isdfarmersmarket.web.dto.CategoryDTO;
@@ -19,14 +19,14 @@ import static org.springframework.http.HttpStatus.OK;
 @RequestMapping("/category")
 @RequiredArgsConstructor
 public class CategoryController {
-    private final CategoryService categoryService;
+    private final CategoryServiceImpl categoryServiceImpl;
 
     @Operation(
             description = "This endpoint is used to create a category"
     )
     @PostMapping()
     public ResponseEntity<CategoryDTO> createCategory(@RequestBody @Valid CreateCategoryCommand createCategoryCommand) {
-        return ResponseEntity.status(CREATED).body(categoryService.createCategory(createCategoryCommand));
+        return ResponseEntity.status(CREATED).body(categoryServiceImpl.createCategory(createCategoryCommand));
     }
 
     @Operation(
@@ -34,7 +34,7 @@ public class CategoryController {
     )
     @PutMapping("/{id}")
     public ResponseEntity<CategoryDTO> updateCategory(@PathVariable Long id, @RequestBody @Valid UpdateCategoryCommand updateCategoryCommand) {
-        return ResponseEntity.status(OK).body(categoryService.updateCategory(id, updateCategoryCommand));
+        return ResponseEntity.status(OK).body(categoryServiceImpl.updateCategory(id, updateCategoryCommand));
     }
 
     @Operation(
@@ -42,7 +42,7 @@ public class CategoryController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<CategoryDTO> deleteCategory(@PathVariable Long id) {
-        return ResponseEntity.status(OK).body(categoryService.deleteCategory(id));
+        return ResponseEntity.status(OK).body(categoryServiceImpl.deleteCategory(id));
     }
 
     @Operation(
@@ -50,7 +50,7 @@ public class CategoryController {
     )
     @GetMapping()
     public ResponseEntity<List<CategoryDTO>> getAllCategories() {
-        return ResponseEntity.status(OK).body(categoryService.getAllCategories());
+        return ResponseEntity.status(OK).body(categoryServiceImpl.getAllCategories());
     }
 }
 
