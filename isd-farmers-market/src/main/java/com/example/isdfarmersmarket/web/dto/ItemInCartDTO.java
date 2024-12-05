@@ -5,6 +5,7 @@ import com.example.isdfarmersmarket.dao.models.User;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.mapstruct.Mapping;
 
 import java.math.BigDecimal;
 
@@ -16,11 +17,15 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemInCartDTO {
+    Long id;
     Long productId;
     String productTitle;
     String productDescription;
-    int quantity;
-    BigDecimal pricePerUnit;
     String imageBase64;
-
+    BigDecimal pricePerUnit;
+    int totalProductQuantity;
+    BigDecimal totalPrice;
+    int discountPercents;
+    String unitType;
+    int quantity;
 }

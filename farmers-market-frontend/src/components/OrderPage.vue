@@ -2,16 +2,6 @@
   <div class="order">
     <Header class="navbar"></Header>
     <div class="main-container">
-      <div @click="goHome">
-        <div
-          class="home-text"
-          :class="{ 'green-color': isHovered }"
-          @mouseover="isHovered = true"
-          @mouseleave="isHovered = false"
-        >
-          Home
-        </div>
-      </div>
       <div class="main-orders-container">
         <div class="order-status-fitering-container">
           <div class="order-staus-icons">
@@ -69,7 +59,7 @@
                       }"
                     >
                       <div
-                        v-for="(product, order) in order.products"
+                        v-for="(product, order) in order.itemsInOrder"
                         :key="product.id"
                         class="md:w-40 relative product-image-title-container"
                       >
@@ -85,7 +75,7 @@
                           <div class="title-description-rating-container">
                             <div>
                               <h2>{{ product.productTitle }}</h2>
-                              <p>{{ product.productDescription }}</p>
+                              <p class="product-description">{{ product.productDescription }}</p>
                             </div>
 
                             <div :class="'stars-container'">
@@ -298,8 +288,8 @@ const toggleWishlist = async (product) => {
 onMounted(async () => {
   //onmounted when page loades, display the method inside, async waits for the request
   try {
-    const response = await axiosInstance.get('/order') // Send request to server.
-    orders.value = response.data // Assign response data to orders.
+    const response = await axiosInstance.get('/order/management') // Send request to server.
+    orders.value = response.data.content // Assign response data to orders.
     console.log(orders.value)
   } catch (err) {
     console.error('Failed to fetch orders', err)
@@ -422,8 +412,17 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 2vh
 }
-
+.product-description {
+  font-size: 0.9rem;
+  height: max-content;
+  max-width: 200px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
 .product-image-title-container {
   display: flex;
   gap: 2vw;

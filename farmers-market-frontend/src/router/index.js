@@ -5,7 +5,6 @@ import OrderPage from '@/components/OrderPage.vue'
 import CartPage from '@/components/CartPage.vue'
 import ProductPage from "@/components/ProductPage.vue";
 import WishlistPage from "@/components/WishlistPage.vue";
-import CreateProduct from "@/components/CreateProduct.vue";
 import UserPage from "@/components/UserPage.vue";
 import SearchProductsPage from "@/components/SearchProductsPage.vue";
 import OrderManagementPage from '@/components/OrderManagementPage.vue';
@@ -13,6 +12,7 @@ import MyProductsPage from "@/components/MyProductsPage.vue";
 import UpdateProduct from "@/components/UpdateProduct.vue";
 import SettingsPage from '@/components/SettingsPage.vue';
 import MessagingPage from '@/components/MessagingPage.vue'
+import CreateProduct from '@/components/CreateProduct.vue'
 import ScheduleOrder from "@/components/ScheduleOrder.vue";
 import UpdateScheduledOrder from "@/components/UpdateScheduledOrder.vue";
 import MyScheduledOrders from "@/components/MyScheduledOrders.vue";
@@ -113,7 +113,7 @@ const routes = [
   {
     path: '/messages',
     name: 'Messages Page',
-    component: MessagingPage
+    component: MessagingPage,
   },
   {
     path: '/server-info',
