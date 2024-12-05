@@ -6,18 +6,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, watch } from "vue";
 import axiosInstance from "@/utils/axiosInstance";
 import Chart from "primevue/chart";
 
-const selectedDate = ref(new Date());
+const props = defineProps({
+    year: {
+        type: Number,
+        required: true,
+    },
+});
+
 const chartData = ref();
 const chartOptions = ref();
 
 const fetchChartData = async () => {
-    const year = selectedDate.value.getFullYear();
     try {
-        const response = await axiosInstance.get(`/performance/order/monthly-revenue-category?year=${year}`);
+        const response = await axiosInstance.get(`/performance/month/category-revenue?year=${props.year}`);
         chartData.value = setChartData(response.data);
         chartOptions.value = setChartOptions();
     } catch (error) {
@@ -26,13 +31,23 @@ const fetchChartData = async () => {
 };
 
 const setChartData = (monthlyRevenueByCategory) => {
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const categories = Object.keys(monthlyRevenueByCategory);
+    const months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
 
-    const datasets = categories.map((category) => ({
+    const revenueData = {};
+    monthlyRevenueByCategory.forEach(({ category, month, revenue }) => {
+        if (!revenueData[category]) {
+            revenueData[category] = {}; 
+        }
+        revenueData[category][month] = revenue; 
+    });
+
+    const datasets = Object.keys(revenueData).map((category) => ({
         label: category,
         backgroundColor: generateColor(),
-        data: months.map((month) => monthlyRevenueByCategory[category][month] || 0),
+        data: months.map((_, index) => revenueData[category][index + 1] || 0), 
     }));
 
     return {
@@ -83,7 +98,15 @@ const generateColor = () => {
     return `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 0.8)`;
 };
 
-onMounted(fetchChartData);
+watch(
+    () => props.year,
+    () => {
+        if (props.year) fetchChartData();
+    }
+);
+
+fetchChartData();
+
 </script>
 
 <style scoped>

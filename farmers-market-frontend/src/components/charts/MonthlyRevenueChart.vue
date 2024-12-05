@@ -1,7 +1,7 @@
 <template>
     <div class="card">
         <div>Monthly revenue</div>
-        <Chart type="bar" :data="chartData" :options="chartOptions" class="chart" />
+        <Chart type="line" :data="chartData" :options="chartOptions" class="chart" />
     </div>
 </template>
 
@@ -20,12 +20,11 @@ const props = defineProps({
 const chartData = ref();
 const chartOptions = ref();
 
-
 const fetchChartData = async () => {
 
     try {
         const response = await axiosInstance.get(
-            `/performance/order/monthly-revenue?year=${props.year}`
+            `/performance/month/revenue?year=${props.year}`
         );
         chartData.value = setChartData(response.data);
         chartOptions.value = setChartOptions();
@@ -43,17 +42,32 @@ watch(
 
 fetchChartData();
 
-const setChartData = (ordersByMonth) => {
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const data = months.map(month => ordersByMonth[month] || 0);
+const setChartData = (performanceProjections) => {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const months = [
+        "January", "February", "March", "April", "May", "June", 
+        "July", "August", "September", "October", "November", "December"
+    ];
+
+    const data = new Array(12).fill(0);
+
+    performanceProjections.forEach(projection => {
+        const monthIndex = projection.month - 1; 
+        const revenue = projection.revenue || 0;
+        if (monthIndex >= 0 && monthIndex < 12) {
+            data[monthIndex] = revenue; 
+        }
+    });
 
     return {
         labels: months,
         datasets: [
             {
-                label: "Total Revenue",
-                backgroundColor: "#7e00d8",
-                borderColor: "#7e00d8",
+                label: "Monthly Revenue",
+                fill: true,
+                borderColor: documentStyle.getPropertyValue('--p-cyan-600'),
+                tension: 0.4,
+                backgroundColor: 'rgba(0, 181, 216, 0.2)',
                 data: data
             }
         ]
@@ -68,7 +82,7 @@ const setChartOptions = () => {
 
     return {
         maintainAspectRatio: false,
-        aspectRatio: 0.8,
+        aspectRatio: 0.6,
         plugins: {
             legend: {
                 labels: {
@@ -79,14 +93,10 @@ const setChartOptions = () => {
         scales: {
             x: {
                 ticks: {
-                    color: textColorSecondary,
-                    font: {
-                        weight: 500
-                    }
+                    color: textColorSecondary
                 },
                 grid: {
-                    display: false,
-                    drawBorder: false
+                    color: surfaceBorder
                 }
             },
             y: {
@@ -94,8 +104,7 @@ const setChartOptions = () => {
                     color: textColorSecondary
                 },
                 grid: {
-                    color: surfaceBorder,
-                    drawBorder: false
+                    color: surfaceBorder
                 }
             }
         }

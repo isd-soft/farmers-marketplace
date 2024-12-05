@@ -3,10 +3,8 @@ package com.example.isdfarmersmarket.web.controllers;
 import com.example.isdfarmersmarket.business.services.UserServiceImpl;
 import com.example.isdfarmersmarket.dao.enums.SearchUserByRoleParams;
 import com.example.isdfarmersmarket.web.commands.CustomerUpgradeCommand;
-import com.example.isdfarmersmarket.web.dto.PageResponseDTO;
-import com.example.isdfarmersmarket.business.security.JwtPrincipal;
-import com.example.isdfarmersmarket.business.services.UserService;
 import com.example.isdfarmersmarket.web.commands.UpdateUserCommand;
+import com.example.isdfarmersmarket.web.dto.PageResponseDTO;
 import com.example.isdfarmersmarket.web.dto.UpdateUserDTO;
 import com.example.isdfarmersmarket.web.dto.UserProfileDTO;
 import jakarta.validation.Valid;
@@ -16,11 +14,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import static org.springframework.http.HttpStatus.OK;
 
@@ -38,6 +32,7 @@ public class UserController {
         UserProfileDTO userProfile = userService.getUserById(id);
         return ResponseEntity.ok(userProfile);
     }
+
     @GetMapping("/search")
     public ResponseEntity<PageResponseDTO<UserProfileDTO>> searchUsers(
             @RequestParam(required = false) String fullName,
@@ -47,6 +42,7 @@ public class UserController {
         PageResponseDTO<UserProfileDTO> users = userService.searchUsers(fullName, roleParams, pageable);
         return ResponseEntity.ok(users);
     }
+
     @PutMapping()
     public ResponseEntity<UpdateUserDTO> updateUser(@RequestBody @Valid UpdateUserCommand updateUserCommand) {
         return ResponseEntity.status(OK).body(userService.updateUser(updateUserCommand));

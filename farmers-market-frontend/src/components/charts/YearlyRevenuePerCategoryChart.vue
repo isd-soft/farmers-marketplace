@@ -10,14 +10,19 @@ import { ref, watch } from "vue";
 import axiosInstance from "@/utils/axiosInstance";
 import Chart from "primevue/chart";
 
-const selectedDate = ref(new Date());
+const props = defineProps({
+    year: {
+        type: Number,
+        required: true,
+    },
+});
+
 const chartData = ref();
 const chartOptions = ref();
 
 const fetchChartData = async () => {
-    const year = selectedDate.value.getFullYear();
     try {
-        const response = await axiosInstance.get(`/performance/category/revenue-sum?year=${year}`);
+        const response = await axiosInstance.get(`/performance/category/revenue-sum?year=${props.year}`);
         chartData.value = setChartData(response.data);
         chartOptions.value = setChartOptions();
     } catch (error) {
@@ -25,9 +30,9 @@ const fetchChartData = async () => {
     }
 };
 
-const setChartData = (revenuePerCategorySum) => {
-    const categories = Object.keys(revenuePerCategorySum);
-    const data = Object.values(revenuePerCategorySum);
+const setChartData = (performanceProjections) => {
+    const categories = performanceProjections.map(projection => projection.category);
+    const data = performanceProjections.map(projection => projection.revenue);
 
     return {
         labels: categories,
@@ -73,9 +78,15 @@ const generateColors = (count) => {
     );
 };
 
-watch(selectedDate, fetchChartData);
+watch(
+    () => props.year,
+    () => {
+        if (props.year) fetchChartData();
+    }
+);
 
 fetchChartData();
+
 </script>
 
 <style scoped>

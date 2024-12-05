@@ -1,11 +1,10 @@
 package com.example.isdfarmersmarket.web.controllers;
 
 import com.example.isdfarmersmarket.business.services.CategoryService;
-import com.example.isdfarmersmarket.web.dto.CategoryDTO;
 import com.example.isdfarmersmarket.web.commands.CreateCategoryCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateCategoryCommand;
+import com.example.isdfarmersmarket.web.dto.CategoryDTO;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +22,6 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @Operation(
-            responses = @ApiResponse(
-                    description = "Created",
-                    responseCode = "201"
-            ),
             description = "This endpoint is used to create a category"
     )
     @PostMapping()

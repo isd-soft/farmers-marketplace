@@ -6,19 +6,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, watch} from "vue";
 import axiosInstance from "@/utils/axiosInstance";
 import Chart from "primevue/chart";
 
-const selectedDate = ref(new Date());
+const props = defineProps({
+    year: {
+        type: Number,
+        required: true,
+    },
+});
+
 const chartData = ref();
 const chartOptions = ref();
 
 const fetchChartData = async () => {
-    const year = selectedDate.value.getFullYear();
     try {
         const response = await axiosInstance.get(
-            `/performance/order/product-count?year=${year}`
+            `/performance/month/category-revenue?year=${props.year}`
         );
         chartData.value = setChartData(response.data);
         chartOptions.value = setChartOptions();
@@ -32,35 +37,36 @@ const generateRandomColor = () => {
     return `rgb(${random()}, ${random()}, ${random()})`;
 };
 
-const setChartData = (ordersByMonth) => {
+const setChartData = (categoryTrends) => {
     const allMonths = [
         "January", "February", "March", "April",
         "May", "June", "July", "August",
         "September", "October", "November", "December"
     ];
 
-    const filledOrdersByMonth = allMonths.reduce((acc, month) => {
-        acc[month] = ordersByMonth[month] || {};
-        return acc;
-    }, {});
-
-    const productCategories = new Set();
-    Object.values(filledOrdersByMonth).forEach((data) => {
-        Object.keys(data).forEach((category) => productCategories.add(category));
+    const trendsByCategory = {};
+    categoryTrends.forEach(({ category, month, revenue }) => {
+        if (!trendsByCategory[category]) {
+            trendsByCategory[category] = {};
+        }
+        trendsByCategory[category][allMonths[month - 1]] = revenue; 
     });
 
     const colorMap = {};
-    Array.from(productCategories).forEach((category) => {
-        colorMap[category] = generateRandomColor();
-    });
+    const datasets = Object.keys(trendsByCategory).map((category) => {
+     
+        if (!colorMap[category]) {
+            colorMap[category] = generateRandomColor();
+        }
 
-    const datasets = Array.from(productCategories).map((category) => ({
-        label: category,
-        data: allMonths.map((month) => filledOrdersByMonth[month][category] || 0),
-        fill: false,
-        borderColor: colorMap[category],
-        tension: 0.4,
-    }));
+        return {
+            label: category,
+            data: allMonths.map((month) => trendsByCategory[category][month] || 0), 
+            fill: false,
+            borderColor: colorMap[category],
+            tension: 0.4,
+        };
+    });
 
     return {
         labels: allMonths,
@@ -105,9 +111,15 @@ const setChartOptions = () => {
     }
 };
 
-onMounted(() => {
-    fetchChartData();
-});
+watch(
+    () => props.year,
+    () => {
+        if (props.year) fetchChartData();
+    }
+);
+
+fetchChartData();
+
 </script>
 
 <style scoped>

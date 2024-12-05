@@ -75,6 +75,7 @@ const fetchCategories = async () => {
     }
 };
 const fetchUserData = async () => {
+  const middleIndex = Math.floor(accountMenu.value[0].items.length / 2);
   try {
     const response = await axiosInstance.get(`/current-user/`);
     currentUser = response.data;
@@ -83,6 +84,11 @@ const fetchUserData = async () => {
         label: 'Products',
         icon: 'pi pi-clipboard',
         command: () => goToMyProducts(),
+      }),
+      accountMenu.value[0].items.splice(middleIndex, 0,{
+        label: 'Performance',
+        icon: 'pi pi-chart-line',
+        command: () => goToPerformance(),
       });
     }
   } catch (error) {
@@ -121,6 +127,10 @@ const goToCategory = (categoryId) => {
   router.push({ name: 'SearchProducts', query: { category: categoryId } });
 };
 
+const goToPerformance = () => {
+  window.location.href = '/performance';
+};
+
 const logout = () => {
   console.log('Logging out...');
   localStorage.removeItem('accessToken');
@@ -145,22 +155,22 @@ onMounted(() => {
 <style scoped>
 .navbar {
   display: flex;
-  justify-content: center; /* Centers the Menubar horizontally */
+  justify-content: center; 
   align-items: center;
   width: 100%;
-  height: 80px; /* Set a height to align properly */
+  height: 80px; 
 }
 
 .menubar {
   display: flex;
   background-color: white;
   border-color: white;
-  width: 100%; /* Full width */
-  max-width: 80%; /* Limit the width of the Menubar */
+  width: 100%; 
+  max-width: 80%; 
   z-index: 1000;
   border-radius: 0;
   height: 80px;
-  justify-content: center; /* Ensures that the content is centered */
+  justify-content: center; 
 }
 
 .menubar img.logo {

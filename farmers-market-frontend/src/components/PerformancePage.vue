@@ -3,14 +3,12 @@
     <Header class="navbar"></Header>
 
     <div class="main-content">
-      
-    <div class="delimiter">
-      <div class="title">Annual Revenue Insights</div>
-      <DatePicker v-model="selectedYear" view="year" dateFormat="yy" class="year-picker" />
-    </div>
+      <div class="delimiter">
+        <div class="title">Total revenue: {{ totalRevenue }} MDL</div>
+        <DatePicker v-model="selectedYear" view="year" dateFormat="yy" class="year-picker" />
+      </div>
       
       <div class="top-content">
-       
         <Card class="card top-card">
           <YearlyRevenuePerCategoryChart :year="selectedYear.getFullYear()" />
         </Card>
@@ -32,7 +30,6 @@
       </div>
     </div>
     <Footer class="footer"></Footer> 
-   
   </div>
 </template>
 
@@ -48,7 +45,6 @@ import CategoryRevenueTrends from "./charts/CategoryRevenueTrends.vue";
 import MonthlyRevenuePerCategory from "./charts/MonthlyRevenuePerCategory.vue";
 import DatePicker from "primevue/datepicker";
 
-
 const totalRevenue = ref(null);
 const selectedYear = ref(new Date());
 
@@ -56,6 +52,7 @@ watch(selectedYear, (newDate) => {
   if (!(newDate instanceof Date)) {
     selectedYear.value = new Date(newDate);
   }
+  fetchTotalRevenue(); 
 });
 
 const fetchTotalRevenue = async () => {
@@ -64,18 +61,18 @@ const fetchTotalRevenue = async () => {
     : new Date(selectedYear.value).getFullYear();
   try {
     const response = await axiosInstance.get(
-      `/performance/revenue/total?year=${year}`
+      `/performance/revenue?year=${year}`
     );
-    totalRevenue.value = response.data;
+    totalRevenue.value = response.data; 
   } catch (error) {
     console.error("Error fetching total revenue:", error);
+    totalRevenue.value = 0; 
   }
 };
 
 onMounted(() => {
   fetchTotalRevenue();
 });
-
 </script>
 
 <style scoped>
@@ -88,9 +85,8 @@ onMounted(() => {
   height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
-  padding-top: 80px;
+  padding-top: 100px;
   gap: 40px;
-
 }
 
 .delimiter {
@@ -98,12 +94,12 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   color: #334155;
-  padding: 10px;
 }
 
 .title {
   font-size: 2rem;
   font-weight: bold;
+  color: #334155;
 }
 
 .year-picker {
@@ -137,7 +133,7 @@ onMounted(() => {
   height: 40vh;
   background-color: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(51, 65, 85, 0.8);
+  box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
 }
 
 .bottom-content {
@@ -152,11 +148,11 @@ onMounted(() => {
   height: 55vh;
   background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(51, 65, 85, 0.8);
+  box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
 }
 
 .card {
-  padding: 20px;
+  padding: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -178,7 +174,7 @@ onMounted(() => {
 }
 
 .main-content .footer {
-  padding-left: 0; 
-  padding-right: 0; 
+  padding-left: 0;
+  padding-right: 0;
 }
 </style>
