@@ -2,7 +2,7 @@ package com.example.isdfarmersmarket.business.services;
 
 import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
-import com.example.isdfarmersmarket.business.services.interfaces.ReviewCommandService;
+import com.example.isdfarmersmarket.business.services.interfaces.CreateReviewsService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
@@ -13,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ReviewCommandServiceImpl implements ReviewCommandService {
+public class CreateReviewsServiceImpl implements CreateReviewsService {
 
     UserRepository userRepository;
     ProductRepository productRepository;

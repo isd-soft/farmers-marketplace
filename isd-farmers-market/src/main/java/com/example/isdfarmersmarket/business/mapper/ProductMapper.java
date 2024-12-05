@@ -1,6 +1,7 @@
 package com.example.isdfarmersmarket.business.mapper;
 
 import com.example.isdfarmersmarket.dao.models.Product;
+import com.example.isdfarmersmarket.dao.repositories.OrderRepository;
 import com.example.isdfarmersmarket.web.dto.ProductDTO;
 import com.example.isdfarmersmarket.web.dto.CompactProductDTO;
 import com.example.isdfarmersmarket.web.dto.ProductPageDTO;
@@ -36,6 +37,5 @@ public interface ProductMapper {
     ProductPageDTO mapToProductPage(Product product);
     @Mapping(target = "unitTypeShort", expression = "java(product.getUnitType().getShortName())")
     List<ProductDTO> mapProducts(List<Product> products);
-
 
 }

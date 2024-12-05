@@ -44,5 +44,4 @@ public class CartController {
                 .status(HttpStatus.OK)
                 .body(cartService.getAllCartItems());
     }
-
 }

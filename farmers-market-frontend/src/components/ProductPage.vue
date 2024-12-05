@@ -132,13 +132,18 @@
                   >
                     {{ buttonText }}
                   </Button>
+                  <Button
+                    label="Schedule"
+                    style="margin-left: 10px;"
+                    @click="scheduleProduct(product.id)"
+                  />
 
                   <i
                     :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
                     style="
                       font-size: 2.5rem;
                       cursor: pointer;
-                      color: red;
+                      color: #179739;
                       margin-left: 10px;
                       vertical-align: middle;
                     "
@@ -192,6 +197,7 @@ import CustomerReviews from '@/components/CustomerReviews.vue'
 import { isLoggedIn } from '@/shared/authState.js'
 import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
+import router from "@/router/index.js";
 
 export default {
   name: 'ProductPage',
@@ -256,14 +262,16 @@ export default {
         isLoading.value = false
       }
     }
-
+    const scheduleProduct = (productId) => {
+      router.push(`/schedule-order/${productId}`);
+    }
     const toggleWishlist = async () => {
       if (!product.value.id) return
       try {
         if (product.value.isInWishlist) {
-          await axiosInstance.delete(`/customer/wishlist/${props.id}`)
+          await axiosInstance.delete(`/wishlist/${props.id}`)
         } else {
-          await axiosInstance.post(`/customer/wishlist/${props.id}`)
+          await axiosInstance.post(`/wishlist/${props.id}`)
         }
         product.value.isInWishlist = !product.value.isInWishlist
       } catch (error) {
@@ -340,6 +348,7 @@ export default {
       isAllReviewsLoaded,
       addToCart,
       toggleWishlist,
+      scheduleProduct,
     }
   },
 }

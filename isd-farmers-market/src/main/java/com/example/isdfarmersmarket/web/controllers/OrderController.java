@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -60,6 +62,14 @@ public class OrderController {
     @GetMapping()
     public ResponseEntity<List<OrderDTO>> getAllOrders() {
         return ResponseEntity.status(OK).body(orderService.getAllOrders());
+    }
+    @Operation(
+            description = "This endpoint is used to get all current user's orders"
+    )
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @GetMapping("/management")
+    public ResponseEntity<Page<OrderDTO>> getCurrentUserOrders(Pageable pageable) {
+        return ResponseEntity.status(OK).body(orderService.getCurrentUserOrders(pageable));
     }
 
     @Operation(

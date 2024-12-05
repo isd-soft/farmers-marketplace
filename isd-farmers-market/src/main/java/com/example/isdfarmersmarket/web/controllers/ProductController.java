@@ -1,6 +1,6 @@
 package com.example.isdfarmersmarket.web.controllers;
 
-import com.example.isdfarmersmarket.business.services.ProductService;
+import com.example.isdfarmersmarket.business.services.interfaces.ProductService;
 import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
 import com.example.isdfarmersmarket.web.commands.ProductDiscountCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateProductCommand;
@@ -10,12 +10,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;

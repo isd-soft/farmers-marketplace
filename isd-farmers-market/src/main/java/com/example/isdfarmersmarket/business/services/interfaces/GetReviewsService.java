@@ -3,7 +3,7 @@ package com.example.isdfarmersmarket.business.services.interfaces;
 import com.example.isdfarmersmarket.web.dto.*;
 import org.springframework.data.domain.Pageable;
 
-public interface ReviewQueryService {
+public interface GetReviewsService {
 
     PageResponseDTO<CustomerProductReviewDTO> fetchAllProductReviewsForCustomer(Long id, Pageable pageable);
 
