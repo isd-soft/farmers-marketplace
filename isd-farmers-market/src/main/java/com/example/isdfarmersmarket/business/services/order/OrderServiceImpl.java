@@ -1,7 +1,5 @@
 package com.example.isdfarmersmarket.business.services.order;
 
-//import com.example.isdfarmersmarket.business.listeners.OrderConfirmedListener;
-
 import com.example.isdfarmersmarket.business.mapper.ItemInCartMapper;
 import com.example.isdfarmersmarket.business.mapper.ItemInOrderMapper;
 import com.example.isdfarmersmarket.business.mapper.OrderMapper;
@@ -10,13 +8,16 @@ import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
 import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
+import com.example.isdfarmersmarket.dao.specifications.OrderSpecification;
 import com.example.isdfarmersmarket.web.commands.order.UpdateOrderCommand;
 import com.example.isdfarmersmarket.web.dto.ItemInOrderDTO;
 import com.example.isdfarmersmarket.web.dto.OrderDTO;
-import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,5 +139,13 @@ public class OrderServiceImpl implements OrderService {
                             .createdDate(order.getCreatedDate())
                             .build();
                 }).toList();
+    }
+    @Transactional(readOnly = true)
+    @Override
+    public Page<OrderDTO> getCurrentUserOrders(Pageable pageable) {
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+        Long customerId = principal.getId();
+        return orderRepository.findAllByCustomerId(customerId, pageable)
+                .map(orderMapper::map);
     }
 }

@@ -48,6 +48,8 @@ public class User implements UserDetails {
     private Set<Product> myProducts = new HashSet<>();
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Order> myOrders = new HashSet<>();
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<PlannedOrder> myPlannedOrders = new HashSet<>();
 
     @Column(length = 1000)
     private String password;

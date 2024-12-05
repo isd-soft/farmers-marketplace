@@ -14,4 +14,9 @@ public class OrderSpecification {
         return (root, query, builder) ->
                 builder.equal(root.get("orderStatus"), orderStatus);
     }
+
+    public static Specification<Order> customerIs(Long userId) {
+        return (root, query, builder) ->
+                builder.equal(root.get("customer").get("id"), userId);
+    }
 }

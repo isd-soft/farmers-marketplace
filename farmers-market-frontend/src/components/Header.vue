@@ -49,6 +49,7 @@ const accountMenu = ref([
     icon: 'pi pi-user',
     items: [
       { label: 'Orders', icon: 'pi pi-shopping-cart', command: () => goToOrders() },
+      { label: 'Scheduled Orders', icon: 'pi pi-clock', command: () => goToScheduledOrders() },
       { label: 'Wishlist', icon: 'pi pi-heart', command: () => goToFavorites() },
       { label: 'Settings', icon: 'pi pi-cog', command: () => goToSettings() },
       { label: 'Logout', icon: 'pi pi-sign-out', command: () => logout() },
@@ -112,6 +113,9 @@ const goToMyProducts = () => {
 
 const goToOrders = () => {
   window.location.href = '/orders';
+};
+const goToScheduledOrders = () => {
+  window.location.href = '/schedule-order/management';
 };
 
 const goToFavorites = () => {
