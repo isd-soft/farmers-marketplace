@@ -17,6 +17,7 @@ import ScheduleOrder from "@/components/ScheduleOrder.vue";
 import UpdateScheduledOrder from "@/components/UpdateScheduledOrder.vue";
 import MyScheduledOrders from "@/components/MyScheduledOrders.vue";
 import ServerInfoPage from '@/components/ServerInfoPage.vue'
+import PerformancePage from '@/components/PerformancePage.vue';
 
 const routes = [
   {
@@ -98,13 +99,11 @@ const routes = [
     path: '/product',
     name: 'SearchProducts',
     component: SearchProductsPage,
-
   },
   {
     path: '/product/management',
     name: 'MyProductsPage',
     component: MyProductsPage,
-
   },
   {
     path: '/ordermanagement',
@@ -120,6 +119,11 @@ const routes = [
     path: '/server-info',
     name: 'Server Info Page',
     component: ServerInfoPage,
+  },
+  {
+    path: '/performance',
+    name: 'Performance',
+    component: PerformancePage,
   },
 ]
 

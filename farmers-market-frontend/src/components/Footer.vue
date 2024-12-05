@@ -1,5 +1,6 @@
 <template>
-    <div class="footer">
+  <div class="footer">
+    <div class="footer-container">
       <div class="footer-section">
         <img src="@/assets/logo.png" alt="Logo" class="footer-logo" @click="goHome" />
         <p class="footer-description">Your trusted platform for quality products and services.</p>
@@ -33,7 +34,8 @@
         </div>
       </div>
     </div>
-  </template>
+  </div>
+</template>
 
   <script setup>
   import { ref } from "vue";
@@ -52,23 +54,65 @@
   </script>
 
   <style scoped>
-  .footer {
+ .footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: center; 
   align-items: flex-start;
   background-color: var(--p-gray-100);
-  width: 100%;
+  width: 100%; 
   color: var(--p-gray-700);
-  bottom: 0;
-  left: 0;
-  right: 0;
-
   border-top: 1px solid var(--p-gray-300);
+}
+
+.footer-container {
+  width: 80%; 
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 10px;
 }
 
 .footer-section {
   flex: 1;
   text-align: center;
+  max-width: 100%;
+}
+
+.footer-logo {
+  width: 80px;
+  cursor: pointer;
+}
+
+.footer-description {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.footer-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links li {
+  margin-bottom: 5px;
+}
+
+.footer-links li:hover {
+  color: #179739;
+}
+
+.footer-links a {
+  text-decoration: none;
+  color: var(--p-gray-700);
+  transition: color 0.3s;
 }
 
 .social-icons {
@@ -83,69 +127,33 @@
   font-size: 20px;
   transition: color 0.3s;
 }
-  .footer-logo {
-    width: 80px;
-    cursor: pointer;
-  }
 
-  .footer-description {
-    margin-top: 10px;
-    font-size: 14px;
-    line-height: 1.6;
-  }
+.subscribe {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
 
-  .footer-title {
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
+.subscribe .p-inputtext {
+  width: 200px;
+}
 
-  .footer-links {
-    list-style: none;
-    padding: 0;
+.subscribe-button {
+  background-color: #179739;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
 
-  }
-
-  .footer-links li {
-    margin-bottom: 5px;
-  }
-  .footer-links li :hover {
+.social-icon:hover {
   color: #179739;
 }
 
-  .footer-links a {
-    text-decoration: none;
-    color: var(--p-gray-700);
-    transition: color 0.3s;
-  }
-
-  .subscribe {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .subscribe .p-inputtext {
-    width: 200px;
-  }
-
-  .subscribe-button {
-    background-color:  #179739;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    border-radius: 5px
-  }
-
-  .social-icon:hover {
-  color:   #179739;
+.subscribe-button:hover {
+  background-color: #334155;
 }
-
-  .subscribe-button:hover {
-    background-color: #334155;
-  }
-  </style>
+ </style>
 
 
