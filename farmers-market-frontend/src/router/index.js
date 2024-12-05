@@ -12,6 +12,7 @@ import MyProductsPage from "@/components/MyProductsPage.vue";
 import UpdateProduct from "@/components/UpdateProduct.vue";
 import SettingsPage from '@/components/SettingsPage.vue';
 import MessagingPage from '@/components/MessagingPage.vue'
+import CreateProduct from '@/components/CreateProduct.vue'
 
 const routes = [
   {
@@ -76,13 +77,11 @@ const routes = [
     path: '/product',
     name: 'SearchProducts',
     component: SearchProductsPage,
-
   },
   {
     path: '/product/management',
     name: 'MyProductsPage',
     component: MyProductsPage,
-
   },
   {
     path: '/ordermanagement',
@@ -92,7 +91,7 @@ const routes = [
   {
     path: '/messages',
     name: 'Messages Page',
-    component: MessagingPage
+    component: MessagingPage,
   },
 ]
 
