@@ -21,6 +21,7 @@ public class ItemInOrder {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
     private int quantity;
 
     @Column(name = "price_per_unit")
@@ -30,7 +31,6 @@ public class ItemInOrder {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     private Order order;
-
 
     @Override
     public boolean equals(Object o) {

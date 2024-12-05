@@ -3,6 +3,7 @@ package com.example.isdfarmersmarket.business.services;
 import com.example.isdfarmersmarket.business.mapper.ProductMapper;
 import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.services.interfaces.ProductService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.models.Category;
 import com.example.isdfarmersmarket.dao.models.Image;
@@ -14,7 +15,9 @@ import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateProductCommand;
 import com.example.isdfarmersmarket.web.dto.*;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,16 +33,18 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProductServiceImpl implements ProductService {
-    private final ProductRepository productRepository;
-    private final ProductMapper productMapper;
-    private final CategoryRepository categoryRepository;
-    private final ImageRepository imageRepository;
-    private final ProductReviewRepository productReviewRepository;
-    private final ReviewMapper reviewMapper;
-    private static final String PRODUCT_FIND_FAILED_BY_ID = "Product with the specified id not found";
-    private static final String CATEGORY_FIND_FAILED_BY_ID = "Category with the specified id not found";
-    private final UserRepository userRepository;
+    ProductRepository productRepository;
+    ProductMapper productMapper;
+    CategoryRepository categoryRepository;
+    ImageRepository imageRepository;
+    ProductReviewRepository productReviewRepository;
+    ReviewMapper reviewMapper;
+    static String PRODUCT_FIND_FAILED_BY_ID = "Product with the specified id not found";
+    static String CATEGORY_FIND_FAILED_BY_ID = "Category with the specified id not found";
+    UserRepository userRepository;
+    OrderRepository orderRepository;
 
     @Override
     @Transactional
@@ -162,10 +167,11 @@ public class ProductServiceImpl implements ProductService {
     public Page<CompactProductDTO> getCurrentUserProducts(Pageable pageable) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         Long creator = principal.getId();
-        Map<String, Object> response = new HashMap<>();
         Specification<Product> filters = Specification.
                 where((creator == null || creator == 0L) ? null : ProductSpecification.creatorIs(creator));
-        return productMapper.mapToCompactProductsDTO(productRepository.findAll(filters, pageable));
+        Page<CompactProductDTO> productDTOS = productMapper.mapToCompactProductsDTO(productRepository.findAll(filters, pageable));
+        productDTOS.forEach(product -> {product.setOrders(orderRepository.countOrdersByProductId(product.getId()));});
+        return productDTOS;
     }
 
     @Override

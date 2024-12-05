@@ -3,6 +3,7 @@ package com.example.isdfarmersmarket.business.mapper;
 import com.example.isdfarmersmarket.dao.models.Order;
 import com.example.isdfarmersmarket.web.dto.OrderDTO;
 import org.mapstruct.Mapper;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -11,4 +12,5 @@ import java.util.List;
 public interface OrderMapper {
     OrderDTO map(Order order);
     List<OrderDTO> mapOrders(List<Order> orders);
+
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <Header class="navbar"></Header>
-    <div style="width: calc(100% - 40px); max-width: 1200px;display: flex; flex-direction: row; justify-content: space-between; gap: 20px">
+    <div style="width: calc(100% - 40px); max-width: 80%;display: flex; flex-direction: row; justify-content: space-between; gap: 20px">
     <h1>My products</h1>
     <Button style="max-width: 200px; flex-grow: 1" @click="goToCreateProduct">Create new product</Button>
     </div>
@@ -36,7 +36,7 @@
         </td>
         <td>{{ product.pricePerUnit }}/{{ product.unitTypeShort }}</td>
         <td>{{ product.quantity }}</td>
-        <td>10</td>
+        <td>{{ product.orders }}</td>
         <td>
         <div>
           <Button
@@ -286,7 +286,7 @@ body{
 
 .products-table {
   width: calc(100% - 40px);
-  max-width: 1200px;
+  max-width: 80%;
    border-collapse: collapse;
    margin-top: 40px;
  }

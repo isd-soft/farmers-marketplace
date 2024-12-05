@@ -29,7 +29,6 @@
       <FloatLabel variant="on">
         <Select
           id="product-category"
-          v-if="categories.length > 0"
           v-model="product.categoryId"
           :options="categories"
           optionLabel="label"
@@ -285,7 +284,7 @@ export default {
   margin-left: 20px;
   margin-right: 20px;
   width: calc(100% - 40px);
-  max-width: 900px;
+  max-width: 80%;
   display: flex;
   flex-direction: column;
   justify-content: center;
