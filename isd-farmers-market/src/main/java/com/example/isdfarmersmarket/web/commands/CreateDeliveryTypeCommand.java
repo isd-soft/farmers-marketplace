@@ -8,5 +8,5 @@ import java.math.BigDecimal;
 @Data
 public class CreateDeliveryTypeCommand {
     private BigDecimal price;
-    private DeliveryTypes types;
+    private DeliveryTypes type;
 }

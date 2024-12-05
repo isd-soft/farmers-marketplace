@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <Header class="navbar"></Header>
-    <div style="display: flex; flex-direction: row; justify-content: space-between; gap: 20px; width: 1200px">
+    <div style="width: calc(100% - 40px); max-width: 1200px;display: flex; flex-direction: row; justify-content: space-between; gap: 20px">
     <h1>My products</h1>
     <Button style="max-width: 200px; flex-grow: 1" @click="goToCreateProduct">Create new product</Button>
     </div>
@@ -12,6 +12,7 @@
         <th>Price</th>
         <th>Quantity</th>
         <th>Orders</th>
+        <th>Discount</th>
         <th class="actions">Actions</th>
       </tr>
       </thead>
@@ -36,6 +37,20 @@
         <td>{{ product.pricePerUnit }}/{{ product.unitTypeShort }}</td>
         <td>{{ product.quantity }}</td>
         <td>10</td>
+        <td>
+        <div>
+          <Button
+            v-if="!product.discountPercents"
+            @click="setDiscountProduct(product)"
+            style="width: 20px; height: 20px; padding: 0; border-style: none; font-size: 14px; line-height: 0px; display: flex; justify-content: center; align-items: center;"
+          >+</Button>
+          <div class="actions-container-disc" v-else>
+            {{ product.discountPercents }}%
+            <i class="pi pi-pencil action-icon" @click="setDiscountProduct(product)"></i>
+            <i class="pi pi-trash action-icon" @click="removeDiscount(product)"></i>
+          </div>
+        </div>
+        </td>
         <td class="actions">
           <div class="actions-container">
             <i @click="editProduct(product)" class="pi pi-pencil action-icon"></i>
@@ -45,7 +60,24 @@
       </tbody>
     </table>
     <h3 style="margin-top: 50px; margin-bottom: 50px; text-align: center; width: 1200px" v-if="products.length===0">Looks like you have no products yet</h3>
-    <Dialog v-model:visible="showConfirmation" modal header="Delete product" :position="'top'">
+
+    <Dialog style="flex-grow: 1; max-width: 500px" v-model:visible="showDiscountDialog" modal header="Set Discount" :position="'top'">
+      <div class="popup-content">
+        <p v-if="selectedProduct && selectedProduct.discountPercents > 0">
+          Current discount: {{ selectedProduct.discountPercents }}%
+        </p>
+        <p v-else>No discount applied.</p>
+        <InputText v-model="newDiscount.discountPercents" placeholder="Enter discount value (%)" style="margin-top: 10px;" />
+        <span v-if="v$.discountPercents.$error" class="error-message">
+        Discount is required and must be minimum 1 and maximum 99</span>
+        <div class="popup-actions">
+          <Button @click="cancelDiscount" class="popup-actions-button">Cancel</Button>
+          <Button @click="applyDiscount" class="popup-actions-button">Apply</Button>
+        </div>
+      </div>
+    </Dialog>
+
+    <Dialog style="flex-grow: 1; max-width: 500px" v-model:visible="showConfirmation" modal header="Delete product" :position="'top'">
       <div class="popup-content">
         <p>Are you sure you want to delete the product "{{ productToDelete?.title }}"?</p>
         <div class="popup-actions">
@@ -54,6 +86,8 @@
         </div>
       </div>
     </Dialog>
+
+
     <Paginator
       style="margin-top: 30px"
       :rows="pageSize"
@@ -66,7 +100,7 @@
 </template>
 
 <script>
-import {ref, onMounted, watch} from "vue";
+import {ref, onMounted, watch, computed, reactive} from "vue";
 import axiosInstance from "@/utils/axiosInstance.js";
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
@@ -77,6 +111,10 @@ import Paginator from 'primevue/paginator';
 import { PrimeIcons } from '@primevue/core/api';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
+import InputText from "primevue/inputtext";
+import useVuelidate from "@vuelidate/core";
+import {required, minValue, maxValue} from "@vuelidate/validators"
+import router from "@/router/index.js";
 export default {
   name: 'SearchProducts',
   components: {
@@ -88,6 +126,7 @@ export default {
     PrimeIcons,
     Dialog,
     Button,
+    InputText,
   },
   setup() {
     const products = ref([]);
@@ -98,6 +137,13 @@ export default {
 
     const showConfirmation = ref(false);
     const productToDelete = ref(null);
+    const showDiscountDialog = ref(false);
+    const selectedProduct = ref(null);
+    const newDiscount = reactive({discountPercents : null});
+    const rules = computed(() => ({
+      discountPercents: { required, minValue: minValue(1), maxValue: maxValue(99) },
+    }));
+    const v$ = useVuelidate(rules, newDiscount);
     const confirmDelete = (product) => {
       productToDelete.value = product;
       showConfirmation.value = true;
@@ -122,6 +168,41 @@ export default {
       productToDelete.value = null;
       showConfirmation.value = false;
     };
+    const setDiscountProduct = (product) => {
+      selectedProduct.value = product;
+      v$.value.$reset();
+      newDiscount.discountPercents = product.discountPercents ||'';
+      showDiscountDialog.value = true;
+    };
+
+    const applyDiscount = async () => {
+        await v$.value.$validate();
+        if(!v$.value.$error) {
+          if (selectedProduct.value) {
+            try {
+              const discountValue = parseInt(newDiscount.discountPercents, 10);
+              await axiosInstance.put(`/product/discount/${selectedProduct.value.id}`, {discountPercents : discountValue});
+              selectedProduct.value.discountPercents = discountValue;
+              showDiscountDialog.value = false;
+            } catch (error) {
+              console.error("Failed to apply discount:", error.message);
+            }
+          }
+        }
+    };
+    const removeDiscount = async (product) => {
+      try {
+        await axiosInstance.put(`/product/discount/${product.id}`, { discountPercents: 0 });
+        product.discountPercents = 0;
+      } catch (error) {
+        console.error("Failed to remove discount:", error.message);
+      }
+    };
+    const cancelDiscount = () => {
+      showDiscountDialog.value = false;
+      selectedProduct.value = null;
+      newDiscount.discountPercents.value = "";
+    };
 
     const fetchProducts = async () => {
       try {
@@ -131,14 +212,25 @@ export default {
         products.value = response.data.content;
         totalRecords.value = response.data.totalElements;
       } catch (error) {
-        console.error('Failed to load products:', error.message)
       }
     }
     const onPageChange = (event) => {
       currentPage.value = event.page;
       fetchProducts();
     }
+    const fetchUserData = async () => {
+      try {
+        const response = await axiosInstance.get(`/current-user/`);
+        const currentUser = response.data;
+        if (!currentUser.isFarmer) {
+          await router.push(`/`);
+        }
+      } catch (error) {
+        await router.push(`/`);
+      }
+    };
     onMounted(() => {
+      fetchUserData()
       fetchProducts()
     });
     return {
@@ -153,6 +245,14 @@ export default {
       deleteProduct,
       showConfirmation,
       productToDelete,
+      showDiscountDialog,
+      selectedProduct,
+      newDiscount,
+      setDiscountProduct,
+      applyDiscount,
+      cancelDiscount,
+      removeDiscount,
+      v$,
     }
   },
   methods: {
@@ -183,8 +283,10 @@ body{
   padding-top: 120px;
   align-items: center;
 }
+
 .products-table {
-   width: 1200px;
+  width: calc(100% - 40px);
+  max-width: 1200px;
    border-collapse: collapse;
    margin-top: 40px;
  }
@@ -209,6 +311,12 @@ body{
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  gap: 20px;
+}
+.actions-container-disc {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   gap: 20px;
 }
 .footer{
@@ -256,6 +364,8 @@ body{
 }
 
 .popup-content {
+  display: flex;
+  flex-direction: column;
   text-align: center;
 }
 .popup-actions{
@@ -268,5 +378,9 @@ body{
 .popup-actions-button{
   max-width: 150px;
   flex-grow: 1;
+}
+.error-message {
+  color: red;
+  font-size: 0.9rem;
 }
 </style>

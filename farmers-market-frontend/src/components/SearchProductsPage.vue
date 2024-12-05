@@ -1,17 +1,18 @@
 <template>
   <div class="home">
     <Header class = "navbar"></Header>
+    <div class="main-container-products">
     <div class="search-filters">
-    <FloatLabel variant="on">
+    <FloatLabel variant="on" class="search-products-input">
       <InputText
         id="product-desc"
         v-model="searchQ"
-        class="search-products-input"
+        class="search-products-input-inner"
         @input="fetchProducts"
       />
       <label for="product-desc">Search</label>
     </FloatLabel>
-    <FloatLabel variant="on">
+    <FloatLabel variant="on" class="search-products-input">
       <Select
         id="product-category"
         v-if="categories.length > 0"
@@ -20,10 +21,23 @@
         optionLabel="label"
         optionValue="value"
         @change="fetchProducts"
-        class="search-products-input"
+        class="search-products-input-inner"
       />
       <label for="product-category">Category</label>
-    </FloatLabel>
+    </FloatLabel >
+      <FloatLabel variant="on" class="search-products-input">
+        <Select
+          id="product-sort"
+          v-if="categories.length > 0"
+          v-model="sortBy"
+          :options="sortOptions"
+          optionLabel="label"
+          optionValue="value"
+          @change="fetchProducts"
+          class="search-products-input-inner"
+        />
+        <label for="product-sort">Sort by</label>
+      </FloatLabel>
     </div>
     <div class="products-grid">
       <ProductCard
@@ -39,11 +53,12 @@
       :first="currentPage * pageSize"
       @page="onPageChange"
     />
+    </div>
   <Footer class = "footer"></Footer>
   </div>
 </template>
 <script>
-import {ref, onMounted, watch} from "vue";
+import {ref, onMounted, watch, computed} from "vue";
   import axiosInstance from "@/utils/axiosInstance.js";
   import Header from "@/components/Header.vue";
   import Footer from "@/components/Footer.vue";
@@ -51,6 +66,8 @@ import {ref, onMounted, watch} from "vue";
   import ProductCard from "@/components/ProductCard.vue";
   import {useRoute} from "vue-router";
   import Paginator from 'primevue/paginator';
+import {maxLength, minLength, required} from "@vuelidate/validators";
+import useVuelidate from "@vuelidate/core";
   export default {
     name: 'SearchProducts',
     components: {
@@ -60,6 +77,7 @@ import {ref, onMounted, watch} from "vue";
       Select,
       Paginator
     },
+
     setup() {
       const products = ref([])
       const categories = ref([])
@@ -69,9 +87,37 @@ import {ref, onMounted, watch} from "vue";
       const currentPage = ref(0);
       const pageSize = ref(6);
       const totalRecords = ref(0);
+      const sortOptions = ref([
+        { label: "Sort by", value: null },
+        { label: "Price Asc", value: "price_asc" },
+        { label: "Price Desc", value: "price_desc" },
+        { label: "Rating Asc", value: "rating_asc" },
+        { label: "Rating Desc", value: "rating_desc" },
+      ]);
+      const sortBy = ref()
       const fetchProducts = async () => {
+        let sort = "";
+        let dir = "";
         try {
-          let url = `/product?search=${searchQ.value}&page=${currentPage.value}&size=${pageSize.value}`;
+          switch (sortBy.value){
+            case "price_asc":
+              sort = "pricePerUnit"
+              dir = "ASC"
+              break;
+            case "price_desc":
+              sort = "pricePerUnit"
+              dir = "DESC"
+              break;
+            case "rating_asc":
+              sort = "rating"
+              dir = "ASC"
+              break;
+            case "rating_desc":
+              sort = "rating"
+              dir = "DESC"
+              break;
+          }
+          let url = `/product?search=${searchQ.value}&page=${currentPage.value}&size=${pageSize.value}&sort=${sort},${dir}`;
           if (category.value) {
             url += `&category=${category.value}`;
           }
@@ -80,7 +126,6 @@ import {ref, onMounted, watch} from "vue";
           products.value = response.data.content;
           totalRecords.value = response.data.totalElements;
         } catch (error) {
-          console.error('Failed to load products:', error.message)
         }
       }
       const fetchCategories = async () => {
@@ -97,7 +142,6 @@ import {ref, onMounted, watch} from "vue";
           }
           console.log("Categories:", categories.value);
         } catch (error) {
-          console.error('Failed to load categories:', error.message)
         }
       }
       const onPageChange = (event) => {
@@ -132,45 +176,58 @@ import {ref, onMounted, watch} from "vue";
         pageSize,
         totalRecords,
         currentPage,
+        sortOptions,
+        sortBy,
       }
     },
   }
 </script>
 <style>
-body{
-  display: block !important;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-.home{
+.main-container-products{
+  position: relative;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  padding-top: 100px;
+  max-width: 1200px;
+  width: calc(100% - 40px);
   margin-left: 20px;
   margin-right: 20px;
-  align-items: center;
 }
 .products-grid {
-  width: 1200px;
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)) !important;
-  gap: 20px;
-  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+  width:100%;
+  justify-content: center;
+  align-content: start;
+}
+
+.search-products-input{
+  flex-grow: 1 !important;
+}
+.search-products-input-inner{
+  min-width: 280px;
+  max-width: none;
+  width: 100%;
+}
+.search-filters{
+  width:100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  row-gap: 20px;
+  column-gap: 30px;
+  align-content: space-between;
 }
 .footer{
   text-align: center;
   padding: 10px;
   margin-top: 50px;
   bottom: 0;
-}
-.search-products-input{
-  width:100%;
-  min-width: 300px;
-}
-.search-filters{
-  flex-grow: 1;
-  display: flex;
-  flex-direction: row;
-  width: 1200px;
-  gap: 20px;
 }
 </style>
