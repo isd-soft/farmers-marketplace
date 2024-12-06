@@ -26,7 +26,7 @@
           </span>
           <span v-else>
             <span style="color: #179739; font-size: 1.5rem">
-              ${{ product.priczzePerUnit }}
+              ${{ product.pricePerUnit }}
             </span>
           </span>
         </div>
