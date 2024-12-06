@@ -76,6 +76,7 @@ const fetchCategories = async () => {
     }
 };
 const fetchUserData = async () => {
+  const middleIndex = Math.floor(accountMenu.value[0].items.length / 2);
   try {
     const response = await axiosInstance.get(`/current-user/`);
     currentUser = response.data;
@@ -84,6 +85,11 @@ const fetchUserData = async () => {
         label: 'Products',
         icon: 'pi pi-clipboard',
         command: () => goToMyProducts(),
+      }),
+      accountMenu.value[0].items.splice(middleIndex, 0,{
+        label: 'Performance',
+        icon: 'pi pi-chart-line',
+        command: () => goToPerformance(),
       });
     }
   } catch (error) {
@@ -125,6 +131,10 @@ const goToCategory = (categoryId) => {
   router.push({ name: 'SearchProducts', query: { category: categoryId } });
 };
 
+const goToPerformance = () => {
+  window.location.href = '/performance';
+};
+
 const logout = () => {
   console.log('Logging out...');
   localStorage.removeItem('accessToken');
@@ -147,24 +157,30 @@ onMounted(() => {
 
 
 <style scoped>
+.navbar {
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  width: 100%;
+  height: 80px; 
+}
+
 .menubar {
   display: flex;
-  align-items: center;
   background-color: white;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
+  border-color: white;
+  width: 100%; 
+  max-width: 80%; 
   z-index: 1000;
   border-radius: 0;
   height: 80px;
+  justify-content: center; 
 }
 
 .menubar img.logo {
   width: 60px;
   height: auto;
   cursor: pointer;
-  margin-left: 40px;
   margin-right: 50px;
 }
 
@@ -203,7 +219,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 15px;
-  margin-right: 40px;
 }
 
 .menubar-item {
