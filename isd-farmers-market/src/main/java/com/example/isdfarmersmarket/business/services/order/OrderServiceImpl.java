@@ -26,10 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -81,6 +78,9 @@ public class OrderServiceImpl implements OrderService {
             orderRepository.save(order);
             items.forEach(item -> item.setOrder(order));
             itemInOrderRepository.saveAll(items);
+
+            OrderPlacedEvent event = new OrderPlacedEvent(this, order, items);
+            eventPublisher.publishEvent(event);
         });
 
         itemInCartRepository.deleteAllByUser(user);
@@ -96,9 +96,11 @@ public class OrderServiceImpl implements OrderService {
 
         order.setOrderStatus(OrderStatus.valueOf(updateOrderCommand.getOrderStatus().toUpperCase()));
 
-        //OrderConfirmedEvent event = new OrderConfirmedEvent(this, order);
-        OrderPlacedEvent event = new OrderPlacedEvent(this, order);
-        eventPublisher.publishEvent(event);
+        if (OrderStatus.CONFIRMED.equals(order.getOrderStatus())) {
+            List<ItemInOrder> items = new ArrayList<>(order.getItemsInOrder());
+            OrderConfirmedEvent event = new OrderConfirmedEvent(this, order, items);
+            eventPublisher.publishEvent(event);
+        }
 
         return orderMapper.map(orderRepository.save(order));
     }

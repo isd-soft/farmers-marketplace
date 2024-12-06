@@ -18,6 +18,7 @@
             background: #ffffff;
             padding: 20px;
             border-radius: 10px;
+            color: #334155;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         .email-header {
@@ -77,13 +78,15 @@
 
         <h3>Products in this Order:</h3>
         <ul>
-            <th:block th:each="item : ${items}">
+            <th:block th:each="item : ${productItems}">
                 <li>
-                    [[${item.product.title}]] - Quantity: [[${item.quantity}]] - Price: $[[${item.pricePerUnit}]] - Total: $[[${item.totalPrice}]]
+                    <span th:text="${item.title}"></span> -
+                    Quantity: <span th:text="${item.quantity}"></span> -
+                    Price per unit: $<span th:text="${item.pricePerUnit}"></span>
+                    Total price: $<span th:text="${item.totalPrice}"></span>
                 </li>
             </th:block>
         </ul>
-
         <p>We appreciate your partnership and look forward to continuing to work with you.</p>
 
         <p>Best regards,<br>Farmers Market</p>
