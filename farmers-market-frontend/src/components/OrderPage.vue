@@ -4,49 +4,27 @@
     <div class="main-container">
       <div class="main-orders-container">
         <div class="order-status-fitering-container">
-          <div class="order-staus-icons">
-            <i class="pi pi-list"></i>
-            <p>All</p>
-          </div>
-          <div class="order-staus-icons">
-            <i class="pi pi-ellipsis-h"></i>
-            <p>Pending (2)</p>
-          </div>
-          <div class="order-staus-icons">
-            <i class="pi pi-verified"></i>
-            <p>Confirmed</p>
-          </div>
-          <div class="order-staus-icons">
-            <i class="pi pi-spinner-dotted"></i>
-            <p>In Progress</p>
-          </div>
-          <div class="order-staus-icons">
-            <i class="pi pi-send"></i>
-            <p>Shipped</p>
-          </div>
-          <div class="order-staus-icons">
-            <i class="pi pi-box"></i>
-            <p>Delivered</p>
-          </div>
-          <div class="order-staus-icons">
-            <i class="pi pi-times"></i>
-            <p>Cancelled</p>
-          </div>
-          <div class="order-staus-icons">
-            <i class="pi pi-check"></i>
-            <p>Completed</p>
+          <div
+            v-for="status in statuses"
+            :key="status.id"
+            class="order-staus-icons"
+            :class="{ 'active-status': selectedStatus === status.type }"
+            @click="setStatusFilter(status.type)"
+          >
+            <i :class="status.icon"></i>
+            <p>{{ status.name }}</p>
           </div>
         </div>
         <div class="orders-container">
           <div class="card">
-            <DataView :value="orders" :sortOrder="sortOrder" :sortField="sortField">
+            <DataView :value="orders">
               <template #header>
                 <Select
-                  v-model="sortKey"
+                  v-model="sortBy"
                   :options="sortOptions"
                   optionLabel="label"
                   placeholder="Sort By Price"
-                  @change="onSortChange"
+                  @change="fetchOrders"
                 />
               </template>
               <template #list="slotProps">
@@ -155,10 +133,17 @@
         </div>
       </div>
     </div>
+    <Paginator
+      style="margin-top: 30px"
+      :rows="pageSize"
+      :totalRecords="totalRecords"
+      :first="currentPage * pageSize"
+      @page="onPageChange"
+    />
     <Footer class="footer"></Footer>
   </div>
 </template>
-<script setup>
+<script>
 import Header from '@/components/Header.vue'
 import Footer from './Footer.vue'
 import InputText from 'primevue/inputtext'
@@ -169,132 +154,168 @@ import Button from 'primevue/button'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
 import 'primeicons/primeicons.css'
+import Paginator from 'primevue/paginator';
 import Rating from 'primevue/rating'
-
-const orders = ref([])
-const sortKey = ref()
-const sortOrder = ref()
-const sortField = ref()
-const sortOptions = ref([
-  { label: 'Price High to Low', value: '!price' },
-  { label: 'Price Low to High', value: 'price' },
-])
-
-// const onSortChange = (event) => {
-//   const value = event.value.value
-//   if (value.startsWith('!')) {
-//     sortOrder.value = -1
-//     sortField.value = value.substring(1)
-//   } else {
-//     sortOrder.value = 1
-//     sortField.value = value
-//   }
-//   sortKey.value = event.value
-// }
-const onSortChange = (event) => {
-  const value = event.value.value
-
-  if (value.startsWith('!')) {
-    sortOrder.value = -1
-    sortField.value = 'orderTotalPrice' // Sorting by orderTotalPrice
-  } else {
-    sortOrder.value = 1
-    sortField.value = 'orderTotalPrice' // Sorting by orderTotalPrice
-  }
-
-  sortKey.value = event.value
-}
-
-// const onSortChange = (event) => {
-//   const value = event.value.value
-//   if (value.startsWith('!')) {
-//     sortOrder.value = -1
-//     sortField.value = value.substring(1) // Remove the "!" to get the field name
-//   } else {
-//     sortOrder.value = 1
-//     sortField.value = value
-//   }
-//   sortKey.value = event.value
-
-//   // Apply sorting to the orders array
-//   if (sortField.value === 'orderTotalPrice') {
-//     orders.value.sort((a, b) => {
-//       if (sortOrder.value === 1) {
-//         return a.orderTotalPrice - b.orderTotalPrice // Price Low to High
-//       } else {
-//         return b.orderTotalPrice - a.orderTotalPrice // Price High to Low
-//       }
-//     })
-//   }
-// }
-
-const getSeverity = (product) => {
-  switch (product.inventoryStatus) {
-    case 'INSTOCK':
-      return 'success'
-    case 'LOWSTOCK':
-      return 'warn'
-    case 'OUTOFSTOCK':
-      return 'danger'
-    default:
-      return null
-  }
-}
-
-const goHome = () => {
-  window.location.href = '/'
-}
-
-function getBase64Image(base64String, imageType = 'jpeg') {
-  return `data:image/${imageType};base64,${base64String}`
-}
-
-const isHovered = ref(false)
-
-const modelValue = ref(4.5)
-const intPart = computed(() => Math.floor(modelValue.value))
-const decimalPart = computed(() => modelValue.value - Math.floor(modelValue.value))
-const isPartial = computed(() => decimalPart.value !== 0)
-const full = computed(() => `${decimalPart.value * 100}%`)
-
-function iconClass(i) {
-  if (i <= modelValue.value) return 'pi pi-star' // Full star
-  if (isPartial.value && i === intPart.value + 1) return 'pi pi-star partial' // Half star
-  return 'pi pi-star-o' // Empty star
-}
-
-function onStarClick(event, i) {
-  console.log(`Star ${i} clicked!`, event)
-  modelValue.value = i
-}
-
-const toggleWishlist = async (product) => {
-  if (!product.id) return
-
-  try {
-    if (product.isInWishlist) {
-      await axiosInstance.delete(`/customer/wishlist/${product.id}`)
-    } else {
-      await axiosInstance.post(`/customer/wishlist/${product.id}`)
+export default {
+  name: 'SearchProducts',
+  components: {
+    Header,
+    Footer,
+    InputText,
+    DataView,
+    Button,
+    Select,
+    Tag,
+    Paginator,
+    Rating,
+  },
+setup() {
+  const statuses = ref([
+    {id: null, type:null, name: "All", icon: "pi pi-list"},
+    {id: 1, type:"PENDING", name: "Pending", icon: "pi pi-ellipsis-h"},
+    {id: 2, type:"CONFIRMED", name: "Confirmed", icon: "pi pi-verified"},
+    {id: 3, type:"INPROGRESS", name: "In Progress", icon: "pi pi-spinner-dotted"},
+    {id: 4, type:"SHIPPED", name: "Shipped", icon: "pi pi-send"},
+    {id: 5, type:"DELIVERED", name: "Delivered", icon: "pi pi-box"},
+    {id: 6, type:"CANCELLED", name: "Cancelled", icon: "pi pi-times"},
+  ]);
+  const orders = ref([])
+  const currentPage = ref(0);
+  const selectedStatus = ref(null);
+  const pageSize = ref(3);
+  const totalRecords = ref(0);
+  const sortOptions = ref([
+    {label: "Sort by", value: null},
+    {label: "Price Asc", value: "price_asc"},
+    {label: "Price Desc", value: "price_desc"},
+    {label: "Old to new", value: "date_asc"},
+    {label: "New to old", value: "date_desc"},
+  ]);
+  const sortBy = ref("")
+  const isHovered = ref(false)
+  const modelValue = ref(4.5)
+  const intPart = computed(() => Math.floor(modelValue.value))
+  const decimalPart = computed(() => modelValue.value - Math.floor(modelValue.value))
+  const isPartial = computed(() => decimalPart.value !== 0)
+  const full = computed(() => `${decimalPart.value * 100}%`)
+  const getSeverity = (product) => {
+    switch (product.inventoryStatus) {
+      case 'INSTOCK':
+        return 'success'
+      case 'LOWSTOCK':
+        return 'warn'
+      case 'OUTOFSTOCK':
+        return 'danger'
+      default:
+        return null
     }
-    product.isInWishlist = !product.isInWishlist
-  } catch (error) {
-    console.error(
-      `Failed to ${product.isInWishlist ? 'remove' : 'add'} product to/from wishlist:`,
-      error.message,
-    )
   }
+  const setStatusFilter = (status) => {
+    selectedStatus.value = status;
+    fetchOrders();
+  };
+
+  const goHome = () => {
+    window.location.href = '/'
+  }
+
+  function getBase64Image(base64String, imageType = 'jpeg') {
+    return `data:image/${imageType};base64,${base64String}`
+  }
+
+  function iconClass(i) {
+    if (i <= modelValue.value) return 'pi pi-star' // Full star
+    if (isPartial.value && i === intPart.value + 1) return 'pi pi-star partial' // Half star
+    return 'pi pi-star-o' // Empty star
+  }
+
+  function onStarClick(event, i) {
+    console.log(`Star ${i} clicked!`, event)
+    modelValue.value = i
+  }
+
+  const toggleWishlist = async (product) => {
+    if (!product.id) return
+
+    try {
+      if (product.isInWishlist) {
+        await axiosInstance.delete(`/customer/wishlist/${product.id}`)
+      } else {
+        await axiosInstance.post(`/customer/wishlist/${product.id}`)
+      }
+      product.isInWishlist = !product.isInWishlist
+    } catch (error) {
+      console.error(
+        `Failed to ${product.isInWishlist ? 'remove' : 'add'} product to/from wishlist:`,
+        error.message,
+      )
+    }
+  }
+  const onPageChange = (event) => {
+    currentPage.value = event.page;
+    fetchOrders();
+  }
+  const fetchOrders = async () => {
+    let sort = "";
+    let dir = "";
+    try {
+      switch (sortBy.value.value) {
+        case "price_asc":
+          sort = "totalPrice"
+          dir = "ASC"
+          break;
+        case "price_desc":
+          sort = "totalPrice"
+          dir = "DESC"
+          break;
+        case "date_asc":
+          sort = "createdDate"
+          dir = "ASC"
+          break;
+        case "date_desc":
+          sort = "createdDate"
+          dir = "DESC"
+          break;
+      }
+      let url = `/order/management?`;
+      if (selectedStatus.value) {
+        url += `status=${selectedStatus.value}`;
+      }
+      url +=`&page=${currentPage.value}&size=${pageSize.value}&sort=${sort},${dir}`
+      const response = await axiosInstance.get(url);
+      console.log(response)
+      orders.value = response.data.content;
+      totalRecords.value = response.data.totalElements;
+    } catch (error) {
+    }
+  }
+  onMounted(() => {
+    fetchOrders()
+  });
+  return {
+    orders,
+    onPageChange,
+    pageSize,
+    totalRecords,
+    currentPage,
+    sortOptions,
+    sortBy,
+    selectedStatus,
+    fetchOrders,
+    statuses,
+    setStatusFilter,
+    getBase64Image,
+    isHovered,
+    full,
+    getSeverity,
+    goHome,
+    iconClass,
+    onStarClick,
+    toggleWishlist,
+    intPart,
+  }
+},
 }
-onMounted(async () => {
-  //onmounted when page loades, display the method inside, async waits for the request
-  try {
-    const response = await axiosInstance.get('/order/management') // Send request to server.
-    orders.value = response.data.content // Assign response data to orders.
-    console.log(orders.value)
-  } catch (err) {
-    console.error('Failed to fetch orders', err)
-  }
-})
 </script>
 
 <style scoped>
@@ -556,6 +577,10 @@ onMounted(async () => {
   display: flex;
   align-items: flex-end;
   gap: 1vw;
+}
+.active-status {
+  color: #179739;
+  font-weight: bold;
 }
 .footer {
   margin: 0;

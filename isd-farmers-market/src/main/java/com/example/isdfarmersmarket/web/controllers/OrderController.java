@@ -68,8 +68,10 @@ public class OrderController {
     )
     @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/management")
-    public ResponseEntity<Page<OrderDTO>> getCurrentUserOrders(Pageable pageable) {
-        return ResponseEntity.status(OK).body(orderService.getCurrentUserOrders(pageable));
+    public ResponseEntity<Page<OrderDTO>> getCurrentUserOrders(
+            @RequestParam(required = false) String status,
+            Pageable pageable) {
+        return ResponseEntity.status(OK).body(orderService.getCurrentUserOrders(status, pageable));
     }
 
     @Operation(

@@ -18,7 +18,7 @@
       <tbody>
       <tr v-for="plannedOrder in plannedOrders" :key="plannedOrder.id">
         <td>
-          <div  class="title-image">
+          <div  style="cursor: pointer" class="title-image" @click="goToProductPage(plannedOrder.product)">
             <div class="image-container">
               <img
                 v-if="getFirstImage(plannedOrder.product.images)"
@@ -183,6 +183,9 @@ export default {
       },
     editPlannedOrder(plannedOrder) {
       this.$router.push(`/schedule-order/update/${plannedOrder.id}`);
+    },
+    goToProductPage(product) {
+      this.$router.push(`/product/${product.id}`);
     },
   },
 }
