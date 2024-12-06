@@ -322,7 +322,6 @@ onMounted(async () => {
   padding: 6vh;
   width: 100%;
   height: max-content;
-  background-color: #f2f2f2;
 }
 .main-orders-container {
   width: 100%;
@@ -559,7 +558,6 @@ onMounted(async () => {
 }
 .footer {
   margin: 0;
-  background-color: #fff;
   padding-top: 20px;
 }
 </style>

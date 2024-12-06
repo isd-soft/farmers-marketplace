@@ -38,6 +38,7 @@ public class CartServiceImpl implements CartService {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException(principal.getId(), User.class));
+
         Product product = productRepository
                 .findById(addItemInCartCommand.getProductId())
                 .orElseThrow(() -> new EntityNotFoundException(addItemInCartCommand.getProductId(), Product.class));
@@ -45,6 +46,7 @@ public class CartServiceImpl implements CartService {
         if(itemInCartRepository.existsByUserAndProduct(user, product)) {
             throw new EntityExistsException("Item already exists");
         }
+
         ItemInCart newItemInCart = itemInCartMapper.mapToEntity(addItemInCartCommand);
         newItemInCart.setUser(user);
         newItemInCart.setProduct(product);
