@@ -16,5 +16,5 @@ public interface OrderService {
     List<OrderDTO> getAllOrders();
 
     @Transactional(readOnly = true)
-    Page<OrderDTO> getCurrentUserOrders(Pageable pageable);
+    Page<OrderDTO> getCurrentUserOrders(String status, Pageable pageable);
 }

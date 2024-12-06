@@ -16,6 +16,7 @@ public class CompactProductDTO {
     BigDecimal pricePerUnit;
     int quantity;
     UnitType unitType;
+    private boolean visible;
     String unitTypeShort;
     int discountPercents;
     Boolean isInWishlist;

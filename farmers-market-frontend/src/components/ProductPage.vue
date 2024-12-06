@@ -261,6 +261,7 @@ export default {
         console.error('Failed to load product:', error.message)
         hasError.value = true
         isLoading.value = false
+        router.push(`/`)
       }
     }
     const scheduleProduct = (productId) => {
@@ -282,7 +283,6 @@ export default {
         )
       }
     }
-
     const addToCart = async () => {
       if (!product.value.id || !quantity.value) {
         alert('Invalid product or quantity')

@@ -37,6 +37,7 @@ public class Product {
 
     private int quantity;
 
+    private boolean visible;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;

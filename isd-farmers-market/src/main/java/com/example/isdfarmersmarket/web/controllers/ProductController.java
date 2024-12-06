@@ -3,6 +3,7 @@ package com.example.isdfarmersmarket.web.controllers;
 import com.example.isdfarmersmarket.business.services.interfaces.ProductService;
 import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
 import com.example.isdfarmersmarket.web.commands.ProductDiscountCommand;
+import com.example.isdfarmersmarket.web.commands.ProductVisibleCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateProductCommand;
 import com.example.isdfarmersmarket.web.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,11 +50,16 @@ public class ProductController {
     public ResponseEntity<ProductDTO> setDiscountProduct(@PathVariable Long id, @RequestBody ProductDiscountCommand discountPercents) {
         return ResponseEntity.status(OK).body(productService.setDiscountProduct(id, discountPercents.getDiscountPercents()));
     }
+    @PreAuthorize("hasRole('FARMER')||hasRole('ADMIN')")
+    @PutMapping(value = "/visible/{id}")
+    public ResponseEntity<ProductDTO> setVisibleProduct(@PathVariable Long id, @RequestBody ProductVisibleCommand visibleCommand) {
+        return ResponseEntity.status(OK).body(productService.changeVisible(id, visibleCommand.isVisible()));
+    }
 
     @Operation(
             description = "This endpoint is used to delete a product"
     )
-    @PreAuthorize("hasRole('FARMER')")
+    @PreAuthorize("hasRole('FARMER')||hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ProductDTO> deleteProduct(@PathVariable Long id) {
         return ResponseEntity.status(OK).body(productService.deleteProduct(id));
