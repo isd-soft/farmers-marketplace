@@ -10,7 +10,6 @@
       />
       <h1 class="user-name">{{ user.firstName + ' ' + user.lastName }}</h1>
 
-      <!-- Display rating and review count only if the user is a farmer -->
       <div v-if="user.isFarmer" class="user-rating">
         <Rating v-model="user.rating" readonly :stars="5" />
         <p>Based on {{ user.reviewCount }} Reviews</p>
@@ -18,19 +17,19 @@
     </div>
 
     <Button
-      v-if="user.isFarmer&&user.canMessage"
+      v-if="user.isFarmer && user.canMessage"
       label="Send Message"
       icon="pi pi-envelope"
+      style="width: 15%; margin-bottom: 1%"
       class="p-button-rounded p-button-success"
       @click="showDialog = true"
     />
-
     <Dialog
       header="Send a Message"
       v-model:visible="showDialog"
       :modal="true"
       :closable="true"
-      style="width: 30vw"
+      style="width: 40vw; max-width: 600px;"
     >
       <div>
         <textarea
@@ -38,7 +37,7 @@
           placeholder="Write your message here..."
           class="p-inputtextarea p-component"
           rows="5"
-          style="width: 100%; margin-bottom: 1rem;"
+          style="width: 100%; margin-bottom: 1rem; resize: none;"
         ></textarea>
 
         <div class="dialog-footer" style="text-align: right;">
@@ -47,7 +46,7 @@
             icon="pi pi-check"
             class="p-button-success"
             @click="sendMessage"
-            style="margin-right: 0.5rem;"
+            style="max-width: 150px;"
           />
           <Button
             label="Cancel"
@@ -58,92 +57,41 @@
         </div>
       </div>
     </Dialog>
+    <div v-if="user.isFarmer">
+    <TabView class="user-tabs">
+        <TabPanel header="Farmer Reviews" v-if="user.isFarmer">
+          <CustomerReviews :id="id" :review-type="'farmer'" />
+        </TabPanel>
 
-    <div>
-      <div v-if="user.isFarmer === true">
-        <CustomerReviews :id="id" :review-type="'farmer'" />
-      </div>
-      <div v-else>
-        <TabView class="user-tabs">
-          <TabPanel header="Product Reviews">
-            <div class="reviews-panel">
-              <h2>Product Reviews</h2>
-              <div v-if="productReviews.length > 0">
-                <ul class="review-list">
-                  <li
-                    v-for="review in productReviews"
-                    :key="review.id"
-                    class="review-item"
-                  >
-                    <Card>
-                      <template #content>
-                        <Rating
-                          v-model="review.rating"
-                          :readOnly="true"
-                          :stars="5"
-                        />
-                        <p>{{ review.content }}</p>
-                        <p><strong>Product:</strong> {{ review.product.title }}</p>
-                      </template>
-                    </Card>
-                  </li>
-                </ul>
-                <Button
-                  v-if="!isAllProductReviewsLoaded"
-                  label="Load More Reviews"
-                  class="p-button-outlined"
-                  @click="loadMoreProductReviews"
-                />
-              </div>
-              <div v-else>
-                <p>No product reviews yet. Be the first to leave one!</p>
-              </div>
+        <TabPanel header="Products" v-if="user.isFarmer">
+          <h2 class="header">Farmer Products</h2>
+          <div class="products-panel">
+            <div v-if="farmerProducts.length === 0">
+              <p>No farmer products available.</p>
             </div>
-          </TabPanel>
-          <TabPanel header="Farmer Reviews">
-            <div class="reviews-panel">
-              <h2>Farmer Reviews</h2>
-              <div v-if="farmerReviews.length > 0">
-                <ul class="review-list">
-                  <li
-                    v-for="review in farmerReviews"
-                    :key="review.id"
-                    class="review-item"
-                  >
-                    <Card>
-                      <template #content>
-                        <Rating
-                          v-model="review.rating"
-                          :readOnly="true"
-                          :stars="5"
-                        />
-                        <p>{{ review.content }}</p>
-                        <p>
-                          <strong>Farmer:</strong> {{ review.farmer.firstName }}
-                          {{ review.farmer.lastName }}
-                        </p>
-                      </template>
-                    </Card>
-                  </li>
-                </ul>
-                <Button
-                  v-if="!isAllFarmerReviewsLoaded"
-                  label="Load More Reviews"
-                  class="p-button-outlined"
-                  @click="loadMoreFarmerReviews"
-                />
-              </div>
-              <div v-else>
-                <p>No farmer reviews yet. Be the first to leave one!</p>
-              </div>
+            <ProductCard
+              v-for="product in farmerProducts"
+              :key="product.id"
+              :product="product"
+            />
+            <Button
+              v-if="!isAllProductsLoaded"
+              label="Load More Products"
+              class="p-button-outlined load-more-button"
+              @click="loadMoreProducts"
+            />
             </div>
-          </TabPanel>
-        </TabView>
-      </div>
+        </TabPanel>
+    </TabView>
+    </div>
+    <div v-else>
+      <ReviewsSection :userId="id" />
     </div>
     <Footer class="footer"></Footer>
   </div>
+
 </template>
+
 <script>
 import { ref, onMounted } from 'vue';
 import axiosInstance from '@/utils/axiosInstance.js';
@@ -153,48 +101,67 @@ import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
-import farmerAvatar from '@/assets/noPhoto.png';
-import customerAvatar from '@/assets/noPhoto.png';
+import farmerAvatar from '@/assets/farmer.png';
+import customerAvatar from '@/assets/customer.png';
 import CustomerReviews from '@/components/CustomerReviews.vue';
 import Header from '@/components/Header.vue';
 import Footer from '@/components/Footer.vue';
+import noPhotoImg from '@/assets/noPhoto.png';
+import router from "@/router/index.js";
+import ProductCard from "@/components/ProductCard.vue";
+import ReviewsSection from '@/components/ReviewsSection.vue'; // Import ReviewsSection component
 
 export default {
   name: 'UserPage',
   components: {
+    ProductCard,
     Footer,
     Header,
     CustomerReviews,
+    ReviewsSection, // Register ReviewsSection component
     Card,
     Rating,
     TabView,
     TabPanel,
     Button,
-    Dialog
+    Dialog,
   },
   props: ['id'],
   setup(props) {
-    const user = ref({})
-    const currentUser = ref({});
-    const productReviews = ref([])
-    const farmerReviews = ref([])
-    const newProductReview = ref({ customerId: props.id, rating: 0, content: '' })
-    const newFarmerReview = ref({ customerId: props.id, rating: 0, content: '' })
-    const isAllProductReviewsLoaded = ref(false)
-    const isAllFarmerReviewsLoaded = ref(false)
-    const loading = ref(true)
+    const user = ref({});
+    const farmerProducts = ref([]);
+    const isAllProductsLoaded = ref(false);
     const messageContent = ref('');
     const showDialog = ref(false);
 
     const fetchUser = async () => {
       try {
-        const response = await axiosInstance.get(`/users/${props.id}`)
-        user.value = response.data
-        console.log(user.value)
+        const response = await axiosInstance.get(`/users/${props.id}`);
+        user.value = response.data;
       } catch (error) {
-        console.error('Failed to fetch user:', error)
+        console.error('Failed to fetch user:', error);
       }
-    }
+    };
+
+    const fetchFarmerProducts = async (page = 0, pageSize = 5) => {
+      try {
+        const response = await axiosInstance.get(`/product/${props.id}/products`, {
+          params: { page, size: pageSize },
+        });
+        farmerProducts.value.push(...response.data.content);
+        if (farmerProducts.value.length >= response.data.totalElements) {
+          isAllProductsLoaded.value = true;
+        }
+      } catch (error) {
+        console.error('Failed to fetch farmer products:', error);
+      }
+    };
+
+    const loadMoreProducts = async () => {
+      const page = Math.ceil(farmerProducts.value.length / 5);
+      await fetchFarmerProducts(page, 5);
+    };
+
     const sendMessage = async () => {
       try {
         await axiosInstance.post('/messaging/user', {
@@ -209,114 +176,52 @@ export default {
       }
     };
 
-    const fetchProductReviews = async (page = 0, pageSize = 5) => {
-      try {
-        const response = await axiosInstance.get(`/reviews/customers/${props.id}/product-reviews`, {
-          params: { page, size: pageSize },
-        })
-        productReviews.value.push(...response.data.content)
-        if (productReviews.value.length >= response.data.totalElements) {
-          isAllProductReviewsLoaded.value = true
-        }
-      } catch (error) {
-        console.error('Failed to fetch product reviews:', error)
-      }
-    }
-    const fetchFarmerReviews = async (page = 0, pageSize = 5) => {
-      try {
-        const response = await axiosInstance.get(`/reviews/customers/${props.id}/farmer-reviews`, {
-          params: { page, size: pageSize },
-        })
-        farmerReviews.value.push(...response.data.content)
-        if (farmerReviews.value.length >= response.data.totalElements) {
-          isAllFarmerReviewsLoaded.value = true
-        }
-      } catch (error) {
-        console.error('Failed to fetch farmer reviews:', error)
-      }
-    }
-
-    const submitProductReview = async () => {
-      try {
-        const response = await axiosInstance.post(
-          '/reviews/customers/product-reviews',
-          newProductReview.value,
-        )
-        productReviews.value.unshift(response.data)
-        newProductReview.value = { customerId: props.id, rating: 0, content: '' }
-      } catch (error) {
-        console.error('Failed to submit product review:', error)
-      }
-    }
-
-    const submitFarmerReview = async () => {
-      try {
-        const response = await axiosInstance.post('/reviews/customers/farmer-reviews', newFarmerReview.value)
-        farmerReviews.value.unshift(response.data)
-        newFarmerReview.value = { customerId: props.id, rating: 0, content: '' }
-      } catch (error) {
-        console.error('Failed to submit farmer review:', error)
-      }
-    }
-
-    const loadMoreProductReviews = async () => {
-      const page = Math.ceil(productReviews.value.length / 5)
-      await fetchProductReviews(page, 5)
-    }
-
-    const loadMoreFarmerReviews = async () => {
-      const page = Math.ceil(farmerReviews.value.length / 5)
-      await fetchFarmerReviews(page, 5)
-    }
-
     onMounted(async () => {
-      loading.value = true
-      await fetchUser()
-      await fetchProductReviews()
-      await fetchFarmerReviews()
-      loading.value = false
-    })
+      await fetchUser();
+      if (user.value.isFarmer) {
+        await fetchFarmerProducts();
+      }
+    });
 
     return {
       user,
-      productReviews,
-      farmerReviews,
-      newProductReview,
-      newFarmerReview,
-      loading,
-      showDialog,
+      farmerProducts,
+      isAllProductsLoaded,
       messageContent,
+      showDialog,
       sendMessage,
-      isAllProductReviewsLoaded,
-      isAllFarmerReviewsLoaded,
       farmerAvatar,
       customerAvatar,
-      submitProductReview,
-      submitFarmerReview,
-      loadMoreProductReviews,
-      loadMoreFarmerReviews,
-    }
+      noPhotoImg,
+      loadMoreProducts,
+    };
   },
-}
+};
 </script>
 
 <style>
 .user-page {
-  width: 80%;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
-  padding-top: 120px; /* Added to ensure the content does not overlap with the header */
-  /* This padding pushes the page content down to avoid overlap */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+  width: 100%;
+  padding-top: 80px;
+}
+
+.user-page > *:not(.footer) {
+  margin-left: 5em;
+  margin-right: 5em;
 }
 
 .navbar {
-  position: fixed; /* Fix the header at the top */
+  position: fixed;
   width: 100%;
   top: 0;
   left: 0;
-  z-index: 10; /* Ensures it stays on top */
+  z-index: 10;
   background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adds shadow to distinguish from the content */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .user-header {
@@ -327,7 +232,9 @@ export default {
   border-radius: 8px;
   margin-bottom: 2rem;
 }
-
+.user-rating {
+  margin-left: 2em;
+}
 .user-header-avatar {
   width: 120px;
   height: 120px;
@@ -345,27 +252,20 @@ export default {
   font-size: 1.2rem;
 }
 
-.reviews-panel {
+.products-panel {
   padding: 2rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.review-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.review-item {
-  margin-bottom: 1.5rem;
-}
-
-h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+.load-more-button {
+  margin-top: 1rem;
+  display: block;
+  width: 100%;
 }
 
 .footer {
   margin-top: 2rem;
 }
-
 </style>

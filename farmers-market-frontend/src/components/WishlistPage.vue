@@ -1,5 +1,6 @@
 <template>
   <Header class="navbar"></Header>
+  <div class="wishlist-page">
   <div class="wishlist-container">
     <Card class="wishlist-card" style="margin: 2rem auto; max-width: 100%">
       <template #content>
@@ -20,7 +21,6 @@
             <Card class="product-card" style="overflow: hidden">
               <template #header>
                 <div class="header-content">
-                  <!-- If image is null, use the default image -->
                   <img
                     alt="product image"
                     :src="product.image?.bytes ? 'data:image/png;base64,' + product.image.bytes : noPhotoImg"
@@ -75,6 +75,8 @@
       </template>
     </Card>
   </div>
+    <Footer class="footer"></Footer>
+  </div>
 </template>
 
 <script>
@@ -86,10 +88,11 @@ import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
 import Header from '@/components/Header.vue'
 import noPhotoImg from '@/assets/noPhoto.png'
+import Footer from "@/components/Footer.vue";
 
 export default {
   name: 'WishlistPage',
-  components: { Header, Button, Rating, Card, ProgressSpinner },
+  components: {Footer, Header, Button, Rating, Card, ProgressSpinner },
   setup() {
     const isLoading = ref(true)
     const wishlist = ref([])
@@ -134,6 +137,19 @@ export default {
 </script>
 
 <style scoped>
+.wishlist-page{
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+  width: 100%;
+  height: max-content;
+}
+
+.wishlist-page > *:not(.footer) {
+  margin-left: 5em;
+  margin-right: 5em;
+}
 .wishlist-container {
   padding: 2rem;
   margin-top: 10vh;
@@ -212,7 +228,7 @@ export default {
 
 .product-image {
   width: 100%;
-  height: 200px; /* Fixed height */
+  height: 24em; /* Fixed height */
   object-fit: cover; /* Ensures the image maintains aspect ratio and covers the area */
 }
 

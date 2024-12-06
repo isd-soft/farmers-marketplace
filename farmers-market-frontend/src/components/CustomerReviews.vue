@@ -12,7 +12,7 @@
       ></textarea>
       <Button
         @click="submitReview"
-        style="background-color: green; width: 12em">
+        style="background-color: green; width: 12em; margin: 1em">
         Submit Review
       </Button>
     </div>
@@ -144,6 +144,7 @@ export default {
 <style scoped>
 .add-review {
   margin-bottom: 20px;
+  padding: 1em;
 }
 
 .add-review h3 {
@@ -153,9 +154,7 @@ export default {
 }
 
 .add-review textarea {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 8px;
+  width: 30%;
   border: 1px solid #ccc;
   border-radius: 4px;
 }

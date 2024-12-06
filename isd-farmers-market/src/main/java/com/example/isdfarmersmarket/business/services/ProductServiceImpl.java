@@ -183,6 +183,15 @@ public class ProductServiceImpl implements ProductService {
         return productDTO;
     }
 
+    @Transactional
+    @Override
+    public Page<CompactProductDTO> getFarmersProducts(Long farmerId, Pageable pageable) {
+        User farmer = userRepository.findById(farmerId)
+                .orElseThrow(EntityNotFoundException::new);
+        Page<Product> products = productRepository.findProductsByFarmer(farmer, pageable);
+        return productMapper.mapToCompactProductsDTO(products);
+    }
+
     @Override
     @Transactional
     public ProductPageDTO getProductPageById(Long productId) {

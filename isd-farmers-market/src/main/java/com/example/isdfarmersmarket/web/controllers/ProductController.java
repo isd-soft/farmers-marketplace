@@ -15,6 +15,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 @Slf4j
@@ -87,5 +89,13 @@ public class ProductController {
     public ResponseEntity<ProductPageDTO> getProductPage(@PathVariable Long productId) {
         return ResponseEntity.status(OK).body(productService.getProductPageById(productId));
     }
+    @Operation(
+            description = "This endpoint is used to get products for a certain farmer"
+    )
+    @GetMapping("/{farmerId}/products")
+    public ResponseEntity<Page<CompactProductDTO>> getFarmersProducts(@PathVariable Long farmerId, Pageable pageable) {
+        return ResponseEntity.status(OK).body(productService.getFarmersProducts(farmerId, pageable));
+    }
+
 
 }
