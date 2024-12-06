@@ -92,7 +92,7 @@ public class ProductController {
     @Operation(
             description = "This endpoint is used to get products for a certain farmer"
     )
-    @GetMapping("/{farmerId}/products")
+    @GetMapping("/farmer/{farmerId}/products")
     public ResponseEntity<Page<CompactProductDTO>> getFarmersProducts(@PathVariable Long farmerId, Pageable pageable) {
         return ResponseEntity.status(OK).body(productService.getFarmersProducts(farmerId, pageable));
     }

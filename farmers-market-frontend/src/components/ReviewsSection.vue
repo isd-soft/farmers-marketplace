@@ -1,5 +1,5 @@
 <template>
-  <TabView class="user-tabs">
+  <TabView class="reviews-tabs">
     <TabPanel header="Product Reviews">
       <div class="reviews-panel">
         <h2>Product Reviews</h2>
@@ -10,7 +10,11 @@
                 <template #content>
                   <Rating v-model="review.rating" :readOnly="true" :stars="5" />
                   <p>{{ review.content }}</p>
-                  <p><strong>Product:</strong> {{ review.product.title }}</p>
+                  <div class="author-name" :data-prefix="'Product:'">
+                    <a :href="`/product/${review.product.id}`">
+                      {{ review.product.title }}
+                    </a>
+                  </div>
                 </template>
               </Card>
             </li>
@@ -28,7 +32,6 @@
       </div>
     </TabPanel>
 
-    <!-- Farmer Reviews Tab -->
     <TabPanel header="Farmer Reviews">
       <div class="reviews-panel">
         <h2>Farmer Reviews</h2>
@@ -39,9 +42,11 @@
                 <template #content>
                   <Rating v-model="review.rating" :readOnly="true" :stars="5" />
                   <p>{{ review.content }}</p>
-                  <p>
-                    <strong>Farmer:</strong> {{ review.farmer.firstName }} {{ review.farmer.lastName }}
-                  </p>
+                  <div class="author-name" :data-prefix="'Farmer:'">
+                    <a :href="`/id${review.farmer.id}`">
+                      {{ review.farmer.firstName }} {{ review.farmer.lastName }}
+                    </a>
+                  </div>
                 </template>
               </Card>
             </li>
@@ -144,13 +149,7 @@ export default {
 </script>
 
 <style scoped>
-.user-name {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin: 0;
-}
-
-.user-tabs {
+.reviews-tabs {
   font-size: 1.2rem;
 }
 
@@ -162,6 +161,33 @@ export default {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.author-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #007bff;
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.author-name a {
+  font-weight: bold;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.author-name a:hover {
+  color: #0056b3;
+}
+
+.author-name::before {
+  content: attr(data-prefix) " ";
+  color: #333;
+  font-weight: normal;
+  margin-right: 5px;
 }
 
 .review-item {

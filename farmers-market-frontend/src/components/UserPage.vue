@@ -145,7 +145,7 @@ export default {
 
     const fetchFarmerProducts = async (page = 0, pageSize = 5) => {
       try {
-        const response = await axiosInstance.get(`/product/${props.id}/products`, {
+        const response = await axiosInstance.get(`/product/farmer/${props.id}/products`, {
           params: { page, size: pageSize },
         });
         farmerProducts.value.push(...response.data.content);

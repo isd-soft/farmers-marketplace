@@ -3,11 +3,10 @@
     <Header class="navbar"></Header>
     <Card
       :style="{
-        position: 'absolute',
         top: '10vh',
-        width: '80em',
-        maxWidth: '95%',
+        width: 'auto',
         margin: '0 auto',
+        maxWidth: '100%',
       }"
     >
       <template #content>
@@ -42,9 +41,7 @@
 
         <div v-else>
           <div class="product-page">
-            <!-- Product Section -->
             <div class="product-content">
-              <!-- Galleria Component -->
               <div class="product-gallery">
                 <Galleria
                   :value="images"
@@ -70,9 +67,13 @@
                 </Galleria>
               </div>
 
-              <!-- Product Details -->
               <div class="product-details">
                 <div class="product-name">{{ product.title || 'Product Name' }}</div>
+                <div class="author-name">
+                  <a :href="`/id${product.farmer.id}`">
+                    {{ product.farmer.firstName || 'Farmer name' }}
+                  </a>
+                </div>
                 <div class="product-cost">
                   <span v-if="product.discountPercents && product.discountPercents > 0">
                     <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
@@ -151,30 +152,30 @@
                 </div>
               </div>
             </div>
+            <TabView>
+              <TabPanel header="Details">
+                <div class="tab-content">
+                  <p>{{ product.description || 'No description' }}</p>
+                </div>
+              </TabPanel>
+
+              <TabPanel header="Reviews">
+                <CustomerReviews :id="id" :review-type="'product'" />
+              </TabPanel>
+
+              <TabPanel header="Shipping">
+                <div class="tab-content">
+                  <p>{{ product.shipping_info || 'Shipping information coming soon.' }}</p>
+                </div>
+              </TabPanel>
+            </TabView>
           </div>
 
-          <!-- Tabs Section -->
-          <TabView>
-            <TabPanel header="Details">
-              <div class="tab-content">
-                <p>{{ product.description || 'No description' }}</p>
-              </div>
-            </TabPanel>
-
-            <TabPanel header="Reviews">
-              <CustomerReviews :id="id" :review-type="'product'" />
-            </TabPanel>
-
-            <TabPanel header="Shipping">
-              <div class="tab-content">
-                <p>{{ product.shipping_info || 'Shipping information coming soon.' }}</p>
-              </div>
-            </TabPanel>
-          </TabView>
         </div>
       </template>
     </Card>
-  </div>
+    <Footer class="footer"></Footer>
+    </div>
 </template>
 
 <script>
@@ -455,13 +456,39 @@ export default {
   font-size: 1rem;
   color: #333;
 }
+.author-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #007bff;
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.author-name a {
+  font-weight: bold;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.author-name a:hover {
+  color: #0056b3;
+}
+
+.author-name::before {
+  content: "By ";
+  color: #333;
+  font-weight: normal;
+  margin-right: 5px;
+}
+
 .home {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
   overflow-x: hidden;
   width: 100%;
-  padding-top: 100px;
-  justify-content: space-between;
-  align-items: center;
+  height: max-content;
 }
 </style>
