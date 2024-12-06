@@ -1,9 +1,8 @@
 <template>
   <div class="server-info-page">
-    <h1 class="page-title">Server Information</h1>
-
-    <!-- Server Info Section -->
+    <Header class="navbar"></Header>
     <div class="server-info" v-if="serverInfo">
+    <h1 class="page-title">Server Information</h1>
       <h2 class="section-title">General Information</h2>
       <div class="info-card">
         <div v-for="(value, key) in serverInfo" :key="key" class="info-item">
@@ -72,6 +71,8 @@
         </tr>
         </tbody>
       </table>
+      <Footer class="footer"></Footer>
+
     </div>
   </div>
 </template>
@@ -80,9 +81,11 @@
 import { ref, onMounted } from 'vue';
 import Dropdown from 'primevue/dropdown';
 import axiosInstance from '@/utils/axiosInstance.js';
+import Header from "@/components/Header.vue";
+import Footer from "@/components/Footer.vue";
 
 export default {
-  components: { Dropdown },
+  components: {Footer, Header, Dropdown },
   setup() {
     const serverInfo = ref(null);
     const requestsInfo = ref(null);
@@ -143,13 +146,14 @@ export default {
 
 <style scoped>
 .server-info-page {
-  padding: 2rem;
-  font-family: Arial, sans-serif;
-  color: #333;
-  background-color: #f4f4f9;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
   width: 70%;
-  min-width: 70%;
-  margin: 0 auto;
+  height: max-content;
+}
+.footer {
 }
 
 .page-title {
