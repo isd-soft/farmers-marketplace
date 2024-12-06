@@ -34,8 +34,15 @@ public class Order {
     @JoinColumn(name = "farmer_id", nullable = false)
     private User farmer;
 
-    @Column(name = "total_price", nullable = false)
-    private BigDecimal totalPrice;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "delivery_type_id", nullable = false)
+    private DeliveryTypeFarmer deliveryTypeFarmer;
+
+    @Column(name = "total_delivery_price", nullable = false)
+    private BigDecimal totalDeliveryPrice;
+
+    @Column(name = "total_items_price", nullable = false)
+    private BigDecimal totalItemsPrice;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ItemInOrder> itemsInOrder = new HashSet<>();
@@ -47,7 +54,7 @@ public class Order {
         this.customer = customer;
         this.farmer = farmer;
         this.orderStatus = orderStatus;
-        this.totalPrice = totalPrice;
+        this.totalItemsPrice = totalPrice;
     }
 
     @Override

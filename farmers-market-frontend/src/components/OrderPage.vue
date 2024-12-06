@@ -54,12 +54,9 @@
                   <div v-for="order in orders" :key="order.id">
                     <div
                       class="flex flex-col sm:flex-row sm:items-center p-6 gap-4 product-container"
-                      :class="{
-                        'border-t border-surface-200 dark:border-surface-700': order !== 0,
-                      }"
                     >
                       <div
-                        v-for="(product, order) in order.itemsInOrder"
+                        v-for="product in order.itemsInOrder"
                         :key="product.id"
                         class="md:w-40 relative product-image-title-container"
                       >
@@ -73,32 +70,21 @@
                           style="left: 4px; top: 4px"
                         >
                           <div class="title-description-rating-container">
-                            <div>
-                              <h2>{{ product.productTitle }}</h2>
+                            <div class="first-product-content-section">
+                              <h3 class="product-title-text">{{ product.productTitle }}</h3>
                               <p class="product-description">{{ product.productDescription }}</p>
+                              <p class="product-quantity-type">{{ product.quantity }} {{ product.unitType }}</p>
                             </div>
-
-                            <div :class="'stars-container'">
-                              <span
-                                :key="i"
-                                v-for="i in 5"
-                                @click="onStarClick($event, i)"
-                                :class="['p-rating-icon', iconClass(i)]"
-                                :style="{ '--full': i === intPart + 1 ? full : '100%' }"
-                              ></span>
-                              <span class="text-surface-900 font-medium text-sm">{{
-                                product.rating
-                              }}</span>
-                              <!-- <Rating v-model="product.rating" :stars="5" :cancel="false" :readonly="true" />
-                                <span class="text-surface-900 font-medium text-sm">{{ product.rating }}</span> -->
-                            </div>
+                          </div>
+                          <div class="second-product-content-section">
+                            <p>Order Created On:</p>
+                            <p class="order-date-text">{{formatOrderDate(order.createdDate) }}</p>
                           </div>
 
                           <div>
                             <Button
                               class="heart-button wishlist-icon"
                               outlined
-
                               :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
                               @click="toggleWishlist(product)"
                               :title="
@@ -109,43 +95,17 @@
                           </div>
                         </div>
                       </div>
-
-                      <div
-                        class="flex flex-col md:flex-row justify-between md:items-center flex-1 gap-6"
-                      >
-                        <div class="flex flex-row md:flex-col justify-between items-start gap-2">
-                          <div class="bg-surface-100 p-1" style="border-radius: 30px">
-                            <div
-                              class="bg-surface-0 flex items-center gap-2 justify-center py-1 px-2"
-                              style="
-                                border-radius: 30px;
-                                box-shadow:
-                                  0px 1px 2px 0px rgba(0, 0, 0, 0.04),
-                                  0px 1px 2px 0px rgba(0, 0, 0, 0.06);
-                              "
-                            ></div>
-                          </div>
-                          <div class="bg-surface-100 p-1" style="border-radius: 30px"></div>
-                        </div>
                         <div class="flex flex-col md:items-end gap-8 buttons-price-container">
                           <span class="text-xl font-semibold price-text"
-                            >{{ order.totalPrice }} MDL</span
-                          >
-                          <div class="flex flex-row-reverse md:flex-row gap-2 buttons-container">
-                            <!-- <div class="wishlist-container">
-
-                            </div> -->
-                            <!-- icon="pi pi-heart" -->
-
+                            >{{ order.totalPrice }} MDL</span>
                             <Button
-                              icon="pi pi-user-edit"
-                              label="Update Order Status"
+                              icon="pi pi-check"
+                              label="Order Recieved"
                               :disabled="order.id === 'OUTOFSTOCK'"
+                              @click=""
                               class="flex-auto md:flex-initial whitespace-nowrap update-button"
                             ></Button>
-                          </div>
                         </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -163,14 +123,19 @@ import Header from '@/components/Header.vue'
 import Footer from './Footer.vue'
 import InputText from 'primevue/inputtext'
 import { ref, onMounted, computed } from 'vue'
-import axiosInstance from '@/utils/axiosInstance' // request with back-end and db
+import axiosInstance from '@/utils/axiosInstance'
 import DataView from 'primevue/dataview'
 import Button from 'primevue/button'
 import Select from 'primevue/select'
-import Tag from 'primevue/tag'
 import 'primeicons/primeicons.css'
-import Rating from 'primevue/rating'
 
+const isHovered = ref(false)
+
+const modelValue = ref(4.5)
+const intPart = computed(() => Math.floor(modelValue.value))
+const decimalPart = computed(() => modelValue.value - Math.floor(modelValue.value))
+const isPartial = computed(() => decimalPart.value !== 0)
+const full = computed(() => `${decimalPart.value * 100}%`)
 const orders = ref([])
 const sortKey = ref()
 const sortOrder = ref()
@@ -180,92 +145,28 @@ const sortOptions = ref([
   { label: 'Price Low to High', value: 'price' },
 ])
 
-// const onSortChange = (event) => {
-//   const value = event.value.value
-//   if (value.startsWith('!')) {
-//     sortOrder.value = -1
-//     sortField.value = value.substring(1)
-//   } else {
-//     sortOrder.value = 1
-//     sortField.value = value
-//   }
-//   sortKey.value = event.value
-// }
-const onSortChange = (event) => {
-  const value = event.value.value
-
-  if (value.startsWith('!')) {
-    sortOrder.value = -1
-    sortField.value = 'orderTotalPrice' // Sorting by orderTotalPrice
-  } else {
-    sortOrder.value = 1
-    sortField.value = 'orderTotalPrice' // Sorting by orderTotalPrice
-  }
-
-  sortKey.value = event.value
+function toastAdd(severity, summary, detail, life = 2000) {
+  toast.add({
+    severity: severity,
+    summary: summary,
+    detail: detail,
+    life: life,
+  })
 }
 
-// const onSortChange = (event) => {
-//   const value = event.value.value
-//   if (value.startsWith('!')) {
-//     sortOrder.value = -1
-//     sortField.value = value.substring(1) // Remove the "!" to get the field name
-//   } else {
-//     sortOrder.value = 1
-//     sortField.value = value
-//   }
-//   sortKey.value = event.value
-
-//   // Apply sorting to the orders array
-//   if (sortField.value === 'orderTotalPrice') {
-//     orders.value.sort((a, b) => {
-//       if (sortOrder.value === 1) {
-//         return a.orderTotalPrice - b.orderTotalPrice // Price Low to High
-//       } else {
-//         return b.orderTotalPrice - a.orderTotalPrice // Price High to Low
-//       }
-//     })
-//   }
-// }
-
-const getSeverity = (product) => {
-  switch (product.inventoryStatus) {
-    case 'INSTOCK':
-      return 'success'
-    case 'LOWSTOCK':
-      return 'warn'
-    case 'OUTOFSTOCK':
-      return 'danger'
-    default:
-      return null
+function formatOrderDate(dateString) {
+  const options = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   }
-}
-
-const goHome = () => {
-  window.location.href = '/'
+  return new Date(dateString).toLocaleDateString(undefined, options)
 }
 
 function getBase64Image(base64String, imageType = 'jpeg') {
   return `data:image/${imageType};base64,${base64String}`
-}
-
-const isHovered = ref(false)
-
-const modelValue = ref(4.5)
-const intPart = computed(() => Math.floor(modelValue.value))
-const decimalPart = computed(() => modelValue.value - Math.floor(modelValue.value))
-const isPartial = computed(() => decimalPart.value !== 0)
-const full = computed(() => `${decimalPart.value * 100}%`)
-
-function iconClass(i) {
-  if (i <= modelValue.value) return 'pi pi-star' // Full star
-  if (isPartial.value && i === intPart.value + 1) return 'pi pi-star partial' // Half star
-  return 'pi pi-star-o' // Empty star
-}
-
-function onStarClick(event, i) {
-  console.log(`Star ${i} clicked!`, event)
-  modelValue.value = i
 }
 
 const toggleWishlist = async (product) => {
@@ -286,10 +187,9 @@ const toggleWishlist = async (product) => {
   }
 }
 onMounted(async () => {
-  //onmounted when page loades, display the method inside, async waits for the request
   try {
-    const response = await axiosInstance.get('/order/management') // Send request to server.
-    orders.value = response.data.content // Assign response data to orders.
+    const response = await axiosInstance.get('/order/management')
+    orders.value = response.data.content
     console.log(orders.value)
   } catch (err) {
     console.error('Failed to fetch orders', err)
@@ -324,49 +224,13 @@ onMounted(async () => {
   height: max-content;
 }
 .main-orders-container {
-  width: 100%;
+  margin: 0 auto;
+  width: 80%;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   gap: 1vw;
   position: relative;
-}
-.home-text {
-  color: #8e90a7;
-  font-size: 0.9rem;
-  font-weight: 300;
-  cursor: pointer;
-  position: absolute;
-  left: 19vw;
-  margin: 0;
-  padding: 10px;
-}
-
-.home-text:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 768px) {
-  .home-text {
-    left: 16vw;
-  }
-}
-@media (max-width: 700px) {
-  .home-text {
-    left: 14vw;
-  }
-}
-
-@media (max-width: 526px) {
-  .home-text {
-    left: 10vw;
-  }
-}
-
-@media (max-width: 425px) {
-  .home-text {
-    left: 2vw;
-  }
 }
 .order-status-fitering-container,
 .orders-container {
@@ -376,9 +240,10 @@ onMounted(async () => {
   height: max-content;
   min-width: max-content;
   width: 55%;
+  box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
 }
 .order-status-fitering-container {
-  width: 15%;
+  width: 20%;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -388,7 +253,7 @@ onMounted(async () => {
   border-radius: 15px;
 }
 .orders-container {
-  width: 45vw;
+  width: 80%;
 }
 .order-staus-icons {
   display: flex;
@@ -402,21 +267,38 @@ onMounted(async () => {
 
 .product-image {
   width: 10vw;
-  max-width: 10vw;
-  height: auto;
+  height: 12vh;
   border-radius: 10px;
+  min-width: 100px;
 }
-
+.product-quantity-type{
+  font-size: 0.9rem;
+  font-weight: 600;
+}
 .title-description-rating-container {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 2vh
+}
+.first-product-content-section{
+  width: 15vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.second-product-content-section{
+  width: 15vw;
+}
+.order-date-text{
+  font-weight: 600;
+}
+.product-title-text {
+  font-size: 1.5rem;
 }
 .product-description {
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   height: max-content;
-  max-width: 200px;
+  max-width: 15vw;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -429,23 +311,17 @@ onMounted(async () => {
 .product-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /* justify-content: flex-end; */
   gap: 2vh;
   padding: 3vh 3vh;
   border-radius: 15px;
   overflow: hidden;
-  box-shadow:
-    0 4px 6px rgba(0, 0, 0, 0.1),
-    0 1px 3px rgba(0, 0, 0, 0.06);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
 }
 .product-content {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  padding: 1rem;
 }
 /* .heart-button {
   border: none;
@@ -477,60 +353,6 @@ onMounted(async () => {
   color: black;
 }
 
-/* .stars {
-  display: inline-block;
-  font-size: 20px;
-  color: #ffd700; /* Gold color for the stars
-}
-
-.star {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  background-size: cover;
-  background-image: url('path_to_your_star_image.svg'); /* Full star image
-}
-
-/* Full star - 100% gold
-/* Full star - 100% gold
-.star.full {
-  background-image: url('@/assets/star_full.svg'); /* Adjust path based on your project
-}
-
-/* Half star - 50% gold
-.star.half {
-  background-image: url('@/assets/star_half.svg'); /* Adjust path based on your project
-}
-
-/* Empty star - transparent or gray
-.star.empty {
-  background-image: url('@/assets/star_empty.svg'); /* Adjust path based on your project
-}  */
-
-.stars-container {
-  display: flex;
-  gap: 4px;
-}
-
-.p-rating-icon {
-  display: inline-block;
-  font-size: 20px;
-  color: #ffd700; /* Gold color for stars */
-}
-
-.p-rating-icon.partial {
-  background: linear-gradient(to right, #ffd700 var(--full), #ccc var(--full));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.p-rating-icon.pi-star {
-  color: #ffd700;
-}
-
-.p-rating-icon.pi-star-o {
-  color: #ccc;
-}
 .heart-button {
   border: 1px solid #179739;
   color: #179739;
@@ -546,8 +368,7 @@ onMounted(async () => {
 }
 .buttons-price-container {
   display: flex;
-  flex-direction: column;
-  text-align: right;
+  justify-content: flex-end;
   align-items: flex-end;
   gap: 2vh;
 }
