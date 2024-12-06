@@ -11,13 +11,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
-
+@Async
 @AllArgsConstructor
 public class EmailSenderService {
 
     private JavaMailSender javaMailSender;
 
-    @Async
     public void sendEmail(SendEmailCommand sendEmailCommand) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
