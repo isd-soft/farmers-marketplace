@@ -5,10 +5,8 @@ import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.interfaces.ProductService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
-import com.example.isdfarmersmarket.dao.models.Category;
-import com.example.isdfarmersmarket.dao.models.Image;
-import com.example.isdfarmersmarket.dao.models.Product;
-import com.example.isdfarmersmarket.dao.models.User;
+import com.example.isdfarmersmarket.dao.enums.ERole;
+import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
 import com.example.isdfarmersmarket.dao.specifications.ProductSpecification;
 import com.example.isdfarmersmarket.web.commands.CreateProductCommand;
@@ -45,6 +43,8 @@ public class ProductServiceImpl implements ProductService {
     static String CATEGORY_FIND_FAILED_BY_ID = "Category with the specified id not found";
     UserRepository userRepository;
     OrderRepository orderRepository;
+    ItemInCartRepository itemInCartRepository;
+    private final PlannedOrderRepository plannedOrderRepository;
 
     @Override
     @Transactional
@@ -74,6 +74,7 @@ public class ProductServiceImpl implements ProductService {
                 .quantity(createProductCommand.getQuantity())
                 .category(category)
                 .farmer(creator)
+                .visible(true)
                 .images(new HashSet<>(images)).build();
         productRepository.save(product);
         if (creator != null) {
@@ -132,15 +133,34 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
         return productMapper.map(product);
     }
-
-    @Override
     @Transactional
-    public ProductDTO deleteProduct(Long id) {
-        if (!isProductOwner(id)) {
+    @Override
+    public ProductDTO changeVisible(Long id, boolean visible) {
+        if (!isProductOwner(id) && !isAppAdmin()) {
             throw new AccessDeniedException("You are not the owner of this product");
         }
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
+        product.setVisible(visible);
+        itemInCartRepository.deleteAllByProduct(product);
+        plannedOrderRepository.deleteAllByProduct(product);
+        productRepository.save(product);
+        return productMapper.map(product);
+    }
+
+    @Override
+    @Transactional
+    public ProductDTO deleteProduct(Long id) {
+        if (!isProductOwner(id) && !isAppAdmin()) {
+            throw new AccessDeniedException("You are not the owner of this product");
+        }
+        if(orderRepository.countOrdersByProductId(id) > 0) {
+            throw new AccessDeniedException("You can not delete product with orders");
+        }
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
+        itemInCartRepository.deleteAllByProduct(product);
+        plannedOrderRepository.deleteAllByProduct(product);
         productRepository.delete(product);
         return productMapper.map(product);
     }
@@ -150,7 +170,8 @@ public class ProductServiceImpl implements ProductService {
     public Page<CompactProductDTO> getAllProducts(Long category, String search, Pageable pageable) {
         Specification<Product> filters = Specification
                 .where(StringUtils.isBlank(search) ? null : ProductSpecification.titleOrDescLike(search))
-                .and((category == null || category == 0L) ? null : ProductSpecification.categoryIs(category));
+                .and((category == null || category == 0L) ? null : ProductSpecification.categoryIs(category))
+                .and(ProductSpecification.isVisible());
         Page<Product> products = productRepository.findAll(filters, pageable);
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         Set<Product> wishlist = new HashSet<>();
@@ -183,6 +204,15 @@ public class ProductServiceImpl implements ProductService {
         return productDTO;
     }
 
+    @Transactional
+    @Override
+    public Page<CompactProductDTO> getFarmersProducts(Long farmerId, Pageable pageable) {
+        User farmer = userRepository.findById(farmerId)
+                .orElseThrow(EntityNotFoundException::new);
+        Page<Product> products = productRepository.findProductsByFarmer(farmer, pageable);
+        return productMapper.mapToCompactProductsDTO(products);
+    }
+
     @Override
     @Transactional
     public ProductPageDTO getProductPageById(Long productId) {
@@ -190,6 +220,9 @@ public class ProductServiceImpl implements ProductService {
         var product = productRepository
                 .findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
+        if(!product.isVisible() && !isProductOwner(product.getId())) {
+            throw new AccessDeniedException("This product is unavaliable");
+        }
         ProductPageDTO productPageDTO = productMapper.mapToProductPage(product);
         if (principal != null) {
             User user = userRepository.findById(principal.getId()).orElseThrow();
@@ -211,12 +244,20 @@ public class ProductServiceImpl implements ProductService {
 
     private boolean isProductOwner(Long productId) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
-        User currentUser = null;
-        if (principal != null) {
-            currentUser = userRepository.findById(principal.getId()).orElseThrow();
-        }
+        User currentUser = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new com.example.isdfarmersmarket.business
+                        .exception.custom_exceptions.EntityNotFoundException(principal.getId(), User.class));
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new RuntimeException("Product not found"));
             return product.getFarmer().equals(currentUser);
         }
+    private boolean isAppAdmin() {
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+        User currentUser = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new com.example.isdfarmersmarket.business
+                        .exception.custom_exceptions.EntityNotFoundException(principal.getId(), User.class));
+        Set<Role> roles = currentUser.getRoles();
+        return roles.stream()
+                .anyMatch(role -> role.getRole() == ERole.ADMIN);
+    }
 }

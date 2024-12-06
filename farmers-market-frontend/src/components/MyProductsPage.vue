@@ -19,7 +19,7 @@
       <tbody>
       <tr v-for="product in products" :key="product.id">
         <td>
-          <div  class="title-image">
+          <div  class="title-image" @click="goToProductPage(product)">
             <div class="image-container">
             <img
               v-if="product.image"
@@ -54,7 +54,14 @@
         <td class="actions">
           <div class="actions-container">
             <i @click="editProduct(product)" class="pi pi-pencil action-icon"></i>
-            <i @click="confirmDelete(product)" class="pi pi-trash action-icon"></i>
+            <i v-if="product.orders<1" @click="confirmDelete(product)" class="pi pi-trash action-icon"></i>
+            <ToggleButton
+              style="font-size: 10px; max-width: fit-content"
+              v-model="product.visible"
+              :onLabel="'Visible'"
+              :offLabel="'Invisible'"
+              @change="toggleActivity(product, product.visible)"
+            />
           </div></td>
       </tr>
       </tbody>
@@ -115,9 +122,11 @@ import InputText from "primevue/inputtext";
 import useVuelidate from "@vuelidate/core";
 import {required, minValue, maxValue} from "@vuelidate/validators"
 import router from "@/router/index.js";
+import ToggleButton from "primevue/togglebutton";
 export default {
   name: 'SearchProducts',
   components: {
+    ToggleButton,
     ProductCard,
     Header,
     Footer,
@@ -164,6 +173,17 @@ export default {
       }
     };
 
+    const toggleActivity = async (product, visible) => {
+      console.log(visible)
+      try {
+        const response = await axiosInstance.put(
+          `/product/visible/${product.id}`,
+          { visible: visible }
+        );
+      } catch (error) {
+        console.error('Failed to update activity state:', error.message);
+      }
+    };
     const cancelDelete = () => {
       productToDelete.value = null;
       showConfirmation.value = false;
@@ -252,6 +272,7 @@ export default {
       applyDiscount,
       cancelDiscount,
       removeDiscount,
+      toggleActivity,
       v$,
     }
   },
@@ -268,6 +289,9 @@ export default {
     },
     editProduct(product) {
       this.$router.push(`/product/update/${product.id}`);
+    },
+    goToProductPage(product) {
+      this.$router.push(`/product/${product.id}`);
     },
   },
 }
@@ -361,6 +385,7 @@ body{
   flex-direction: row;
   align-items: center;
   gap: 10px;
+  cursor: pointer;
 }
 
 .popup-content {

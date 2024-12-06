@@ -10,18 +10,19 @@ import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.EventPublisher;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
-import com.example.isdfarmersmarket.dao.models.ItemInCart;
-import com.example.isdfarmersmarket.dao.models.ItemInOrder;
-import com.example.isdfarmersmarket.dao.models.Order;
-import com.example.isdfarmersmarket.dao.models.User;
+import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
+import com.example.isdfarmersmarket.dao.specifications.OrderSpecification;
+import com.example.isdfarmersmarket.dao.specifications.ProductSpecification;
 import com.example.isdfarmersmarket.web.commands.order.UpdateOrderCommand;
 import com.example.isdfarmersmarket.web.dto.OrderDTO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -142,29 +143,24 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderDTO> getAllOrders() {
-//        JwtPrincipal principal = SecurityUtils.getPrincipal();
-//        User authenticatedUser = userRepository.findById(principal.getId())
-//                .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(principal.getId(), User.class));
-//
-//        List<Order> orders = orderRepository.findAllByCustomerId(authenticatedUser.getId());
-//
-//        return orders.stream()
-//                .map(order -> {
-//                    List<ItemInOrderDTO> itemInOrderDTOs = itemInOrderMapper.mapOrders(order.getItemsInOrder().stream().toList());
-//
-//                    OrderDTO orderDTO = orderMapper.map(order);
-//                    orderDTO.setUserId(authenticatedUser.getId());
-//                    orderDTO.setProducts(itemInOrderDTOs.stream().collect(Collectors.toSet()));
-//                }).toList();
-        return null;
+        List<OrderDTO> orderDTOList = orderMapper.mapOrders(orderRepository.findAll());
+        orderDTOList.forEach(orderDTO -> {
+            Order order = orderRepository.findById(orderDTO.getId()).orElseThrow();
+            Set<ItemInOrder> itemInOrders = order.getItemsInOrder();
+            orderDTO.setItemsInOrder(itemInOrderMapper.mapOrders(itemInOrders));
+        });
+        return orderDTOList;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Page<OrderDTO> getCurrentUserOrders(Pageable pageable) {
+    public Page<OrderDTO> getCurrentUserOrders(String orderStatus, Pageable pageable) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         Long customerId = principal.getId();
-        Page<OrderDTO> orderDTOPage = orderRepository.findAllByCustomerId(customerId, pageable)
+        Specification<Order> filters = Specification
+                .where(orderStatus == null ? null : OrderSpecification.statusIs(orderStatus))
+                .and((customerId == null || customerId == 0L) ? null : OrderSpecification.customerIs(customerId));
+        Page<OrderDTO> orderDTOPage = orderRepository.findAll(filters, pageable)
                 .map(orderMapper::map);
         orderDTOPage.forEach(orderDTO -> {
             Order order = orderRepository.findById(orderDTO.getId()).orElseThrow();

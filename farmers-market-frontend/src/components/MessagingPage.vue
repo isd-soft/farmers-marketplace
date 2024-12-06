@@ -1,69 +1,78 @@
 <template>
-  <div class="messaging-page">
-    <!-- Conversations Sidebar -->
-    <div class="conversations-sidebar">
-      <h2>Conversations</h2>
-      <ul class="conversation-list">
-        <li
-          v-for="conversation in conversations"
-          :key="conversation.id"
-          :class="{ 'selected-conversation': selectedConversation?.id === conversation.id }"
-          @click="selectConversation(conversation)"
-        >
-          <Card class="conversation-card">
-            <template #title>
-              {{ conversation.farmer.firstName }} {{ conversation.farmer.lastName }}
-            </template>
-            <template #content>
-              <p>{{ conversation.lastMessage || 'No messages yet' }}</p>
-            </template>
-          </Card>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Messages Section -->
-    <div class="messages-section" v-if="selectedConversation">
-      <h2>Chat with {{ selectedConversation.farmer.id == this.userId ? selectedConversation.customer.firstName : selectedConversation.farmer.firstName }}</h2>
-      <div ref="messageList" class="messages-list" @scroll="handleScroll">
-        <ul>
+  <div class="app-container">
+    <Header class="navbar"></Header>
+    <div class="messaging-page">
+      <div class="conversations-sidebar">
+        <h2>Conversations</h2>
+        <ul class="conversation-list">
           <li
-            v-for="message in messages.slice().reverse()"
-            :key="message.id"
-            :class="[
-              { 'sent-message': message.sender.id == this.userId },
-              { 'received-message': message.sender.id != this.userId },
-              { 'farmer-message': message.sender.isFarmer },
-              { 'non-farmer-message': !message.sender.isFarmer }
-            ]"
+            v-for="conversation in conversations"
+            :key="conversation.id"
+            :class="{ 'selected-conversation': selectedConversation?.id === conversation.id }"
+            @click="selectConversation(conversation)"
           >
-            <div class="message-bubble">
-              <strong>{{ message.sender.firstName }}:</strong> {{ message.content }}
-            </div>
+            <Card class="conversation-card">
+              <template #title>
+                {{ conversation.farmer.firstName }} {{ conversation.farmer.lastName }}
+              </template>
+              <template #content>
+                <p>{{ conversation.lastMessage || 'No messages yet' }}</p>
+              </template>
+            </Card>
           </li>
         </ul>
       </div>
-      <div class="message-input-container">
-        <InputText
-          v-model="newMessage"
-          placeholder="Type a message..."
-          class="message-input"
-          @keyup.enter="sendMessage"
-        />
-        <Button
-          icon="pi pi-send"
-          class="p-button-rounded p-button-primary send-button"
-          @click="sendMessage"
-        />
+
+      <!-- Messages Section -->
+      <div class="messages-section" v-if="selectedConversation">
+        <h2>
+          Chat with
+          {{ selectedConversation.farmer.id == this.userId
+          ? selectedConversation.customer.firstName
+          : selectedConversation.farmer.firstName }}
+        </h2>
+        <div ref="messageList" class="messages-list" @scroll="handleScroll">
+          <ul>
+            <li
+              v-for="message in messages.slice().reverse()"
+              :key="message.id"
+              :class="[
+                { 'sent-message': message.sender.id == this.userId },
+                { 'received-message': message.sender.id != this.userId },
+                { 'farmer-message': message.sender.isFarmer },
+                { 'non-farmer-message': !message.sender.isFarmer }
+              ]"
+            >
+              <div class="message-bubble">
+                <strong>{{ message.sender.firstName }}:</strong> {{ message.content }}
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="message-input-container">
+          <InputText
+            v-model="newMessage"
+            placeholder="Type a message..."
+            class="message-input"
+            @keyup.enter="sendMessage"
+          />
+          <Button
+            icon="pi pi-send"
+            class="p-button-rounded p-button-primary send-button"
+            @click="sendMessage"
+          />
+        </div>
+      </div>
+
+      <!-- Placeholder if no conversation is selected -->
+      <div class="messages-section no-conversation-selected" v-else>
+        <p>Please select a conversation to start chatting.</p>
       </div>
     </div>
-
-    <!-- Placeholder if no conversation is selected -->
-    <div class="messages-section no-conversation-selected" v-else>
-      <p>Please select a conversation to start chatting.</p>
-    </div>
+    <Footer class="footer"></Footer>
   </div>
 </template>
+
 
 <script>
 import { ref, onMounted, watch } from 'vue';
@@ -73,10 +82,14 @@ import axiosInstance, { getUserId } from '@/utils/axiosInstance.js';
 import Card from 'primevue/card';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
+import Header from "@/components/Header.vue";
+import Footer from "@/components/Footer.vue";
 
 export default {
   name: 'MessageList',
   components: {
+    Footer,
+    Header,
     Card,
     Button,
     InputText,
@@ -184,11 +197,29 @@ export default {
   },
 };
 </script>
+
 <style scoped>
-.messaging-page {
+.app-container {
   display: flex;
-  height: 100vh;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+  width: 100%;
+  padding-top: 5em;
+  height: max-content;
+  padding-right: 8em;
+  padding-left: 8em;
+}
+
+.navbar {
+  flex-shrink: 0;
+}
+
+.messaging-page {
+  flex: 1;
+  display: flex;
   background-color: #f4f4f4;
+  overflow: hidden;
 }
 
 .conversations-sidebar {
@@ -216,9 +247,11 @@ export default {
 
 .messages-section {
   flex: 1;
+  height: 80vh;
   display: flex;
   flex-direction: column;
-  padding: 1rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
   background-color: #ffffff;
 }
 
@@ -234,6 +267,7 @@ export default {
   flex: 1;
   overflow-y: auto;
   margin-bottom: 1rem;
+  max-height: calc(100vh - 200px);
 }
 
 .messages-list ul {
@@ -247,15 +281,17 @@ export default {
   margin-bottom: 0.5rem;
   max-width: 70%;
 }
+
 .sent-message {
   display: flex;
-  justify-content: flex-end;  /* Align the entire message to the right */
+  justify-content: flex-end;
 }
 
 .received-message {
   display: flex;
-  justify-content: flex-start;  /* Align the entire message to the left */
+  justify-content: flex-start;
 }
+
 .farmer-message .message-bubble {
   background-color: green !important;
   color: white;
@@ -278,5 +314,14 @@ export default {
 
 .send-button {
   flex-shrink: 0;
+}
+
+/* Footer stays at the bottom */
+.footer {
+  flex-shrink: 0;
+  background-color: #fff;
+  text-align: center;
+  padding: 1rem;
+  border-top: 1px solid #ddd;
 }
 </style>

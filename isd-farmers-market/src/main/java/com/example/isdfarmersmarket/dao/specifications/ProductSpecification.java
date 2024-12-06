@@ -19,5 +19,9 @@ public class ProductSpecification {
         return (root, query, builder) ->
                 builder.equal(root.get("farmer").get("id"), userId);
     }
+    public static Specification<Product> isVisible() {
+        return (root, query, builder) ->
+                builder.equal(root.get("visible"), true);
+    }
 
 }
