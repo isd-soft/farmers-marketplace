@@ -18,15 +18,15 @@
         <div class="product-cost">
           <span v-if="product.discountPercents && product.discountPercents > 0">
             <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
-              ${{ product.pricePerUnit }}
+              {{ product.pricePerUnit }} MDL
             </s>
             <span style="color: #179739; font-size: 1.5rem">
-              ${{ discountedPrice }}
+              {{ discountedPrice }} MDL
             </span>
           </span>
           <span v-else>
             <span style="color: #179739; font-size: 1.5rem">
-              ${{ product.priczzePerUnit }}
+              {{ product.pricePerUnit }} MDL
             </span>
           </span>
         </div>
