@@ -49,6 +49,7 @@ const accountMenu = ref([
     icon: 'pi pi-user',
     items: [
       { label: 'Orders', icon: 'pi pi-shopping-cart', command: () => goToOrders() },
+      { label: 'Messages', icon: 'pi pi-envelope', command: () => goToMessages() },
       { label: 'Scheduled Orders', icon: 'pi pi-clock', command: () => goToScheduledOrders() },
       { label: 'Wishlist', icon: 'pi pi-heart', command: () => goToFavorites() },
       { label: 'Settings', icon: 'pi pi-cog', command: () => goToSettings() },
@@ -118,6 +119,10 @@ const goToScheduledOrders = () => {
   window.location.href = '/schedule-order/management';
 };
 
+const goToMessages = () => {
+  window.location.href = '/messages';
+}
+
 const goToFavorites = () => {
   window.location.href = '/wishlist';
 };
@@ -159,22 +164,22 @@ onMounted(() => {
 <style scoped>
 .navbar {
   display: flex;
-  justify-content: center; 
+  justify-content: center;
   align-items: center;
   width: 100%;
-  height: 80px; 
+  height: 80px;
 }
 
 .menubar {
   display: flex;
   background-color: white;
   border-color: white;
-  width: 100%; 
-  max-width: 80%; 
+  width: 100%;
+  max-width: 80%;
   z-index: 1000;
   border-radius: 0;
   height: 80px;
-  justify-content: center; 
+  justify-content: center;
 }
 
 .menubar img.logo {
