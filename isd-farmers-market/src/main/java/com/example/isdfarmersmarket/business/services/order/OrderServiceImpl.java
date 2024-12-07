@@ -56,20 +56,34 @@ public class OrderServiceImpl implements OrderService {
         List<ItemInOrder> itemsInOrder = itemsInCart.stream()
                 .map(item -> new ItemInOrder(item.getProduct(), item.getQuantity(), item.getProduct().getPricePerUnit()))
                 .toList();
+
         Map<Long, List<ItemInOrder>> groupedByFarmer = itemsInOrder.stream()
                 .collect(Collectors.groupingBy(item -> item.getProduct().getFarmer().getId()));
 
-        groupedByFarmer.forEach((farmerId, items) -> {
-            BigDecimal totalPrice = new BigDecimal(0);
-            items.forEach(item -> {
-                item.setPricePerUnit(item.getProduct().getPricePerUnit().subtract(item.getProduct()
-                        .getPricePerUnit().multiply(BigDecimal.valueOf(item.getProduct().getDiscountPercents() / 100))));
-                item.getProduct().setQuantity(item.getProduct().getQuantity() - item.getQuantity());
-            });
+//        groupedByFarmer.forEach((farmerId, items) -> {
+//            BigDecimal totalPrice = new BigDecimal(0);
+//            items.forEach(item -> {
+//                item.setPricePerUnit(item.getProduct().getPricePerUnit().subtract(item.getProduct()
+//                        .getPricePerUnit().multiply(BigDecimal.valueOf(item.getProduct().getDiscountPercents() / 100))));
+//                item.getProduct().setQuantity(item.getProduct().getQuantity() - item.getQuantity());
+//            });
+//
+//            for (var item : items) {
+//                totalPrice = totalPrice.add(item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())));
+//            }
 
-            for (var item : items) {
-                totalPrice = totalPrice.add(item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())));
-            }
+
+            groupedByFarmer.forEach((farmerId, items) -> {
+                BigDecimal totalPrice = items.stream()
+                        .peek(item -> {
+                            BigDecimal discountMultiplier = BigDecimal.valueOf(1 - item.getProduct().getDiscountPercents() / 100.0);
+                            item.setPricePerUnit(item.getProduct().getPricePerUnit().multiply(discountMultiplier));
+
+                            item.getProduct().setQuantity(item.getProduct().getQuantity() - item.getQuantity());
+                        })
+                        .map(item -> item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
 
             Order order = new Order(user, userRepository.findById(farmerId)
                     .orElseThrow(() -> new EntityNotFoundException(farmerId, Order.class)),
@@ -77,6 +91,7 @@ public class OrderServiceImpl implements OrderService {
                     totalPrice);
 
             orderRepository.save(order);
+
             items.forEach(item -> item.setOrder(order));
             itemInOrderRepository.saveAll(items);
 

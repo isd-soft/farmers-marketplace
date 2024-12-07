@@ -34,7 +34,7 @@ public class OrderPlacedListener {
         context.setVariable("lastName", order.getFarmer().getLastName());
         context.setVariable("orderId", order.getId());
         context.setVariable("orderDate", formattedDate);
-        context.setVariable("totalPrice", order.getTotalPrice());
+        context.setVariable("totalPrice", order.getTotalItemsPrice());
 
         List<ProductInfoDTO> productInfoList = new ArrayList<>();
         for (ItemInOrder item : items) {

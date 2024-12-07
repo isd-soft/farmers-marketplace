@@ -14,11 +14,13 @@
                 class="flex flex-col order-container"
                 v-for="product in cartProducts"
                 :key="product.productId"
+                :class="{ 'out-of-stock-product': isOutOfStock(product) }"
               >
                 <div class="md:w-40 relative product-container">
                   <div class="product-image-title-container">
                     <img
                       class="block xl:block mx-auto rounded w-full product-image"
+                      :class="{ 'overflow-image': getSeverity(product) === 'OUTOFSTOCK' }"
                       :src="getBase64Image(product.imageBase64, product.imageType)"
                       :alt="product.productTitle"
                     />
@@ -42,6 +44,8 @@
                           :step="1"
                           mode="decimal"
                           fluid
+                          :disabled="isOutOfStock(product)"
+                          :min="1"
                           @input="updateCart(product)"
                         >
                           <template #incrementbuttonicon>
@@ -53,21 +57,27 @@
                         </InputNumber>
 
                         <p class="unit-type-text">{{ product.unitType }}</p>
-                        <i class="pi pi-trash" @click="removeItemFromCart(product.id)"></i>
+
+                        <i
+                          class="pi pi-trash"
+                          @click="removeItemFromCart(product.id)"
+                        ></i>
                       </div>
                     </div>
                   </div>
 
                   <div class="product-price-quantity-container">
                     <div class="product-prices-container">
-                      <span style="text-decoration: line-through"
-                        >{{ product.pricePerUnit * product.quantity }} MDL</span
-                      >
+                      <span v-html="displayDiscountedPrice(product)"></span>
                       <span class="text-xl font-semibold price-text">
                         {{
-                          product.pricePerUnit *
-                          product.quantity *
-                          (1 - product.discountPercents / 100)
+                          isOutOfStock(product)
+                            ? 'Unavailable'
+                            : (
+                                product.pricePerUnit *
+                                product.quantity *
+                                (1 - product.discountPercents / 100)
+                              ).toFixed(2)
                         }}
                         MDL
                       </span>
@@ -86,6 +96,7 @@
         <div class="cart-pay-container">
           <div class="order-summary-container">
             <h3 class="order-summary-price-text">Order Summary</h3>
+            <h3>Delivery Type</h3>
             <div class="all-cart-price-container">
               <h3 class="total-price-text">Total</h3>
               <p class="total-price-value">{{ calculateTotalPrice() }} MDL</p>
@@ -132,18 +143,45 @@ const toast = useToast()
 let totalPrice = ref(0)
 let buttonBuyFor = ref('Buy for')
 
+
+function toastAdd(severity,summary,detail,life = 2000){
+  toast.add({
+          severity: severity,
+          summary: summary,
+          detail: detail,
+          life: life,
+        })
+}
+function isOutOfStock(product) {
+  return product.totalProductQuantity === 0
+}
+
 function calculateTotalPrice() {
   totalPrice = 0
   cartProducts.value.forEach((p) => {
-    totalPrice += p.pricePerUnit * p.quantity * (1 - p.discountPercents / 100)
+    if (!isOutOfStock(p)) {
+      totalPrice += p.pricePerUnit * p.quantity * (1 - p.discountPercents / 100)
+    }
   })
   buttonBuyFor.value = `Buy for ${totalPrice.toFixed(2)} MDL`
-  return totalPrice
+  return totalPrice.toFixed(2)
+}
+
+function displayDiscountedPrice(product) {
+  const { pricePerUnit, quantity, discountPercents } = product
+  const originalPrice = (pricePerUnit * quantity).toFixed(2)
+
+  if (discountPercents > 0) {
+    return `
+      <span>
+        <span style="text-decoration: line-through">${originalPrice} MDL</span>
+      </span>`
+  }
+  return ``
 }
 
 function getSeverity(product) {
   const quantity = product.totalProductQuantity
-
   if (quantity > 50) {
     return 'INSTOCK'
   } else if (quantity > 0 && quantity <= 50) {
@@ -203,35 +241,22 @@ onMounted(async () => {
   }
 })
 
-// const updateCart = async (id) => {
-  // try {
-  //   console.log('dscd', id)
-  //   const response = await axios.put(`/cart/${product.id}`, {
-  //     quantity: product.quantity,
-  //   })
-  //   console.log('Cart updated:', response.data)
-  // } catch (error) {
-  //   console.error('Error updating cart:', error)
-  // }
-// }
-
 const updateCart = async (product) => {
   if (!product.id) {
-    console.error('Invalid product for updateCart');
-    return;
+    console.error('Invalid product for updateCart')
+    return
   }
   try {
     const response = await axiosInstance.put(`/cart/${product.id}`, {
       quantity: product.quantity,
-    });
-    console.log('Cart updated:', response.data);
+    })
+    console.log('Cart updated:', response.data)
   } catch (error) {
-    console.error('Error updating cart:', error);
+    console.error('Error updating cart:', error)
   }
-};
+}
 
 const removeItemFromCart = async (id) => {
-  console.log(id)
   if (!id) {
     alert('Invalid product')
     return
@@ -241,51 +266,41 @@ const removeItemFromCart = async (id) => {
     const response = await axiosInstance.delete(`/cart/${id}`)
     cartProducts.value = cartProducts.value.filter((p) => p.id !== id)
   } catch (error) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: 'Failed to remove item from cart. Please try again.',
-      life: 3000,
-    })
+    toastAdd('error','Removing Item Failed','Failed to remove item from cart. Please try again');
   }
 }
 
-console.log(cartProducts.value)
+
 const addProductsToOrder = async () => {
-  if (cartProducts.value.length === 0) {
-    toast.add({
-      severity: 'error',
-      summary: 'Empty Cart',
-      detail: 'Your cart is empty. Add items before proceeding.',
-      life: 3000,
-    })
+  const outOfStockProducts = cartProducts.value.filter((product) => isOutOfStock(product))
+
+  if (outOfStockProducts.length > 0) {
+    toastAdd('error','Order Creation Failed','Remove the product(s) that are out of stock before proceeding.');
     return
   }
+
+  if (cartProducts.value.length === 0) {
+    toastAdd('error','Empty Cart','Your cart is empty. Add items before proceeding.');
+    return
+  }
+
   loginValidation()
+
   try {
     const response = await axiosInstance.post(`/order`)
     cartProducts.value = []
     buttonBuyFor.value = 'Buy for'
 
-    toast.add({
-      severity: 'success',
-      summary: 'Order Created',
-      detail: 'Your order has been successfully created!',
-      life: 3000,
-    })
-
+    toastAdd('success','Order Created','Your order has been successfully created!');
     console.log('Order Response', response.data)
-  } catch (error) {
-    console.error('Order Creation Failed', error)
 
-    toast.add({
-      severity: 'error',
-      summary: 'Order Creation Failed',
-      detail: 'An error occurred while creating your order. Please try again.',
-      life: 3000,
-    })
+  } catch (error) {
+
+    console.error('Order Creation Failed', error)
+    toastAdd('error', 'Order Creation Failed','An error occurred while creating your order. Please try again.');
   }
 }
+
 </script>
 
 <style scoped>
@@ -400,6 +415,9 @@ const addProductsToOrder = async () => {
   max-width: 10vw;
   border-radius: 10px;
 }
+.overflow-image {
+  opacity: 0.3;
+}
 .product-title-text {
   font-weight: 700;
   font-size: 1.4rem;
@@ -506,25 +524,9 @@ const addProductsToOrder = async () => {
 }
 
 .footer {
-  width: 100%;
-  background-color: #fff;
-}
-
-@media (max-width: 768px) {
-  .home-text {
-    left: 16vw;
-  }
-}
-@media (max-width: 700px) {
-  .home-text {
-    left: 14vw;
-  }
-}
-
-@media (max-width: 526px) {
-  .home-text {
-    left: 10vw;
-  }
+  /* width: 100%; */
+  margin: 0;
+  padding-top: 20px;
 }
 @media (max-width: 425px) {
   .main-container {
@@ -551,8 +553,5 @@ const addProductsToOrder = async () => {
   .home-text {
     left: 2vw;
   }
-  /* .product-image{
-    width: 100px;
-  } */
 }
 </style>

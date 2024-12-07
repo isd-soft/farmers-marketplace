@@ -125,6 +125,7 @@ const routes = [
     name: 'Performance',
     component: PerformancePage,
   },
+  
 ]
 
 const router = createRouter({
