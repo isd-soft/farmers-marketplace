@@ -22,6 +22,7 @@ public interface ItemInOrderMapper {
     @Mapping(target = "imageBase64", expression = "java(convertImageToBase64(itemInOrder.getProduct().getImages().stream().findFirst().orElse(null)))")
     @Mapping(target = "reviewCount", expression = "java(itemInOrder.getProduct().getReviews().size())")
     @Mapping(target = "rating", expression = "java(itemInOrder.getProduct().getRating())")
+    @Mapping(target = "unitType", expression = "java(itemInOrder.getProduct().getUnitType())")
     ItemInOrderDTO map(ItemInOrder itemInOrder);
     List<ItemInOrderDTO> mapOrders(List<ItemInOrder> itemInOrder);
     @Mapping(target = "productId",  expression = "java(itemInOrder.getProduct().getId())")

@@ -8,11 +8,14 @@ import com.example.isdfarmersmarket.business.mapper.ItemInOrderMapper;
 import com.example.isdfarmersmarket.business.mapper.OrderMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.EventPublisher;
+import com.example.isdfarmersmarket.business.services.cart.TotalPriceService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
+import com.example.isdfarmersmarket.dao.enums.DeliveryTypes;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
 import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
 import com.example.isdfarmersmarket.dao.specifications.OrderSpecification;
+import com.example.isdfarmersmarket.web.commands.order.CreateOrderCommand;
 import com.example.isdfarmersmarket.web.commands.order.UpdateOrderCommand;
 import com.example.isdfarmersmarket.web.dto.OrderDTO;
 import lombok.AccessLevel;
@@ -24,7 +27,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,13 +40,13 @@ public class OrderServiceImpl implements OrderService {
     ItemInOrderRepository itemInOrderRepository;
     ItemInCartRepository itemInCartRepository;
     OrderMapper orderMapper;
-    ItemInCartMapper itemInCartMapper;
     ItemInOrderMapper itemInOrderMapper;
     EventPublisher eventPublisher;
+    DeliveryTypeRepository deliveryTypeRepository;
 
     @Override
     @Transactional
-    public List<OrderDTO> createOrders() {
+    public List<OrderDTO> createOrders(CreateOrderCommand createOrderCommand) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
 
         User user = userRepository.findById(principal.getId())
@@ -54,27 +56,22 @@ public class OrderServiceImpl implements OrderService {
         List<ItemInOrder> itemsInOrder = itemsInCart.stream()
                 .map(item -> new ItemInOrder(item.getProduct(), item.getQuantity(), item.getProduct().getPricePerUnit()))
                 .toList();
+
         Map<Long, List<ItemInOrder>> groupedByFarmer = itemsInOrder.stream()
                 .collect(Collectors.groupingBy(item -> item.getProduct().getFarmer().getId()));
 
-        groupedByFarmer.forEach((farmerId, items) -> {
-            BigDecimal totalPrice = new BigDecimal(0);
-            items.forEach(item -> {
-                item.setPricePerUnit(item.getProduct().getPricePerUnit().subtract(item.getProduct()
-                        .getPricePerUnit().multiply(BigDecimal.valueOf(item.getProduct().getDiscountPercents() / 100))));
-                item.getProduct().setQuantity(item.getProduct().getQuantity() - item.getQuantity());
-            });
-
-            for (var item : items) {
-                totalPrice = totalPrice.add(item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())));
-            }
-
+            groupedByFarmer.forEach((farmerId, items) -> {
             Order order = new Order(user, userRepository.findById(farmerId)
                     .orElseThrow(() -> new EntityNotFoundException(farmerId, Order.class)),
                     OrderStatus.PENDING,
-                    totalPrice);
+                    deliveryTypeRepository.findByFarmerIdAndType(farmerId, DeliveryTypes.valueOf(createOrderCommand.getDeliveryTypeFarmer()))
+                            .orElseThrow(() -> new EntityNotFoundException(farmerId, DeliveryTypes.class)),
+                    createOrderCommand.getTotalPriceOfDelivery(),
+                    createOrderCommand.getTotalPriceOfProducts(),
+                    createOrderCommand.getTotalPrice());
 
             orderRepository.save(order);
+
             items.forEach(item -> item.setOrder(order));
             itemInOrderRepository.saveAll(items);
 
