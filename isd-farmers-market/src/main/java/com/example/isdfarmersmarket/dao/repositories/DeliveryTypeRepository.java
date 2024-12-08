@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface DeliveryTypeRepository extends JpaRepository<DeliveryTypeFarmer, Integer> {
     Optional<DeliveryTypeFarmer> findByFarmerEmailAndType(String email, DeliveryTypes type);
+    Optional<DeliveryTypeFarmer> findByFarmerIdAndType(Long id, DeliveryTypes type);
     Optional<DeliveryTypeFarmer> getDeliveryTypeFarmerById(Long id);
     List<DeliveryTypeFarmer> findByFarmerEmail(String email);
 }

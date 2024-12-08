@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface TotalPriceService {
-
     BigDecimal getTotalPriceOfProducts(List<ItemInCart> itemInCarts);
     BigDecimal getTotalPriceOfDelivery(List<ItemInCart> itemInCarts, DeliveryTypes deliveryType);
 }

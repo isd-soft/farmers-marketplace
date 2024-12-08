@@ -4,7 +4,9 @@ import com.example.isdfarmersmarket.dao.enums.DeliveryTypes;
 import com.example.isdfarmersmarket.dao.models.DeliveryTypeFarmer;
 import com.example.isdfarmersmarket.dao.models.ItemInCart;
 import com.example.isdfarmersmarket.dao.models.User;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -13,6 +15,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class TotalPriceServiceImpl implements TotalPriceService {
     @Override
     public BigDecimal getTotalPriceOfProducts(List<ItemInCart> itemInCarts) {

@@ -11,9 +11,7 @@ import java.util.List;
 public interface CartService {
 
     ItemInCartDTO addToCart(AddItemInCartCommand item);
-
     ItemInCartDTO removeFromCart(Long id);
     ItemInCartDTO updateCart(Long id, UpdateItemInCartCommand updateItemInCartCommand);
-
     CartDTO getAllCartItems(DeliveryTypes deliveryTypes);
 }

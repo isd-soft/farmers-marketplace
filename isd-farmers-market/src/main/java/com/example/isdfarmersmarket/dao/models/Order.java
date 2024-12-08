@@ -2,6 +2,7 @@ package com.example.isdfarmersmarket.dao.models;
 
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -44,18 +45,31 @@ public class Order {
     @Column(name = "total_items_price", nullable = false)
     private BigDecimal totalItemsPrice;
 
+    @Column(name = "total_price", nullable = false)
+    private BigDecimal totalPrice;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ItemInOrder> itemsInOrder = new HashSet<>();
 
     @Column(name = "created_date", columnDefinition = "TimeStamp")
     private LocalDateTime createdDate = LocalDateTime.now();
 
-    public Order(User customer, User farmer, OrderStatus orderStatus, BigDecimal totalPrice) {
+    public Order(User customer, User farmer, OrderStatus orderStatus, DeliveryTypeFarmer deliveryTypeFarmer, BigDecimal totalDeliveryPrice, BigDecimal totalItemsPrice, BigDecimal totalPrice) {
         this.customer = customer;
         this.farmer = farmer;
         this.orderStatus = orderStatus;
-        this.totalItemsPrice = totalPrice;
+        this.deliveryTypeFarmer = deliveryTypeFarmer;
+        this.totalDeliveryPrice = totalDeliveryPrice;
+        this.totalItemsPrice = totalItemsPrice;
+        this.totalPrice = totalPrice;
     }
+
+//    public Order(User customer, User farmer, OrderStatus orderStatus, BigDecimal totalPrice) {
+//        this.customer = customer;
+//        this.farmer = farmer;
+//        this.orderStatus = orderStatus;
+//        this.totalItemsPrice = totalPrice;
+//    }
 
     @Override
     public boolean equals(Object o) {

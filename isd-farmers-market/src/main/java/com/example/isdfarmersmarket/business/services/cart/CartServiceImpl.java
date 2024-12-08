@@ -100,8 +100,8 @@ public class CartServiceImpl implements CartService {
         BigDecimal totalPriceOfProducts = totalPriceService.getTotalPriceOfProducts(itemsInCart);
         BigDecimal totalPriceOfDelivery = totalPriceService.getTotalPriceOfDelivery(itemsInCart,deliveryTypes);
 
-        CartDTO cartDto = new CartDTO(itemInCartDTOS, totalPriceOfProducts, totalPriceOfDelivery, totalPriceOfProducts.add(totalPriceOfDelivery));
-        return  cartDto;
+        CartDTO cartDTO = new CartDTO(itemInCartDTOS, totalPriceOfProducts, totalPriceOfDelivery, totalPriceOfProducts.add(totalPriceOfDelivery), deliveryTypes);
+        return  cartDTO;
 //        return itemInCartMapper.mapToDTOs(itemsInCart);
     }
 }

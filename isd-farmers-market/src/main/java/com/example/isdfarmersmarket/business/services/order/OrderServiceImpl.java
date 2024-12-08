@@ -8,25 +8,25 @@ import com.example.isdfarmersmarket.business.mapper.ItemInOrderMapper;
 import com.example.isdfarmersmarket.business.mapper.OrderMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.EventPublisher;
+import com.example.isdfarmersmarket.business.services.cart.TotalPriceService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
+import com.example.isdfarmersmarket.dao.enums.DeliveryTypes;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
 import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
 import com.example.isdfarmersmarket.dao.specifications.OrderSpecification;
-import com.example.isdfarmersmarket.dao.specifications.ProductSpecification;
+import com.example.isdfarmersmarket.web.commands.order.CreateOrderCommand;
 import com.example.isdfarmersmarket.web.commands.order.UpdateOrderCommand;
 import com.example.isdfarmersmarket.web.dto.OrderDTO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,13 +40,13 @@ public class OrderServiceImpl implements OrderService {
     ItemInOrderRepository itemInOrderRepository;
     ItemInCartRepository itemInCartRepository;
     OrderMapper orderMapper;
-    ItemInCartMapper itemInCartMapper;
     ItemInOrderMapper itemInOrderMapper;
     EventPublisher eventPublisher;
+    DeliveryTypeRepository deliveryTypeRepository;
 
     @Override
     @Transactional
-    public List<OrderDTO> createOrders() {
+    public List<OrderDTO> createOrders(CreateOrderCommand createOrderCommand) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
 
         User user = userRepository.findById(principal.getId())
@@ -60,35 +60,15 @@ public class OrderServiceImpl implements OrderService {
         Map<Long, List<ItemInOrder>> groupedByFarmer = itemsInOrder.stream()
                 .collect(Collectors.groupingBy(item -> item.getProduct().getFarmer().getId()));
 
-//        groupedByFarmer.forEach((farmerId, items) -> {
-//            BigDecimal totalPrice = new BigDecimal(0);
-//            items.forEach(item -> {
-//                item.setPricePerUnit(item.getProduct().getPricePerUnit().subtract(item.getProduct()
-//                        .getPricePerUnit().multiply(BigDecimal.valueOf(item.getProduct().getDiscountPercents() / 100))));
-//                item.getProduct().setQuantity(item.getProduct().getQuantity() - item.getQuantity());
-//            });
-//
-//            for (var item : items) {
-//                totalPrice = totalPrice.add(item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())));
-//            }
-
-
             groupedByFarmer.forEach((farmerId, items) -> {
-                BigDecimal totalPrice = items.stream()
-                        .peek(item -> {
-                            BigDecimal discountMultiplier = BigDecimal.valueOf(1 - item.getProduct().getDiscountPercents() / 100.0);
-                            item.setPricePerUnit(item.getProduct().getPricePerUnit().multiply(discountMultiplier));
-
-                            item.getProduct().setQuantity(item.getProduct().getQuantity() - item.getQuantity());
-                        })
-                        .map(item -> item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())))
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-
             Order order = new Order(user, userRepository.findById(farmerId)
                     .orElseThrow(() -> new EntityNotFoundException(farmerId, Order.class)),
                     OrderStatus.PENDING,
-                    totalPrice);
+                    deliveryTypeRepository.findByFarmerIdAndType(farmerId, DeliveryTypes.valueOf(createOrderCommand.getDeliveryTypeFarmer()))
+                            .orElseThrow(() -> new EntityNotFoundException(farmerId, DeliveryTypes.class)),
+                    createOrderCommand.getTotalPriceOfDelivery(),
+                    createOrderCommand.getTotalPriceOfProducts(),
+                    createOrderCommand.getTotalPrice());
 
             orderRepository.save(order);
 
