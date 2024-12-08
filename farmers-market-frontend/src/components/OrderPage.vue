@@ -125,7 +125,6 @@ export default {
     DataView,
     Button,
     Select,
-    Tag,
     Paginator,
     Rating,
   },
@@ -295,24 +294,10 @@ function getBase64Image(base64String, imageType = 'jpeg') {
     isHovered,
     full,
     getSeverity,
-    goHome,
-    iconClass,
-    onStarClick,
     toggleWishlist,
     intPart,
   }
 }}
-// onMounted(async () => {
-//   //onmounted when page loades, display the method inside, async waits for the request
-//   try {
-//     const response = await axiosInstance.get('/order/management') // Send request to server.
-//     orders.value = response.data.content // Assign response data to orders.
-//     console.log(orders.value)
-//   } catch (err) {
-//     console.error('Failed to fetch orders', err)
-//   }
-// }
-
 </script>
 
 <style scoped>

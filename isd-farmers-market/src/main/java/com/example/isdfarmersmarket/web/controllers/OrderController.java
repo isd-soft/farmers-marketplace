@@ -1,6 +1,7 @@
 package com.example.isdfarmersmarket.web.controllers;
 
 import com.example.isdfarmersmarket.business.services.order.OrderService;
+import com.example.isdfarmersmarket.web.commands.order.CreateOrderCommand;
 import com.example.isdfarmersmarket.web.commands.order.UpdateOrderCommand;
 import com.example.isdfarmersmarket.web.dto.OrderDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,8 +34,8 @@ public class OrderController {
     )
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping
-    public ResponseEntity<List<OrderDTO>> createOrder() {
-        return ResponseEntity.status(CREATED).body(orderService.createOrders());
+    public ResponseEntity<List<OrderDTO>> createOrder(@RequestBody @Valid CreateOrderCommand createOrderCommand) {
+        return ResponseEntity.status(CREATED).body(orderService.createOrders(createOrderCommand));
     }
 
     @Operation(
