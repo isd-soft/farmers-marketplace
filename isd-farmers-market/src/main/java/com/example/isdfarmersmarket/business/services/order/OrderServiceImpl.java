@@ -3,29 +3,31 @@ package com.example.isdfarmersmarket.business.services.order;
 import com.example.isdfarmersmarket.business.events.OrderConfirmedEvent;
 import com.example.isdfarmersmarket.business.events.OrderPlacedEvent;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException;
-import com.example.isdfarmersmarket.business.mapper.ItemInCartMapper;
 import com.example.isdfarmersmarket.business.mapper.ItemInOrderMapper;
 import com.example.isdfarmersmarket.business.mapper.OrderMapper;
+import com.example.isdfarmersmarket.business.mapper.ProductMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.EventPublisher;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
+import com.example.isdfarmersmarket.dao.enums.DeliveryTypes;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
-import com.example.isdfarmersmarket.dao.models.ItemInCart;
-import com.example.isdfarmersmarket.dao.models.ItemInOrder;
-import com.example.isdfarmersmarket.dao.models.Order;
-import com.example.isdfarmersmarket.dao.models.User;
+import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
+import com.example.isdfarmersmarket.dao.specifications.OrderSpecification;
+import com.example.isdfarmersmarket.web.commands.order.CreateOrderCommand;
 import com.example.isdfarmersmarket.web.commands.order.UpdateOrderCommand;
 import com.example.isdfarmersmarket.web.dto.OrderDTO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,13 +41,14 @@ public class OrderServiceImpl implements OrderService {
     ItemInOrderRepository itemInOrderRepository;
     ItemInCartRepository itemInCartRepository;
     OrderMapper orderMapper;
-    ItemInCartMapper itemInCartMapper;
     ItemInOrderMapper itemInOrderMapper;
     EventPublisher eventPublisher;
+    DeliveryTypeRepository deliveryTypeRepository;
+    private final ProductMapper productMapper;
 
     @Override
     @Transactional
-    public List<OrderDTO> createOrders() {
+    public List<OrderDTO> createOrders(CreateOrderCommand createOrderCommand) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
 
         User user = userRepository.findById(principal.getId())
@@ -55,27 +58,22 @@ public class OrderServiceImpl implements OrderService {
         List<ItemInOrder> itemsInOrder = itemsInCart.stream()
                 .map(item -> new ItemInOrder(item.getProduct(), item.getQuantity(), item.getProduct().getPricePerUnit()))
                 .toList();
+
         Map<Long, List<ItemInOrder>> groupedByFarmer = itemsInOrder.stream()
                 .collect(Collectors.groupingBy(item -> item.getProduct().getFarmer().getId()));
 
-        groupedByFarmer.forEach((farmerId, items) -> {
-            BigDecimal totalPrice = new BigDecimal(0);
-            items.forEach(item -> {
-                item.setPricePerUnit(item.getProduct().getPricePerUnit().subtract(item.getProduct()
-                        .getPricePerUnit().multiply(BigDecimal.valueOf(item.getProduct().getDiscountPercents() / 100))));
-                item.getProduct().setQuantity(item.getProduct().getQuantity() - item.getQuantity());
-            });
-
-            for (var item : items) {
-                totalPrice = totalPrice.add(item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())));
-            }
-
+            groupedByFarmer.forEach((farmerId, items) -> {
             Order order = new Order(user, userRepository.findById(farmerId)
                     .orElseThrow(() -> new EntityNotFoundException(farmerId, Order.class)),
                     OrderStatus.PENDING,
-                    totalPrice);
+                    deliveryTypeRepository.findByFarmerIdAndType(farmerId, DeliveryTypes.valueOf(createOrderCommand.getDeliveryTypeFarmer()))
+                            .orElseThrow(() -> new EntityNotFoundException(farmerId, DeliveryTypes.class)),
+                    createOrderCommand.getTotalPriceOfDelivery(),
+                    createOrderCommand.getTotalPriceOfProducts(),
+                    createOrderCommand.getTotalPrice());
 
             orderRepository.save(order);
+
             items.forEach(item -> item.setOrder(order));
             itemInOrderRepository.saveAll(items);
 
@@ -90,10 +88,22 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderDTO updateOrder(Long id, UpdateOrderCommand updateOrderCommand) {
+    public OrderDTO farmerStatusChangeOrder(Long id, UpdateOrderCommand updateOrderCommand) {
+        if(!isOrderFarmer(id)){
+            throw new AccessDeniedException("You are not able to change status of this order");
+        }
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(id, Order.class));
-
+                .orElseThrow(() -> new EntityNotFoundException(id, Order.class));
+        Hibernate.initialize(order.getItemsInOrder());
+        order.getItemsInOrder().forEach(item -> Hibernate.initialize(item.getProduct()));
+        if(order.getOrderStatus() == OrderStatus.CANCELLED){
+            throw new AccessDeniedException("You are not able to change status of this order right now");
+        }
+        if(order.getOrderStatus() == OrderStatus.PENDING &&
+                OrderStatus.valueOf(updateOrderCommand.getOrderStatus().toUpperCase())!=OrderStatus.CONFIRMED &&
+                OrderStatus.valueOf(updateOrderCommand.getOrderStatus().toUpperCase())!=OrderStatus.CANCELLED){
+            throw new AccessDeniedException("Please, confirm the order first");
+        }
         order.setOrderStatus(OrderStatus.valueOf(updateOrderCommand.getOrderStatus().toUpperCase()));
 
         if (OrderStatus.CONFIRMED.equals(order.getOrderStatus())) {
@@ -104,13 +114,29 @@ public class OrderServiceImpl implements OrderService {
 
         return orderMapper.map(orderRepository.save(order));
     }
+    @Transactional
+    @Override
+    public OrderDTO customerReceivedOrder(Long id) {
+        if(!isOrderCustomer(id)){
+            throw new AccessDeniedException("You are not able to change status of this order to delivered");
+        }
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(id, Order.class));
+        if(order.getOrderStatus() == OrderStatus.PENDING || order.getOrderStatus() == OrderStatus.CANCELLED){
+            throw new AccessDeniedException("You are not able to change status of this order to delivered right now");
+        }
+
+        order.setOrderStatus(OrderStatus.DELIVERED);
+        return orderMapper.map(orderRepository.save(order));
+    }
+
 
 
     @Override
     @Transactional
     public OrderDTO deleteOrder(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(id, Order.class));
+                .orElseThrow(() -> new EntityNotFoundException(id, Order.class));
         orderRepository.delete(order);
         return orderMapper.map(order);
     }
@@ -119,7 +145,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderDTO getOrderById(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(id, Order.class));
+                .orElseThrow(() -> new EntityNotFoundException(id, Order.class));
 
         return orderMapper.map(order);
     }
@@ -127,29 +153,53 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderDTO> getAllOrders() {
-//        JwtPrincipal principal = SecurityUtils.getPrincipal();
-//        User authenticatedUser = userRepository.findById(principal.getId())
-//                .orElseThrow(() -> new com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException(principal.getId(), User.class));
-//
-//        List<Order> orders = orderRepository.findAllByCustomerId(authenticatedUser.getId());
-//
-//        return orders.stream()
-//                .map(order -> {
-//                    List<ItemInOrderDTO> itemInOrderDTOs = itemInOrderMapper.mapOrders(order.getItemsInOrder().stream().toList());
-//
-//                    OrderDTO orderDTO = orderMapper.map(order);
-//                    orderDTO.setUserId(authenticatedUser.getId());
-//                    orderDTO.setProducts(itemInOrderDTOs.stream().collect(Collectors.toSet()));
-//                }).toList();
-        return null;
+        List<OrderDTO> orderDTOList = orderMapper.mapOrders(orderRepository.findAll());
+        orderDTOList.forEach(orderDTO -> {
+            Order order = orderRepository.findById(orderDTO.getId()).orElseThrow();
+            Set<ItemInOrder> itemInOrders = order.getItemsInOrder();
+            orderDTO.setItemsInOrder(itemInOrderMapper.mapOrders(itemInOrders));
+        });
+        return orderDTOList;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Page<OrderDTO> getCurrentUserOrders(Pageable pageable) {
+    public Page<OrderDTO> getCurrentUserOrders(String orderStatus, Pageable pageable) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         Long customerId = principal.getId();
-        Page<OrderDTO> orderDTOPage = orderRepository.findAllByCustomerId(customerId, pageable)
+        Specification<Order> filters = Specification
+                .where(orderStatus == null ? null : OrderSpecification.statusIs(orderStatus))
+                .and((customerId == null || customerId == 0L) ? null : OrderSpecification.customerIs(customerId));
+
+        Set<Product> wishlist;
+        if (principal != null) {
+            User user = userRepository.findById(principal.getId()).orElse(null);
+            if(user!=null) {
+                wishlist = user.getWishlist();
+            } else {
+                wishlist = new HashSet<>();
+            }
+        } else {
+            wishlist = new HashSet<>();
+        }
+        Page<OrderDTO> orderDTOPage = orderRepository.findAll(filters, pageable)
+                .map(orderMapper::map);
+        orderDTOPage.forEach(orderDTO -> {
+            Order order = orderRepository.findById(orderDTO.getId()).orElseThrow();
+            Set<ItemInOrder> itemInOrders = order.getItemsInOrder();
+            orderDTO.setItemsInOrder(itemInOrderMapper.mapToItemsInOrderDTO(itemInOrders, wishlist));
+        });
+        return orderDTOPage;
+    }
+    @Transactional(readOnly = true)
+    @Override
+    public Page<OrderDTO> getCurrentFarmerOrders(String orderStatus, Pageable pageable) {
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+        Long customerId = principal.getId();
+        Specification<Order> filters = Specification
+                .where(orderStatus == null ? null : OrderSpecification.statusIs(orderStatus))
+                .and((customerId == null || customerId == 0L) ? null : OrderSpecification.farmerIs(customerId));
+        Page<OrderDTO> orderDTOPage = orderRepository.findAll(filters, pageable)
                 .map(orderMapper::map);
         orderDTOPage.forEach(orderDTO -> {
             Order order = orderRepository.findById(orderDTO.getId()).orElseThrow();
@@ -157,5 +207,22 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setItemsInOrder(itemInOrderMapper.mapOrders(itemInOrders));
         });
         return orderDTOPage;
+    }
+
+    private boolean isOrderFarmer(Long orderId) {
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+        User currentUser = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new EntityNotFoundException(principal.getId(), User.class));
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException(orderId, Order.class));
+        return order.getFarmer().equals(currentUser);
+    }
+    private boolean isOrderCustomer(Long orderId) {
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+        User currentUser = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new EntityNotFoundException(principal.getId(), User.class));
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException(orderId, Order.class));
+        return order.getCustomer().equals(currentUser);
     }
 }

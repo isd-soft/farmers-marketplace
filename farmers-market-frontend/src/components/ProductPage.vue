@@ -135,7 +135,7 @@
                   </Button>
                   <Button
                     label="Schedule"
-                    style="margin-left: 10px;"
+                    style="margin-left: 10px"
                     @click="scheduleProduct(product.id)"
                   />
 
@@ -198,7 +198,7 @@ import CustomerReviews from '@/components/CustomerReviews.vue'
 import { isLoggedIn } from '@/shared/authState.js'
 import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
-import router from "@/router/index.js";
+import router from '@/router/index.js'
 
 export default {
   name: 'ProductPage',
@@ -224,6 +224,15 @@ export default {
     const isAllReviewsLoaded = ref(false)
     const toast = useToast()
     const images = ref([])
+
+    function toastAdd(severity, summary, detail, life = 2000) {
+      toast.add({
+        severity: severity,
+        summary: summary,
+        detail: detail,
+        life: life,
+      })
+    }
 
     const responsiveOptions = ref([
       { breakpoint: '1024px', numVisible: 3 },
@@ -261,10 +270,11 @@ export default {
         console.error('Failed to load product:', error.message)
         hasError.value = true
         isLoading.value = false
+        router.push(`/`)
       }
     }
     const scheduleProduct = (productId) => {
-      router.push(`/schedule-order/${productId}`);
+      router.push(`/schedule-order/${productId}`)
     }
     const toggleWishlist = async () => {
       if (!product.value.id) return
@@ -282,9 +292,13 @@ export default {
         )
       }
     }
-
     const addToCart = async () => {
-      if (!product.value.id || !quantity.value) {
+      if (!product.value.id || product.value.quantity < 1) {
+        toastAdd('error', 'Unavailable Quantity', 'Product is out of stock or invalid quantity.')
+        return
+      }
+
+      if (!product.value.id || !quantity.value || quantity.value < 1) {
         alert('Invalid product or quantity')
         return
       }
@@ -301,12 +315,7 @@ export default {
         const response = await axiosInstance.post('/cart', itemInCart)
         console.log('Added to cart:', response.data)
 
-        toast.add({
-          severity: 'success',
-          summary: 'Item Added to cart',
-          detail: 'This item was successfully added to cart.',
-          life: 4000,
-        })
+        toastAdd('success', 'Item Added to cart', 'This item was successfully added to cart.', 1000)
 
         buttonText.value = 'Item Added'
         setTimeout(() => {
@@ -316,19 +325,9 @@ export default {
         console.error('Error adding to cart:', error)
 
         if (error.response && error.response.status === 409) {
-          toast.add({
-            severity: 'warn',
-            summary: 'Item Already in Cart',
-            detail: 'This item is already in your cart.',
-            life: 3000,
-          })
+          toastAdd('warn', 'Item Already in Cart', 'This item is already in your cart.')
         } else {
-          toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to add item to cart. Please try again later.',
-            life: 3000,
-          })
+          toastAdd('error', 'Error', 'Failed to add item to cart. Please try again later.')
         }
       }
     }

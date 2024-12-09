@@ -54,7 +54,7 @@
         Product unit type is required</span>
 
       <FloatLabel variant="on">
-        <InputNumber
+        <InputNumberв
           id="product-price"
           v-model="product.pricePerUnit"
           class="create-product-input"
@@ -107,6 +107,22 @@
         label="Create product"
       />
     </form>
+    <Dialog
+      v-model:visible="showDeliveryDialog"
+      style="flex-grow: 1; max-width: 500px;"
+      :position="'top'"
+      header="Missing Delivery Types"
+      modal
+      :closable="false"
+    >
+      <p>You must add all possible delivery types before publishing a product.</p>
+        <Button
+          class="popup-actions-button"
+          @click="navigateToSettings"
+        >
+          Go to Settings
+        </Button>
+    </Dialog>
   </div>
   <Footer class = "footer"></Footer>
   </div>
@@ -125,6 +141,8 @@ import FloatLabel from "primevue/floatlabel";
 import InputNumber from "primevue/inputnumber";
 import Select from "primevue/select";
 import router from "@/router/index.js";
+import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
 
 export default {
   name: "CreateProduct",
@@ -134,7 +152,9 @@ export default {
     InputNumber,
     Select,
     Header,
-    Footer
+    Footer,
+    Dialog,
+    Button,
   },
   setup() {
     const product = reactive({
@@ -148,6 +168,7 @@ export default {
     const selectedFiles = ref([]);
     const unitTypes = ref([]);
     const categories = ref([]);
+    const showDeliveryDialog = ref(false);
     let currentUser = null;
 
     const rules = computed(() => ({
@@ -236,7 +257,31 @@ export default {
         }
       } catch (error) {
       }
-    });
+
+      try {
+        console.log("Fetching user delivery types...");
+        const response = await axiosInstance.get("/deliverytypes/current-farmer");
+        const userDeliveryTypes = response.data;
+
+        console.log("Fetching all delivery types...");
+        const deliveryTypesResponse = await axiosInstance.get("/delivery-types-enum");
+        const allDeliveryTypes = deliveryTypesResponse.data;
+
+        const userHasAllDeliveryTypes = allDeliveryTypes.every((type) =>
+          userDeliveryTypes.includes(type)
+        );
+
+        if (!userHasAllDeliveryTypes) {
+          console.warn("User is missing delivery types. Showing dialog...");
+          showDeliveryDialog.value = true;
+
+        }
+      } catch (error) {
+        console.error("Error checking delivery types:", error.response?.data || error.message);
+        await router.push("/");
+      }
+
+      });
     const handleNewProduct = async (event) => {
       event.preventDefault();
       await v$.value.$validate();
@@ -274,12 +319,25 @@ export default {
       handleNewProduct,
       v$,
       selectedFiles,
+      showDeliveryDialog,
     };
+  },
+  methods: {
+    navigateToSettings() {
+      this.$router.push(`/settings`);
+    },
   },
 };
 </script>
 
 <style scoped>
+.popup-actions-button{
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 150px;
+  flex-grow: 1;
+}
 .create-product-container {
   margin-left: 20px;
   margin-right: 20px;

@@ -1,5 +1,6 @@
 package com.example.isdfarmersmarket.web.dto;
 
+import com.example.isdfarmersmarket.dao.enums.UnitType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -21,4 +22,7 @@ public class ItemInOrderDTO {
     String imageBase64;
     Integer reviewCount;
     Float rating;
+    UnitType unitType;
+    String unitTypeShort;
+    Boolean isInWishlist;
 }

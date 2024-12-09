@@ -1,6 +1,7 @@
 package com.example.isdfarmersmarket.dao.repositories;
 
 import com.example.isdfarmersmarket.dao.models.PlannedOrder;
+import com.example.isdfarmersmarket.dao.models.Product;
 import com.example.isdfarmersmarket.dao.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +15,5 @@ public interface PlannedOrderRepository extends JpaRepository<PlannedOrder, Long
     List<PlannedOrder> findByDayOfWeekAndTime(DayOfWeek dayOfWeek, LocalTime time, boolean active);
 
     List<PlannedOrder> findPlannedOrdersByCustomer(User customer);
+    void deleteAllByProduct(Product product);
 }

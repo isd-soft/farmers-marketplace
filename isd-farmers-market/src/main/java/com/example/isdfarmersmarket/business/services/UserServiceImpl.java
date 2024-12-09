@@ -3,7 +3,6 @@ package com.example.isdfarmersmarket.business.services;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.CustomUsernameNotFoundException;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.RoleAlreadyExistsException;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.RoleDoesntExistException;
-import com.example.isdfarmersmarket.business.mapper.UserMapper;
 import com.example.isdfarmersmarket.business.mapper.UserProfileMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.interfaces.CreateReviewsService;
@@ -74,6 +73,9 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         User profileUser = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
         UserProfileDTO userProfileDTO = userProfileMapper.map(profileUser);
 
+    public UserProfileDTO getUserById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
+        return userProfileMapper.map(user);
         if (principal != null) {
             User authenticatedUser = userRepository.findById(principal.getId())
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));

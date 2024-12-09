@@ -1,8 +1,8 @@
 package com.example.isdfarmersmarket.business.services.interfaces;
 
+import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.web.commands.UpdatePasswordCommand;
 import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
-import com.example.isdfarmersmarket.dao.models.User;
 
 public interface AuthService {
 
@@ -10,7 +10,7 @@ public interface AuthService {
 
     void deleteRefreshToken(String refreshToken);
 
-    void registerUser(UserRegisterCommand registerRequestDTO);
+    void registerUser(UserRegisterCommand registerRequestDTO, String appUrl);
 
     String generateRefreshToken(Long id);
 

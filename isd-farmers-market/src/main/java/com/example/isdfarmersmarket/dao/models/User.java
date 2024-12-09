@@ -1,18 +1,19 @@
 package com.example.isdfarmersmarket.dao.models;
 
-import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springdoc.core.providers.HateoasHalProvider;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -24,6 +25,8 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
     private Long id;
+    @Column(name = "enabled")
+    private boolean enabled = false;
     @Column(name = "first_name")
     private String firstName;
     @Column(name = "last_name")
@@ -37,11 +40,11 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ItemInCart> cart = new HashSet<>();
 
-    @ManyToMany(cascade = { CascadeType.ALL })
+    @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(
             name = "wishlist",
-            joinColumns =    { @JoinColumn(name = "user_id") },
-            inverseJoinColumns = { @JoinColumn(name = "product_id") }
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "product_id")}
     )
     private Set<Product> wishlist = new HashSet<>();
     @OneToMany(mappedBy = "farmer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -54,7 +57,7 @@ public class User implements UserDetails {
     @Column(length = 1000)
     private String password;
     @Column(name = "free_delivery_from")
-    private  int freeDeliveryFrom;
+    private int freeDeliveryFrom;
     @OneToMany(mappedBy = "farmer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<DeliveryTypeFarmer> deliveryTypes = new HashSet<>();
@@ -70,7 +73,7 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @Column(name="created_date", columnDefinition = "TimeStamp")
+    @Column(name = "created_date", columnDefinition = "TimeStamp")
     private LocalDateTime createdDate = LocalDateTime.now();
 
 
@@ -85,15 +88,18 @@ public class User implements UserDetails {
     public int hashCode() {
         return Objects.hash(getId());
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;
     }
+
     public void addRole(Role role) {
         if (role != null) {
             this.roles.add(role);
         }
     }
+
     @Override
     public String getUsername() {
         return email;
@@ -116,7 +122,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 
 }
