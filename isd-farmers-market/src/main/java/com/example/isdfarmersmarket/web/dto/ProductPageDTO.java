@@ -19,8 +19,9 @@ public class ProductPageDTO {
     BigDecimal pricePerUnit;
     Integer discountPercents;
     Integer quantity;
-    UserDTO user;
+    UserDTO farmer;
     Float rating;
+    private boolean visible;
     Integer reviewCount;
     Boolean canReview;
     Boolean isInWishlist;

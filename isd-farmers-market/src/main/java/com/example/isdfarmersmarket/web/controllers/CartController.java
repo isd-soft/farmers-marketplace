@@ -1,9 +1,11 @@
 package com.example.isdfarmersmarket.web.controllers;
 
 import com.example.isdfarmersmarket.business.services.cart.CartService;
+import com.example.isdfarmersmarket.dao.enums.DeliveryTypes;
 import com.example.isdfarmersmarket.web.commands.cart.AddItemInCartCommand;
 import com.example.isdfarmersmarket.web.commands.cart.UpdateItemInCartCommand;
 import com.example.isdfarmersmarket.web.commands.order.UpdateOrderCommand;
+import com.example.isdfarmersmarket.web.dto.CartDTO;
 import com.example.isdfarmersmarket.web.dto.ItemInCartDTO;
 import com.example.isdfarmersmarket.web.dto.OrderDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,9 +55,9 @@ public class CartController {
 
     @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping
-    public ResponseEntity<List<ItemInCartDTO>> getAllFromCart() {
+    public ResponseEntity<CartDTO> getAllFromCart(DeliveryTypes deliveryTypes) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(cartService.getAllCartItems());
+                .body(cartService.getAllCartItems(deliveryTypes));
     }
 }

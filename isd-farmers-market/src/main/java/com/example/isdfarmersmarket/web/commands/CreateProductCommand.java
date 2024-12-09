@@ -1,20 +1,16 @@
 package com.example.isdfarmersmarket.web.commands;
 
 import com.example.isdfarmersmarket.dao.enums.UnitType;
-import com.example.isdfarmersmarket.dao.models.Image;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Data
 public class CreateProductCommand {

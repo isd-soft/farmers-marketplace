@@ -8,11 +8,11 @@
         v-model="newReview.content"
         rows="6"
         placeholder="Write your review..."
-        style="margin-top: 1em"
+        style="margin-top: 1em; width: 30em"
       ></textarea>
       <Button
         @click="submitReview"
-        style="background-color: green; width: 12em">
+        style="background-color: green; width: 12em; margin: 1em">
         Submit Review
       </Button>
     </div>
@@ -26,9 +26,11 @@
             <Card>
               <template #content>
                 <Rating v-model="review.rating" :readOnly="true" :stars="5" />
-                <strong>
-                  {{ review.creator.firstName }} {{ review.creator.lastName }}
-                </strong>
+                <div class="author-name" :data-prefix="'Farmer:'">
+                  <a :href="`/id${review.creator.id}`">
+                    {{ review.creator.firstName }} {{ review.creator.lastName }}
+                  </a>
+                </div>
                 <p>{{ review.content }}</p>
               </template>
             </Card>
@@ -143,19 +145,16 @@ export default {
 
 <style scoped>
 .add-review {
-  margin-bottom: 20px;
+  padding: 1em;
 }
 
 .add-review h3 {
   font-size: 1.5rem;
   font-weight: bold;
-  margin-bottom: 10px;
 }
 
 .add-review textarea {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 8px;
+  width: 30%;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
@@ -188,5 +187,31 @@ export default {
 
 .review-item strong {
   font-weight: bold;
+}
+.author-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #007bff;
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.author-name a {
+  font-weight: bold;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.author-name a:hover {
+  color: #0056b3;
+}
+
+.author-name::before {
+  content: "Author: ";
+  color: #333;
+  font-weight: normal;
+  margin-right: 5px;
 }
 </style>

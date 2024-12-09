@@ -4,11 +4,10 @@
     <Toast />
     <Card
       :style="{
-        position: 'absolute',
         top: '10vh',
-        width: '80em',
-        maxWidth: '95%',
+        width: 'auto',
         margin: '0 auto',
+        maxWidth: '100%',
       }"
     >
       <template #content>
@@ -43,9 +42,7 @@
 
         <div v-else>
           <div class="product-page">
-            <!-- Product Section -->
             <div class="product-content">
-              <!-- Galleria Component -->
               <div class="product-gallery">
                 <Galleria
                   :value="images"
@@ -71,23 +68,27 @@
                 </Galleria>
               </div>
 
-              <!-- Product Details -->
               <div class="product-details">
                 <div class="product-name">{{ product.title || 'Product Name' }}</div>
+                <div class="author-name">
+                  <a :href="`/id${product.farmer.id}`">
+                    {{ product.farmer.firstName || 'Farmer name' }}
+                  </a>
+                </div>
                 <div class="product-cost">
                   <span v-if="product.discountPercents && product.discountPercents > 0">
                     <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
-                      ${{ product.pricePerUnit }}
+                      {{ product.pricePerUnit }} MDL
                     </s>
                     <span style="color: #007bff; font-size: 1.5rem">
-                      ${{
+                      {{
                         product.pricePerUnit * ((100 - product.discountPercents) / 100).toFixed(2)
-                      }}
+                      }} MDL
                     </span>
                   </span>
                   <span v-else
                     ><span style="color: #007bff; font-size: 1.5rem">
-                      ${{ product.pricePerUnit }}
+                      {{ product.pricePerUnit }} MDL
                     </span>
                   </span>
                 </div>
@@ -134,7 +135,7 @@
                   </Button>
                   <Button
                     label="Schedule"
-                    style="margin-left: 10px;"
+                    style="margin-left: 10px"
                     @click="scheduleProduct(product.id)"
                   />
 
@@ -153,30 +154,30 @@
                 </div>
               </div>
             </div>
+            <TabView>
+              <TabPanel header="Details">
+                <div class="tab-content">
+                  <p>{{ product.description || 'No description' }}</p>
+                </div>
+              </TabPanel>
+
+              <TabPanel header="Reviews">
+                <CustomerReviews :id="id" :review-type="'product'" />
+              </TabPanel>
+
+              <TabPanel header="Shipping">
+                <div class="tab-content">
+                  <p>{{ product.shipping_info || 'Shipping information coming soon.' }}</p>
+                </div>
+              </TabPanel>
+            </TabView>
           </div>
 
-          <!-- Tabs Section -->
-          <TabView>
-            <TabPanel header="Details">
-              <div class="tab-content">
-                <p>{{ product.description || 'No description' }}</p>
-              </div>
-            </TabPanel>
-
-            <TabPanel header="Reviews">
-              <CustomerReviews :id="id" :review-type="'product'" />
-            </TabPanel>
-
-            <TabPanel header="Shipping">
-              <div class="tab-content">
-                <p>{{ product.shipping_info || 'Shipping information coming soon.' }}</p>
-              </div>
-            </TabPanel>
-          </TabView>
         </div>
       </template>
     </Card>
-  </div>
+    <Footer class="footer"></Footer>
+    </div>
 </template>
 
 <script>
@@ -197,7 +198,7 @@ import CustomerReviews from '@/components/CustomerReviews.vue'
 import { isLoggedIn } from '@/shared/authState.js'
 import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
-import router from "@/router/index.js";
+import router from '@/router/index.js'
 
 export default {
   name: 'ProductPage',
@@ -223,6 +224,15 @@ export default {
     const isAllReviewsLoaded = ref(false)
     const toast = useToast()
     const images = ref([])
+
+    function toastAdd(severity, summary, detail, life = 2000) {
+      toast.add({
+        severity: severity,
+        summary: summary,
+        detail: detail,
+        life: life,
+      })
+    }
 
     const responsiveOptions = ref([
       { breakpoint: '1024px', numVisible: 3 },
@@ -260,10 +270,11 @@ export default {
         console.error('Failed to load product:', error.message)
         hasError.value = true
         isLoading.value = false
+        router.push(`/`)
       }
     }
     const scheduleProduct = (productId) => {
-      router.push(`/schedule-order/${productId}`);
+      router.push(`/schedule-order/${productId}`)
     }
     const toggleWishlist = async () => {
       if (!product.value.id) return
@@ -281,9 +292,13 @@ export default {
         )
       }
     }
-
     const addToCart = async () => {
-      if (!product.value.id || !quantity.value) {
+      if (!product.value.id || product.value.quantity < 1) {
+        toastAdd('error', 'Unavailable Quantity', 'Product is out of stock or invalid quantity.')
+        return
+      }
+
+      if (!product.value.id || !quantity.value || quantity.value < 1) {
         alert('Invalid product or quantity')
         return
       }
@@ -300,12 +315,7 @@ export default {
         const response = await axiosInstance.post('/cart', itemInCart)
         console.log('Added to cart:', response.data)
 
-        toast.add({
-          severity: 'success',
-          summary: 'Item Added to cart',
-          detail: 'This item was successfully added to cart.',
-          life: 4000,
-        })
+        toastAdd('success', 'Item Added to cart', 'This item was successfully added to cart.', 1000)
 
         buttonText.value = 'Item Added'
         setTimeout(() => {
@@ -315,19 +325,9 @@ export default {
         console.error('Error adding to cart:', error)
 
         if (error.response && error.response.status === 409) {
-          toast.add({
-            severity: 'warn',
-            summary: 'Item Already in Cart',
-            detail: 'This item is already in your cart.',
-            life: 3000,
-          })
+          toastAdd('warn', 'Item Already in Cart', 'This item is already in your cart.')
         } else {
-          toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to add item to cart. Please try again later.',
-            life: 3000,
-          })
+          toastAdd('error', 'Error', 'Failed to add item to cart. Please try again later.')
         }
       }
     }
@@ -482,13 +482,39 @@ export default {
   font-size: 1rem;
   color: #333;
 }
+.author-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #007bff;
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.author-name a {
+  font-weight: bold;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.author-name a:hover {
+  color: #0056b3;
+}
+
+.author-name::before {
+  content: "By ";
+  color: #333;
+  font-weight: normal;
+  margin-right: 5px;
+}
+
 .home {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
   overflow-x: hidden;
   width: 100%;
-  padding-top: 100px;
-  justify-content: space-between;
-  align-items: center;
+  height: max-content;
 }
 </style>

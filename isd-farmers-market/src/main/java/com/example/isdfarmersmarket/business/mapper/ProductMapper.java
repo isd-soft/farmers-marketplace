@@ -19,6 +19,7 @@ public interface ProductMapper {
     @Mapping(target = "image", expression = "java(imageMapper.map(product.getImages().stream().findFirst().orElse(null)))")
     @Mapping(target = "unitTypeShort", expression = "java(product.getUnitType().getShortName())")
     CompactProductDTO mapToProductInWishlistDTO(Product product);
+
     default Page<CompactProductDTO> mapToCompactProductsDTO(Page<Product> products, Set<Product> wishlist) {
         return products.map(product -> {
             CompactProductDTO compactProductDTO = this.mapToProductInWishlistDTO(product);

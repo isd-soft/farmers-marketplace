@@ -141,7 +141,7 @@ public class PlannedOrderServiceImpl implements PlannedOrderService {
                 newOrder.setCustomer(plannedOrder.getCustomer());
                 newOrder.setFarmer(plannedOrder.getProduct().getFarmer());
                 newOrder.setOrderStatus(OrderStatus.PENDING);
-                newOrder.setTotalPrice(newItem.getPricePerUnit().multiply(BigDecimal.valueOf(plannedOrder.getQuantity())));
+                newOrder.setTotalItemsPrice(newItem.getPricePerUnit().multiply(BigDecimal.valueOf(plannedOrder.getQuantity())));
                 newOrder.getItemsInOrder().add(newItem);
 
                 newItem.setOrder(newOrder);

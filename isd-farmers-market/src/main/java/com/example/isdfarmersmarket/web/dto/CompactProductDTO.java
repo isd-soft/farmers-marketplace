@@ -11,15 +11,16 @@ import java.math.BigDecimal;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CompactProductDTO {
     Long id;
-    private String title;
-    private String description;
-    private BigDecimal pricePerUnit;
-    private int quantity;
-    private UnitType unitType;
-    private String unitTypeShort;
-    private int discountPercents;
+    String title;
+    String description;
+    BigDecimal pricePerUnit;
+    int quantity;
+    UnitType unitType;
+    private boolean visible;
+    String unitTypeShort;
+    int discountPercents;
     Boolean isInWishlist;
-    private Float rating;
-    private ImageDTO image;
-    private long orders;
+    Float rating;
+    ImageDTO image;
+    long orders;
 }

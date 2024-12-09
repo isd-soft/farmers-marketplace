@@ -7,13 +7,18 @@
       <div class="product-container-schedule" style="min-width: 260px">
         <div class="product-inner-container-scheduler">
             <img
+              style="cursor: pointer"
+              @click="goToProductPage(product)"
               class="product-image-schedule"
               :src="getFirstImage(product.images)"
               :alt="product.title"
             />
           <div class="title-description-quantity-container-schedule" >
             <div class="title-price-schedule">
-              <h3 class="product-title-text">{{ product.title }}</h3>
+              <h3
+                style="cursor: pointer"
+                @click="goToProductPage(product)"
+                class="product-title-text">{{ product.title }}</h3>
               <div class="product-cost">
           <span v-if="product.discountPercents && product.discountPercents > 0">
             <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
@@ -46,10 +51,14 @@
                   fluid
                 >
                   <template #incrementbuttonicon>
-                    <span class="pi pi-plus" />
+                    <span
+                      style="font-size: 10px; color: black"
+                      class="pi pi-plus" />
                   </template>
                   <template #decrementbuttonicon>
-                    <span class="pi pi-minus" />
+                    <span
+                      style="font-size: 10px; color: black"
+                      class="pi pi-minus" />
                   </template>
                 </InputNumber>
                 <span v-if="v$.quantity.$error" class="error-message">Quantity in you order is required and must be minimum 1 maximum 1000</span>
@@ -128,8 +137,7 @@ import Header from "./Header.vue";
 import Footer from "../components/Footer.vue";
 import Checkbox from "primevue/checkbox";
 import axiosInstance from "@/utils/axiosInstance.js";
-import axios from "axios";
-import router from "@/router/index.js";
+import 'primeicons/primeicons.css'
 
 export default {
   name: "Planner",
@@ -255,6 +263,9 @@ export default {
       }
       return "";
     },
+    goToProductPage(product) {
+      this.$router.push(`/product/${product.id}`);
+    },
   },
 }
 </script>
@@ -340,6 +351,7 @@ export default {
   justify-content: space-between;
 }
 .quantity-selector {
+  max-width: 200px;
   width: 9rem;
   min-width: 6rem;
   height: 2.5vh;
