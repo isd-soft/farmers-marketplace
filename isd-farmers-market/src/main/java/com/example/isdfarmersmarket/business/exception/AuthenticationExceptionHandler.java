@@ -20,7 +20,8 @@ public class AuthenticationExceptionHandler {
             RoleDoesntExistException.class, UsernameNotFoundException.class,
             PasswordsDoNotMatchException.class, InvalidCredentialsException.class,
             MalformedJwtException.class, AccessDeniedException.class,
-            BadCredentialsException.class, AuthenticationException.class})
+            BadCredentialsException.class, AuthenticationException.class,
+            AccountNotActivatedException.class})
     public ProblemDetail handleException(Exception ex) {
         AuthError authError = switch (ex) {
             case EmailAlreadyExistsException e -> AuthError.EMAIL_ALREADY_EXISTS;
@@ -33,6 +34,7 @@ public class AuthenticationExceptionHandler {
             case AccessDeniedException e -> AuthError.ACCESS_DENIED;
             case BadCredentialsException e -> AuthError.BAD_CREDENTIALS;
             case AuthenticationException e -> AuthError.AUTHENTICATION_FAILED;
+            case AccountNotActivatedException e -> AuthError.ACCOUNT_NOT_ACTIVATED;
             default -> AuthError.UNEXPECTED_JWT_ERROR;
         };
 
