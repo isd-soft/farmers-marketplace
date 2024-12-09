@@ -3,7 +3,6 @@ package com.example.isdfarmersmarket.business.services;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.CustomUsernameNotFoundException;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.RoleAlreadyExistsException;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.RoleDoesntExistException;
-import com.example.isdfarmersmarket.business.mapper.UserMapper;
 import com.example.isdfarmersmarket.business.mapper.UserProfileMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.interfaces.UserService;
@@ -34,8 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -44,7 +41,6 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     UserRepository userRepository;
     UserProfileMapper userProfileMapper;
     RoleRepository roleRepository;
-    UserMapper userMapper;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -58,7 +54,6 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         var content = userProfileMapper.map(usersPage.getContent());
         return new PageResponseDTO<>(content, usersPage.getTotalElements());
     }
-
 
 
     public UserProfileDTO getUserById(Long id) {
@@ -102,6 +97,4 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         userRepository.save(customer);
         return userProfileMapper.map(customer);
     }
-
-
 }

@@ -2,6 +2,7 @@ package com.example.isdfarmersmarket.business.initializers;
 
 import com.example.isdfarmersmarket.business.services.AuthServiceImpl;
 import com.example.isdfarmersmarket.dao.enums.ERole;
+import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
 import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 @Order(2)
@@ -34,7 +37,13 @@ public class MainAdminInitializer implements CommandLineRunner {
                     ERole.ADMIN,
                     null,null
             );
-            authService.registerUser(adminData);
+            authService.registerUser(adminData, null);
+            Optional<User> registeredUserOptional = userRepository.findByEmail(adminEmail);
+
+            registeredUserOptional.ifPresent(registeredUser -> {
+                registeredUser.setEnabled(true);
+                userRepository.save(registeredUser);
+            });
         }
     }
 }

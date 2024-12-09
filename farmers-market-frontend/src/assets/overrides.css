@@ -28,15 +28,14 @@
   --p-inputtext-hover-border-color: #334155 !important;
   --p-inputtext-focus-border-color: #334155 !important;
 
-  /* Button Styles */
-  --p-button-primary-background: #179739 !important;
-  --p-button-primary-hover-background: 
-   !important;
-  --p-button-primary-active-background: #334155 !important;
-  --p-button-primary-border-color: #179739 !important;
-  --p-button-primary-hover-border-color: #334155 !important;
-  --p-button-primary-active-border-color: #179739 !important;
-  --p-button-primary-focus-ring-color: #334155 !important;
+   /* Button Styles */
+   --p-button-primary-background: #179739 !important;
+   --p-button-primary-hover-background: #334155 !important;
+   --p-button-primary-active-background: #334155 !important;
+   --p-button-primary-border-color: #179739 !important;
+   --p-button-primary-hover-border-color: #334155 !important;
+   --p-button-primary-active-border-color: #179739 !important;
+   --p-button-primary-focus-ring-color: #334155 !important;
 
   /*Date-Picker Styles */
   --p-datepicker-date-selected-background:  #179739 !important;
