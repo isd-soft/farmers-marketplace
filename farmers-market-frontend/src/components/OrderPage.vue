@@ -227,10 +227,23 @@ const leaveComment = async (order) =>{
     try {
       if (itemInCart.isInWishlist) {
         await axiosInstance.delete(`/wishlist/${itemInCart.productId}`);
+        orders.value.forEach((order) => {
+          order.itemsInOrder.forEach((item) => {
+            if (item.productId === itemInCart.productId) {
+              item.isInWishlist = false;
+            }
+          });
+        });
       } else {
         await axiosInstance.post(`/wishlist/${itemInCart.productId}`);
+        orders.value.forEach((order) => {
+          order.itemsInOrder.forEach((item) => {
+            if (item.productId === itemInCart.productId) {
+              item.isInWishlist = true;
+            }
+          });
+        });
       }
-      itemInCart.isInWishlist = !itemInCart.isInWishlist;
     } catch (error) {
       console.error(
         `Failed to ${

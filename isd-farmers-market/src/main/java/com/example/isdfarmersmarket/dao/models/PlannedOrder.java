@@ -22,6 +22,10 @@ public class PlannedOrder {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "planned_order_sequence")
     private Long id;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "delivery_type_id", nullable = false)
+    private DeliveryTypeFarmer deliveryTypeFarmer;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private User customer;
@@ -41,7 +45,7 @@ public class PlannedOrder {
     private boolean active = true;
 
     @Column(name="created_date", columnDefinition = "TimeStamp")
-    private LocalDateTime createdDate;
+    private LocalDateTime createdDate = LocalDateTime.now();
 
     @Override
     public boolean equals(Object o) {

@@ -34,15 +34,13 @@
             </span>
           </span>
               </div>
-              <span class="price-text"
-              >{{totalPrice}} MDL</span
-              >
             </div>
               <p class="product-description">{{ product.description }}</p>
               <div class="quantity-container">
                 <InputNumber
                   class="quantity-selector"
                   v-model="order.quantity"
+                  min="1"
                   inputId="horizontal-buttons"
                   showButtons
                   buttonLayout="horizontal"
@@ -63,6 +61,17 @@
                 </InputNumber>
                 <span v-if="v$.quantity.$error" class="error-message">Quantity in you order is required and must be minimum 1 maximum 1000</span>
               </div>
+            <div style="display: flex; flex-direction: column; width: 100%; align-items: end">
+            <span class="price-text-part"
+            >Items: {{totalItemsPrice}} MDL</span
+            >
+              <span class="price-text-part"
+              >+ Delivery {{deliveryPrice}} MDL</span
+              >
+              <span class="price-total-text"
+              >Total: {{totalPrice}} MDL</span
+              >
+            </div>
           </div>
         </div>
       </div>
@@ -70,6 +79,18 @@
           <div class="day-time-container">
           <p>Choose day and time for scheduled order.</p>
             <div class="input-error">
+              <FloatLabel variant="on" class="schedule-input-labels">
+              <Select
+                class="schedule-input"
+                id="delivery-type"
+                v-model="selectedDeliveryType"
+                :options="deliveryTypeValues"
+                optionLabel="label"
+                option-value="value"
+                @change = "totalDeliveryPrice"
+              />
+                <label for="delivery-type">DeliveryType</label>
+              </FloatLabel>
             <FloatLabel variant="on" class="schedule-input-labels">
             <Select
               class="schedule-input"
@@ -160,6 +181,8 @@ export default {
     const v$ = useVuelidate(rules, order);
     const router = useRouter();
     const product = ref({})
+    const selectedDeliveryType = ref(null)
+    const deliveryTypeValues = ref([])
 
     const daysOfWeek = ref([
       { label: "Monday", value: "MONDAY" },
@@ -176,9 +199,24 @@ export default {
         ((100 - (product.value.discountPercents || 0)) / 100)
       ).toFixed(2);
     });
-    const totalPrice = computed(() => {
+    const totalItemsPrice = computed(() => {
       return (discountedPrice.value * order.quantity
       ).toFixed(2);
+    });
+    const deliveryPrice = ref(0);
+    const totalDeliveryPrice = (async () => {
+      console.log(selectedDeliveryType.value)
+      console.log(product.value.farmer.email)
+      const resp = await axiosInstance.get("/deliverytypes/price", {
+        params: {
+          farmerEmail: product.value.farmer.email,
+          deliveryType: selectedDeliveryType.value
+        }
+      });
+      deliveryPrice.value = resp.data;
+    });
+    const totalPrice = computed(() => {
+      return (Number(totalItemsPrice.value) + Number(deliveryPrice.value)).toFixed(2);
     });
     const hours = ref([
       { label: "0", value: "00" },
@@ -226,6 +264,7 @@ export default {
             quantity: order.quantity,
             dayOfWeek: order.dayOfWeek,
             time: `${order.hour}:${order.minute}:00`,
+            deliveryType: selectedDeliveryType.value,
           });
           await router.push("/schedule-order/management");
         } catch (error) {
@@ -242,6 +281,20 @@ export default {
         console.error('Failed to fetch Product', err)
         await router.push(`/`);
       }
+      try {
+        const deliveryResponse = await axiosInstance.get('/delivery-types-enum')
+        if (Array.isArray(deliveryResponse.data)) {
+          deliveryTypeValues.value = deliveryResponse.data.map((type) => ({
+            label: type,
+            value: type,
+          }));
+          console.log("Unit types loaded:", deliveryTypeValues.value);
+          selectedDeliveryType.value = deliveryTypeValues.value[0].value
+        }
+      } catch (err) {
+        console.error('Failed to fetch Delivery Types or Cart Products', err)
+      }
+      await totalDeliveryPrice();
     })
 
     return {
@@ -252,8 +305,13 @@ export default {
       saveSchedule,
       order,
       discountedPrice,
-      totalPrice,
+      totalItemsPrice,
       v$,
+      selectedDeliveryType,
+      deliveryTypeValues,
+      totalPrice,
+      totalDeliveryPrice,
+      deliveryPrice,
     };
 },
   methods: {
@@ -339,7 +397,12 @@ export default {
   border-radius: 15px;
   box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
 }
-.price-text {
+.price-text-part {
+  font-size: 1rem;
+  font-weight: 500;
+  color: black;
+}
+.price-total-text {
   font-size: 1.5rem;
   font-weight: 600;
   color: black;

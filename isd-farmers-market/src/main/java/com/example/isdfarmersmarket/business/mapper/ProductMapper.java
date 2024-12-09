@@ -31,6 +31,17 @@ public interface ProductMapper {
             return compactProductDTO;
         });
     }
+    default List<CompactProductDTO> mapToCompactProductsDTO(List<Product> products, Set<Product> wishlist) {
+        return products.stream().map(product -> {
+            CompactProductDTO compactProductDTO = this.mapToProductInWishlistDTO(product);
+            if (wishlist.contains(product)) {
+                compactProductDTO.setIsInWishlist(true);
+            } else {
+                compactProductDTO.setIsInWishlist(false);
+            }
+            return compactProductDTO;
+        }).toList();
+    }
     default Page<CompactProductDTO> mapToCompactProductsDTO(Page<Product> products) {
         return products.map(this::mapToProductInWishlistDTO);
     }
