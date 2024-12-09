@@ -7,6 +7,8 @@ import com.example.isdfarmersmarket.web.commands.UpdatePasswordCommand;
 import com.example.isdfarmersmarket.web.commands.UserLoginCommand;
 import com.example.isdfarmersmarket.web.commands.UserRegisterCommand;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -30,10 +32,23 @@ public class AuthController {
     JwtServiceImpl jwtService;
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> userRegister(@RequestBody UserRegisterCommand registerRequestDTO) {
-        authService.registerUser(registerRequestDTO);
+    public ResponseEntity<Map<String, String>> userRegister(@RequestBody UserRegisterCommand registerRequestDTO,
+                                                            HttpServletRequest request) {
+        authService.registerUser(registerRequestDTO, request.getContextPath());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("message", "User registered successfully"));
+    }
+
+    @GetMapping("/register/confirm")
+    public ResponseEntity<String> confirmRegistration(@RequestParam("token") String token) {
+        try {
+            authService.validateAndEnableUser(token);
+            return ResponseEntity.status(FOUND)
+                    .header("Location", "http://localhost:5173/login")
+                    .build();
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(BAD_REQUEST).body("Invalid or expired token. Please request a new one.");
+        }
     }
 
     @PostMapping("/login")

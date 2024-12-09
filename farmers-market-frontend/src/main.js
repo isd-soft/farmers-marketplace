@@ -9,6 +9,7 @@ import SelectButton from 'primevue/selectbutton';
 import InputText from 'primevue/inputtext'
 import FloatLabel from 'primevue/floatlabel'; 
 import ToastService from 'primevue/toastservice'
+import ConfirmationService from 'primevue/confirmationservice';
 
 import 'primeicons/primeicons.css';
 import './assets/main.css'
@@ -27,7 +28,7 @@ app.use(PrimeVue, {
 })
 
 app.use(ToastService)
-
+app.use(ConfirmationService);
 app.use(router)
 
 app.component('ThemedButton', Button)
