@@ -83,6 +83,11 @@ const fetchUserData = async () => {
     currentUser = response.data;
     if (currentUser.isFarmer) {
       accountMenu.value[0].items.unshift({
+        label: 'My sales',
+        icon: 'pi pi-credit-card',
+        command: () => goToMySales(),
+      }),
+      accountMenu.value[0].items.unshift({
         label: 'Products',
         icon: 'pi pi-clipboard',
         command: () => goToMyProducts(),
@@ -110,6 +115,9 @@ const goToCart = () => {
 };
 const goToMyProducts = () => {
   window.location.href = '/product/management';
+};
+const goToMySales = () => {
+  window.location.href = '/ordermanagement';
 };
 
 const goToOrders = () => {

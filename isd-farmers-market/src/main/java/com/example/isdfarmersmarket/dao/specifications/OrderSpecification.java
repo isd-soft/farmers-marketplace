@@ -15,6 +15,10 @@ public class OrderSpecification {
         return (root, query, builder) ->
                 builder.equal(root.get("customer").get("id"), userId);
     }
+    public static Specification<Order> farmerIs(Long userId) {
+        return (root, query, builder) ->
+                builder.equal(root.get("farmer").get("id"), userId);
+    }
     public static Specification<Order> statusIs(String status) {
         return (root, query, builder) -> status == null
                 ? builder.conjunction()

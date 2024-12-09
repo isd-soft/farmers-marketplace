@@ -23,13 +23,14 @@
                   v-model="sortBy"
                   :options="sortOptions"
                   optionLabel="label"
-                  placeholder="Sort By Price"
+                  placeholder="Sort by"
                   @change="fetchOrders"
                 />
               </template>
               <template #list="slotProps">
                 <div class="flex flex-col order-container">
                   <div v-for="order in orders" :key="order.id">
+                    <p>{{ order.orderStatus }}</p>
                     <div
                       class="flex flex-col sm:flex-row sm:items-center p-6 gap-4 product-container"
                     >
@@ -51,7 +52,7 @@
                             <div class="first-product-content-section">
                               <h3 class="product-title-text">{{ product.productTitle }}</h3>
                               <p class="product-description">{{ product.productDescription }}</p>
-                              <p class="product-quantity-type">{{ product.quantity }} {{ product.unitType }}</p>
+                              <p class="product-quantity-type">{{ product.quantity }} {{ product.unitTypeShort }}</p>
                             </div>
                           </div>
                           <div class="second-product-content-section">
@@ -59,30 +60,31 @@
                             <p class="order-date-text">{{formatOrderDate(order.createdDate) }}</p>
                           </div>
 
-                          <div>
-                            <Button
-                              class="heart-button wishlist-icon"
-                              outlined
-                              :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
-                              @click="toggleWishlist(product)"
-                              :title="
-                                product.isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'
-                              "
-                            >
-                            </Button>
-                          </div>
+                          <i
+                            :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
+                            class="icons"
+                            @click.stop="toggleWishlist(product)"
+                            :title="product.isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'"
+                          />
+
                         </div>
                       </div>
                         <div class="flex flex-col md:items-end gap-8 buttons-price-container">
                           <span class="text-xl font-semibold price-text"
                             >{{ order.totalPrice }} MDL</span>
                             <Button
+                              v-if="order.orderStatus!=='DELIVERED' && order.orderStatus!=='CANCELLED'&& order.orderStatus!=='PENDING'"
                               icon="pi pi-check"
                               label="Order Recieved"
-                              :disabled="order.id === 'OUTOFSTOCK'"
-                              @click=""
+                              @click="orderDelivered(order)"
                               class="flex-auto md:flex-initial whitespace-nowrap update-button"
                             ></Button>
+                          <Button
+                            v-if="order.orderStatus==='DELIVERED'"
+                            label="Leave a comment"
+                            @click="leaveComment(order)"
+                            class="flex-auto md:flex-initial whitespace-nowrap update-button"
+                          ></Button>
                         </div>
                     </div>
                   </div>
@@ -115,6 +117,7 @@ import Select from 'primevue/select'
 import 'primeicons/primeicons.css'
 import Rating from 'primevue/rating'
 import Paginator from 'primevue/paginator';
+import router from "@/router/index.js";
 
 export default {
   name: 'SearchProducts',
@@ -168,7 +171,7 @@ setup() {
 // const isPartial = computed(() => decimalPart.value !== 0)
 // const full = computed(() => `${decimalPart.value * 100}%`)
 
-  
+
 function toastAdd(severity, summary, detail, life = 2000) {
   toast.add({
     severity: severity,
@@ -216,32 +219,38 @@ function getBase64Image(base64String, imageType = 'jpeg') {
   return `data:image/${imageType};base64,${base64String}`
 }
 
-
-
-  const toggleWishlist = async (product) => {
-    if (!product.id) return
-
-  try {
-    if (product.isInWishlist) {
-      await axiosInstance.delete(`/customer/wishlist/${product.id}`)
-    } else {
-      await axiosInstance.post(`/customer/wishlist/${product.id}`)
-    }
-    product.isInWishlist = !product.isInWishlist
-  } catch (error) {
-    console.error(
-      `Failed to ${product.isInWishlist ? 'remove' : 'add'} product to/from wishlist:`,
-      error.message,
-    )
-  }
+const leaveComment = async (order) =>{
+  await router.push(`/id${order.farmer.id}`);
 }
+  const toggleWishlist = async (itemInCart) => {
+    if (!itemInCart) return;
+    try {
+      if (itemInCart.isInWishlist) {
+        await axiosInstance.delete(`/wishlist/${itemInCart.productId}`);
+      } else {
+        await axiosInstance.post(`/wishlist/${itemInCart.productId}`);
+      }
+      itemInCart.isInWishlist = !itemInCart.isInWishlist;
+    } catch (error) {
+      console.error(
+        `Failed to ${
+          itemInCart.isInWishlist ? "remove" : "add"
+        } product to/from wishlist:`,
+        error.message
+      );
+    }
+  };
  const onPageChange = (event) => {
     currentPage.value = event.page;
     fetchOrders();
   }
+  const orderDelivered = async (order) => {
+    const response = await axiosInstance.put(`/order/receive/${order.id}`)
+    order.orderStatus = response.data.orderStatus
+  }
   const fetchOrders = async () => {
-    let sort = "";
-    let dir = "";
+    let sort = "createdDate";
+    let dir = "DESC";
     try {
       switch (sortBy.value.value) {
         case "price_asc":
@@ -296,6 +305,8 @@ function getBase64Image(base64String, imageType = 'jpeg') {
     getSeverity,
     toggleWishlist,
     intPart,
+    orderDelivered,
+    leaveComment,
   }
 }}
 </script>
@@ -487,5 +498,10 @@ function getBase64Image(base64String, imageType = 'jpeg') {
 .footer {
   margin: 0;
   padding-top: 20px;
+}
+.icons{
+  font-size: 20px;
+  cursor: pointer;
+  color: #179739;
 }
 </style>

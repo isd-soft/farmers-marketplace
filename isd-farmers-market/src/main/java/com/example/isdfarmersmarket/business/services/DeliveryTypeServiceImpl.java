@@ -3,6 +3,7 @@ package com.example.isdfarmersmarket.business.services;
 
 import com.example.isdfarmersmarket.business.mapper.DaoMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.enums.DeliveryTypes;
 import com.example.isdfarmersmarket.dao.models.DeliveryTypeFarmer;
 import com.example.isdfarmersmarket.dao.models.User;
@@ -52,8 +53,6 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
     @Transactional
     public DeliveryTypeDTO updateDeliveryType(UpdateDeliveryTypeCommand updateDeliveryTypeCommand) {
         JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User farmer = userRepository.findByEmail(principal.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Farmer with this email doesn't exist"));
 
         System.out.println(principal.getEmail());
         System.out.println(updateDeliveryTypeCommand.getType());
@@ -111,5 +110,15 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
             }
         }
         return result;
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> getAllCurrentUserDeliveryType() {
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+        return deliveryTypeRepository.findByFarmerEmail(principal.getEmail())
+                .stream().map(deliveryTypeFarmer -> {
+                    return deliveryTypeFarmer.getType().name();
+                })
+                .toList();
     }
 }

@@ -8,6 +8,7 @@ import com.example.isdfarmersmarket.web.dto.DeliveryTypeDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,5 +48,11 @@ public class DeliveryTypeController {
     public ResponseEntity<List<DeliveryTypeDTO>> getDeliveryTypes() {
         return ResponseEntity.status(OK)
                 .body(deliveryTypeService.getAllDeliveryType());
+    }
+    @PreAuthorize("hasRole('FARMER')")
+    @GetMapping("/current-farmer")
+    public ResponseEntity<List<String>> getCurrentFarmerDeliveryTypes() {
+        return ResponseEntity.status(OK)
+                .body(deliveryTypeService.getAllCurrentUserDeliveryType());
     }
 }

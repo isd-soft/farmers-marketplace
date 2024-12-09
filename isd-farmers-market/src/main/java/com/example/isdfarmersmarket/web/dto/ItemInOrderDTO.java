@@ -23,4 +23,6 @@ public class ItemInOrderDTO {
     Integer reviewCount;
     Float rating;
     UnitType unitType;
+    String unitTypeShort;
+    Boolean isInWishlist;
 }

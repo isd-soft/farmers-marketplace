@@ -11,11 +11,18 @@ import java.util.List;
 
 public interface OrderService {
     List<OrderDTO> createOrders(CreateOrderCommand createOrderCommand);
-    OrderDTO updateOrder(Long id, UpdateOrderCommand updateOrderCommand);
+    OrderDTO farmerStatusChangeOrder(Long id, UpdateOrderCommand updateOrderCommand);
+
+    @Transactional
+    OrderDTO customerReceivedOrder(Long id);
+
     OrderDTO deleteOrder(Long id);
     OrderDTO getOrderById( Long id);
     List<OrderDTO> getAllOrders();
 
     @Transactional(readOnly = true)
     Page<OrderDTO> getCurrentUserOrders(String status, Pageable pageable);
+
+    @Transactional(readOnly = true)
+    Page<OrderDTO> getCurrentFarmerOrders(String orderStatus, Pageable pageable);
 }
