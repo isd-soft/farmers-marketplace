@@ -31,7 +31,7 @@
           </span>
         </div>
         <div class="product-icons">
-          <i id="addToCart" @click="addToCart" class="pi pi-shopping-cart cart-icon icons" ></i>
+          <i id="addToCart" @click.stop="addToCart" class="pi pi-shopping-cart cart-icon icons" ></i>
           <i
             :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
             class="icons"
@@ -48,6 +48,7 @@
 import {computed, ref} from "vue";
 import axiosInstance from "@/utils/axiosInstance.js";
 import {isLoggedIn} from "@/shared/authState.js";
+import {useToast} from "primevue/usetoast";
 
 export default {
   name: "ProductCard",
@@ -58,14 +59,14 @@ export default {
     },
   },
   setup(props) {
-    const quantity = props.product.quantity
+    const toast = useToast()
     const toggleWishlist = async () => {
       if (!props.product.id) return;
       try {
         if (props.product.isInWishlist) {
-          await axiosInstance.delete(`/customer/wishlist/${props.product.id}`);
+          await axiosInstance.delete(`/wishlist/${props.product.id}`);
         } else {
-          await axiosInstance.post(`/customer/wishlist/${props.product.id}`);
+          await axiosInstance.post(`/wishlist/${props.product.id}`);
         }
         props.product.isInWishlist = !props.product.isInWishlist;
       } catch (error) {
@@ -77,32 +78,47 @@ export default {
         );
       }
     };
+    function toastAdd(severity, summary, detail, life = 2000) {
+      toast.add({
+        severity: severity,
+        summary: summary,
+        detail: detail,
+        life: life,
+      })
+    }
     const addToCart = async () => {
-      if (!props.product.id || !quantity.value) {
+      if (!props.product.id || props.product.quantity < 1) {
+        toastAdd('error', 'Unavailable Quantity', 'Product is out of stock or invalid quantity.')
+        return
+      }
+
+      if (!props.product.id || !props.product) {
         alert('Invalid product or quantity')
         return
       }
       if (!isLoggedIn.value) {
-        window.location.href = "/login";
-        return;
+        window.location.href = '/login'
+        return
       }
 
       const itemInCart = {
         productId: props.product.id,
-        quantity: quantity.value,
+        quantity: 1,
       }
-
       try {
         const response = await axiosInstance.post('/cart', itemInCart)
         console.log('Added to cart:', response.data)
 
-        buttonText.value = 'Item Added';
-        setTimeout(() => {
-          buttonText.value = 'Add to Cart';
-        }, 3000);
+        toastAdd('success', 'Item Added to cart', 'This item was successfully added to cart.', 1000)
 
       } catch (error) {
         console.error('Error adding to cart:', error)
+
+        if (error.response && error.response.status === 409) {
+          toastAdd('warn', 'Item Already in Cart', 'This item is already in your cart.')
+        } else {
+          toastAdd('error', 'Error', 'Failed to add item to cart. Please try again later.')
+        }
       }
     }
 
@@ -117,7 +133,6 @@ export default {
       toggleWishlist,
       discountedPrice,
       addToCart,
-      quantity,
     };
   },
   methods: {

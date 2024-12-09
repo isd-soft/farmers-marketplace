@@ -20,8 +20,10 @@ public class OrderDTO {
     Long id;
     String orderStatus;
     UserProfileDTO customer;
+    UserProfileDTO farmer;
     BigDecimal totalDeliveryPrice;
     BigDecimal totalItemsPrice;
+    BigDecimal totalPrice;
     Set<ItemInOrderDTO> itemsInOrder = new HashSet<>();
     LocalDateTime createdDate = LocalDateTime.now();
     DeliveryTypeDTO deliveryTypeFarmer;

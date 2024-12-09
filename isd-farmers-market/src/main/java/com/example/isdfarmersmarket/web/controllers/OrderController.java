@@ -41,8 +41,14 @@ public class OrderController {
     )
     @PreAuthorize("hasRole('FARMER')")
     @PutMapping("/{id}")
-    public ResponseEntity<OrderDTO> updateOrder(@PathVariable Long id, @RequestBody @Valid UpdateOrderCommand updateOrderCommand) {
-        return ResponseEntity.status(OK).body(orderService.updateOrder(id, updateOrderCommand));
+    public ResponseEntity<OrderDTO> farmerStatusChangeOrder(@PathVariable Long id, @RequestBody @Valid UpdateOrderCommand updateOrderCommand) {
+        return ResponseEntity.status(OK).body(orderService.farmerStatusChangeOrder(id, updateOrderCommand));
+    }
+
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @PutMapping("/receive/{id}")
+    public ResponseEntity<OrderDTO> customerReceivedOrder(@PathVariable Long id) {
+        return ResponseEntity.status(OK).body(orderService.customerReceivedOrder(id));
     }
 
     @Operation(
@@ -71,6 +77,16 @@ public class OrderController {
             @RequestParam(required = false) String status,
             Pageable pageable) {
         return ResponseEntity.status(OK).body(orderService.getCurrentUserOrders(status, pageable));
+    }
+    @Operation(
+            description = "This endpoint is used to get all current user's orders"
+    )
+    @PreAuthorize("hasRole('FARMER')")
+    @GetMapping("/farmer/management")
+    public ResponseEntity<Page<OrderDTO>> getCurrentFarmerOrders(
+            @RequestParam(required = false) String status,
+            Pageable pageable) {
+        return ResponseEntity.status(OK).body(orderService.getCurrentFarmerOrders(status, pageable));
     }
 
     @Operation(

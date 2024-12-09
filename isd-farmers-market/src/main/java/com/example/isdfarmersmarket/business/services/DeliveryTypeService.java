@@ -14,4 +14,5 @@ public interface DeliveryTypeService {
     DeliveryTypeDTO deleteDeliveryType(Long id);
 
     List<DeliveryTypeDTO> getAllDeliveryType();
+    List<String> getAllCurrentUserDeliveryType();
 }
