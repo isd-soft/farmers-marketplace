@@ -1,7 +1,6 @@
 package com.example.isdfarmersmarket.business.mapper;
 
 import com.example.isdfarmersmarket.dao.models.Product;
-import com.example.isdfarmersmarket.dao.repositories.OrderRepository;
 import com.example.isdfarmersmarket.web.dto.ProductDTO;
 import com.example.isdfarmersmarket.web.dto.CompactProductDTO;
 import com.example.isdfarmersmarket.web.dto.ProductPageDTO;
@@ -19,6 +18,7 @@ public interface ProductMapper {
     @Mapping(target = "image", expression = "java(imageMapper.map(product.getImages().stream().findFirst().orElse(null)))")
     @Mapping(target = "unitTypeShort", expression = "java(product.getUnitType().getShortName())")
     CompactProductDTO mapToProductInWishlistDTO(Product product);
+
     default Page<CompactProductDTO> mapToCompactProductsDTO(Page<Product> products, Set<Product> wishlist) {
         return products.map(product -> {
             CompactProductDTO compactProductDTO = this.mapToProductInWishlistDTO(product);

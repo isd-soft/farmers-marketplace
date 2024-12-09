@@ -1,23 +1,32 @@
 <template>
+  <Toast />
   <div>
-    <!-- Add Review Form -->
-    <div class="add-review">
+    <div class="add-review" v-if="isAllowedToReview">
       <h3>Leave a Review</h3>
-      <Rating v-model="newReview.rating" :stars="5" />
+      <div>
+        <Rating id="reviewRating" v-model="newReview.rating" :stars="5" @blur="v$.rating.$touch" />
+        <span v-if="v$.rating.$error" class="error-message"> Rating is required. </span>
+      </div>
       <textarea
+        id="reviewTextarea"
         v-model="newReview.content"
         rows="6"
         placeholder="Write your review..."
         style="margin-top: 1em; width: 30em"
+        @blur="v$.content.$touch"
       ></textarea>
-      <Button
-        @click="submitReview"
-        style="background-color: green; width: 12em; margin: 1em">
+      <span
+        v-if="v$.content.$error"
+        class="error-message"
+        style="display: block; margin-top: 0.5em"
+      >
+        Review must be between 10 and 300 characters.
+      </span>
+      <Button @click="submitReview" style="background-color: green; width: 12em; margin: 1em">
         Submit Review
       </Button>
     </div>
 
-    <!-- Reviews Section -->
     <div class="reviews-section">
       <h3>Customer Reviews</h3>
       <div v-if="reviews.length > 0">
@@ -25,7 +34,7 @@
           <li v-for="review in reviews" :key="review.id" class="review-item">
             <Card>
               <template #content>
-                <Rating v-model="review.rating" :readOnly="true" :stars="5" />
+                <Rating v-model="review.rating" readonly :stars="5" />
                 <div class="author-name" :data-prefix="'Farmer:'">
                   <a :href="`/id${review.creator.id}`">
                     {{ review.creator.firstName }} {{ review.creator.lastName }}
@@ -52,28 +61,34 @@
 </template>
 
 <script>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import Rating from 'primevue/rating'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 import axiosInstance from '@/utils/axiosInstance.js'
+import { required, minLength, maxLength, minValue } from '@vuelidate/validators'
+import useVuelidate from '@vuelidate/core'
+import Toast from 'primevue/toast'
+import { useToast } from 'primevue/usetoast'
 
 export default {
   name: 'CustomerReviews',
   components: {
+    Toast,
     Rating,
     Card,
     Button,
   },
-  props: ['id', 'reviewType'],
+  props: ['id', 'reviewType', 'canReview'],
   setup(props) {
     const reviews = ref([])
-
+    const isAllowedToReview = ref(props.canReview)
     const newReview = ref({
       [`${props.reviewType}Id`]: props.id,
       rating: 0,
-      content: ''
+      content: '',
     })
+    const toast = useToast();
 
     const currentPage = ref(0)
     const pageSize = ref(5)
@@ -81,15 +96,19 @@ export default {
 
     const fetchReviews = async () => {
       try {
-        const reviewEndpoint = props.reviewType === 'product'
-          ? `/reviews/products/${props.id}`
-          : `/reviews/farmers/${props.id}`;
+        const reviewEndpoint =
+          props.reviewType === 'product'
+            ? `/reviews/products/${props.id}`
+            : `/reviews/farmers/${props.id}`
 
         const response = await axiosInstance.get(reviewEndpoint, {
           params: { page: currentPage.value, size: pageSize.value },
         })
         reviews.value.push(...response.data.content)
-        if (currentPage.value * pageSize.value + response.data.content.length === response.data.totalElements) {
+        if (
+          currentPage.value * pageSize.value + response.data.content.length ===
+          response.data.totalElements
+        ) {
           isAllReviewsLoaded.value = true
         }
       } catch (error) {
@@ -97,6 +116,12 @@ export default {
       }
     }
 
+    const rules = computed(() => ({
+      rating: { required, minValue: minValue(1) },
+      content: { required, minLength: minLength(10), maxLength: maxLength(300) },
+    }))
+
+    const v$ = useVuelidate(rules, newReview)
 
     const loadMoreReviews = () => {
       currentPage.value += 1
@@ -104,27 +129,30 @@ export default {
     }
 
     const submitReview = async () => {
-      if (!newReview.value.rating || !newReview.value.content.trim()) {
-        console.error('Rating and content are required.')
+      v$.value.$touch()
+      if (v$.value.$invalid) {
+        console.error('Validation failed:', v$.value.$errors)
         return
       }
+
       try {
-        const reviewEndpoint = props.reviewType === 'product'
-          ? `/reviews/products`
-          : `/reviews/farmers`;
+        const reviewEndpoint =
+          props.reviewType === 'product' ? `/reviews/products` : `/reviews/farmers`
 
         const response = await axiosInstance.post(reviewEndpoint, newReview.value)
         reviews.value.unshift(response.data)
-        newReview.value = {
-          [`${props.reviewType}Id`]: props.id,
-          rating: 0,
-          content: ''
-        }
+        isAllowedToReview.value = false
+        toast.add({
+          severity: 'success',
+          summary: 'Message Sent',
+          detail: 'Your message was sent successfully!',
+          life: 4000,
+          group: 'bc',
+        })
       } catch (error) {
         console.error('Failed to submit review:', error.message)
       }
     }
-
 
     onMounted(() => {
       fetchReviews()
@@ -138,6 +166,8 @@ export default {
       isAllReviewsLoaded,
       loadMoreReviews,
       submitReview,
+      isAllowedToReview,
+      v$,
     }
   },
 }
@@ -209,7 +239,7 @@ export default {
 }
 
 .author-name::before {
-  content: "Author: ";
+  content: 'Author: ';
   color: #333;
   font-weight: normal;
   margin-right: 5px;

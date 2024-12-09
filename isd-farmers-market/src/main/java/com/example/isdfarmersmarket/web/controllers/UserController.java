@@ -1,6 +1,6 @@
 package com.example.isdfarmersmarket.web.controllers;
 
-import com.example.isdfarmersmarket.business.services.UserServiceImpl;
+import com.example.isdfarmersmarket.business.services.interfaces.UserService;
 import com.example.isdfarmersmarket.dao.enums.SearchUserByRoleParams;
 import com.example.isdfarmersmarket.web.commands.CustomerUpgradeCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateUserCommand;
@@ -25,21 +25,21 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor
 public class UserController {
 
-    UserServiceImpl userService;
+    UserService userService;
 
     @GetMapping("/{id}")
     public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable Long id) {
-        UserProfileDTO userProfile = userService.getUserById(id);
+        UserProfileDTO userProfile = userService.getUserProfile(id);
         return ResponseEntity.ok(userProfile);
     }
 
-    @GetMapping("/search")
+    @GetMapping
     public ResponseEntity<PageResponseDTO<UserProfileDTO>> searchUsers(
-            @RequestParam(required = false) String fullName,
+            @RequestParam(required = false) String search,
             @RequestParam(required = false) SearchUserByRoleParams roleParams,
             Pageable pageable
     ) {
-        PageResponseDTO<UserProfileDTO> users = userService.searchUsers(fullName, roleParams, pageable);
+        PageResponseDTO<UserProfileDTO> users = userService.searchUsers(search, roleParams, pageable);
         return ResponseEntity.ok(users);
     }
 

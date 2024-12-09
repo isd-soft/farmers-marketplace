@@ -162,7 +162,7 @@
               </TabPanel>
 
               <TabPanel header="Reviews">
-                <CustomerReviews :id="id" :review-type="'product'" />
+                <CustomerReviews :id="id" :review-type="'product'" :canReview="product.canReview" />
               </TabPanel>
 
               <TabPanel header="Shipping">

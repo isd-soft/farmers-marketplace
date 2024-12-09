@@ -37,10 +37,11 @@ import {useRoute, useRouter} from "vue-router";
 
 const searchQ = ref('');
 let currentUser = null;
+
 const items = ref([
   { label: 'Deals' },
   { label: "What's New" },
-  { label: 'Delivery' },
+  { label: 'Delivery' , command: () => goToDeliveries() },
 ]);
 
 const accountMenu = ref([
@@ -50,9 +51,11 @@ const accountMenu = ref([
     items: [
       { label: 'Orders', icon: 'pi pi-shopping-cart', command: () => goToOrders() },
       { label: 'Messages', icon: 'pi pi-envelope', command: () => goToMessages() },
+      { label: 'Farmers Search', icon: 'pi pi-search', command: () => goToFarmersSearch()  },
       { label: 'Scheduled Orders', icon: 'pi pi-clock', command: () => goToScheduledOrders() },
       { label: 'Wishlist', icon: 'pi pi-heart', command: () => goToFavorites() },
       { label: 'Settings', icon: 'pi pi-cog', command: () => goToSettings() },
+      { label: 'Server Info', icon: 'pi pi-exclamation-triangle', command: () => goToServerInfo() },
       { label: 'Logout', icon: 'pi pi-sign-out', command: () => logout() },
     ],
   },
@@ -112,8 +115,18 @@ const goToMyProducts = () => {
   window.location.href = '/product/management';
 };
 
+function goToDeliveries() {
+  window.location.href = '/delivery';
+}
+
+function goToFarmersSearch() {
+  window.location.href = '/farmers-search';
+}
 const goToOrders = () => {
   window.location.href = '/orders';
+};
+const goToServerInfo = () => {
+  window.location.href = '/server-info';
 };
 const goToScheduledOrders = () => {
   window.location.href = '/schedule-order/management';
@@ -163,11 +176,13 @@ onMounted(() => {
 
 <style scoped>
 .navbar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: fixed;
   width: 100%;
-  height: 80px;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .menubar {

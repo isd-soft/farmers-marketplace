@@ -17,16 +17,6 @@
       </div>
 
       <div class="footer-section">
-        <h3 class="footer-title">Stay Connected</h3>
-        <div class="social-icons">
-          <a href="#" class="social-icon"><i class="pi pi-facebook"></i></a>
-          <a href="#" class="social-icon"><i class="pi pi-twitter"></i></a>
-          <a href="#" class="social-icon"><i class="pi pi-instagram"></i></a>
-          <a href="#" class="social-icon"><i class="pi pi-linkedin"></i></a>
-        </div>
-      </div>
-
-      <div class="footer-section">
         <h3 class="footer-title">Subscribe</h3>
         <div class="subscribe">
           <InputText v-model="email" placeholder="Your email address" />
@@ -56,16 +46,16 @@
   <style scoped>
  .footer {
   display: flex;
-  justify-content: center; 
+  justify-content: center;
   align-items: flex-start;
   background-color: var(--p-gray-100);
-  width: 100%; 
+  width: 100%;
   color: var(--p-gray-700);
   border-top: 1px solid var(--p-gray-300);
 }
 
 .footer-container {
-  width: 80%; 
+  width: 80%;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;

@@ -18,6 +18,12 @@ import UpdateScheduledOrder from "@/components/UpdateScheduledOrder.vue";
 import MyScheduledOrders from "@/components/MyScheduledOrders.vue";
 import ServerInfoPage from '@/components/ServerInfoPage.vue'
 import PerformancePage from '@/components/PerformancePage.vue';
+import AboutUsPage from '@/components/AboutUsPage.vue'
+import ContactUsPage from '@/components/ContactUsPage.vue'
+import FAQPage from '@/components/FAQPage.vue'
+import PrivacyPolicyPage from '@/components/PrivacyPolicyPage.vue'
+import DeliveryPage from '@/components/DeliveryPage.vue'
+import FarmersSearchPage from '@/components/FarmersSearchPage.vue'
 
 const routes = [
   {
@@ -125,6 +131,36 @@ const routes = [
     name: 'Performance',
     component: PerformancePage,
   },
+  {
+    path: '/about',
+    name: 'About Us',
+    component: AboutUsPage
+  },
+  {
+    path: '/contact',
+    name: 'Contact Us',
+    component: ContactUsPage
+  },
+  {
+    path: '/faq',
+    name: 'FAQ',
+    component: FAQPage,
+  },
+  {
+    path: '/privacy',
+    name: 'Privacy Policy',
+    component: PrivacyPolicyPage,
+  },
+  {
+    path: '/delivery',
+    name: 'Deliveries',
+    component: DeliveryPage,
+  },
+  {
+    path: '/farmers-search',
+    name: 'Farmers Search',
+    component: FarmersSearchPage,
+  }
 ]
 
 const router = createRouter({

@@ -8,7 +8,7 @@
             <li v-for="review in productReviews" :key="review.id" class="review-item">
               <Card>
                 <template #content>
-                  <Rating v-model="review.rating" :readOnly="true" :stars="5" />
+                  <Rating v-model="review.rating" readonly :stars="5" />
                   <p>{{ review.content }}</p>
                   <div class="author-name" :data-prefix="'Product:'">
                     <a :href="`/product/${review.product.id}`">
@@ -40,7 +40,7 @@
             <li v-for="review in farmerReviews" :key="review.id" class="review-item">
               <Card>
                 <template #content>
-                  <Rating v-model="review.rating" :readOnly="true" :stars="5" />
+                  <Rating v-model="review.rating" readonly :stars="5" />
                   <p>{{ review.content }}</p>
                   <div class="author-name" :data-prefix="'Farmer:'">
                     <a :href="`/id${review.farmer.id}`">
@@ -74,12 +74,15 @@ import TabPanel from "primevue/tabpanel";
 import Button from "primevue/button";
 import Rating from "primevue/rating";
 import Card from "primevue/card";
+import Toast from 'primevue/toast'
+import { useToast } from 'primevue/usetoast'
 
 export default {
   name: 'ReviewsSection',
   props: ['userId'],
 
   components: {
+    Toast,
     Card,
     Rating,
     TabView,

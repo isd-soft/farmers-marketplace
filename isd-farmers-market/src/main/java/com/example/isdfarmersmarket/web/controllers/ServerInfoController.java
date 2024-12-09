@@ -5,9 +5,11 @@ import com.example.isdfarmersmarket.dao.enums.TimeInterval;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.boot.actuate.env.EnvironmentEndpoint;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.info.InfoEndpoint;
 import org.springframework.boot.actuate.metrics.MetricsEndpoint;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,32 +27,43 @@ public class ServerInfoController {
     HealthEndpoint healthEndpoint;
     InfoEndpoint infoEndpoint;
     MetricsEndpoint metricsEndpoint;
+    Environment environment;
     RequestTracker requestTracker;
 
-//    @PreAuthorize("hasRole('ADMIN')")
-@GetMapping
-public ResponseEntity<Map<String, Object>> getServerInfo() {
-    Map<String, Object> serverInfo = new HashMap<>();
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getServerInfo() {
+        Map<String, Object> serverInfo = new HashMap<>();
 
-    serverInfo.put("Health", healthEndpoint.health().getStatus().toString());
+        serverInfo.put("Health", healthEndpoint.health().getStatus().toString());
 
-    serverInfo.put("Info", infoEndpoint.info());
+        Map<String, Object> appInfo = infoEndpoint.info();
+        if (appInfo.isEmpty()) {
+            appInfo = new HashMap<>();
+            appInfo.put("App Name", environment.getProperty("spring.application.name", "Unknown"));
+            appInfo.put("App Version", environment.getProperty("info.app.version", "Unknown"));
+            appInfo.put("Description", environment.getProperty("info.app.description", "No description provided"));
+        }
+        serverInfo.put("App Info", appInfo);
 
-    Map<String, Object> metrics = new HashMap<>();
-    metrics.put("Processors available", Runtime.getRuntime().availableProcessors());
-    metrics.put("Uptime (seconds)", metricsEndpoint.metric("process.uptime", null)
-            .getMeasurements().stream().findFirst().map(MetricsEndpoint.Sample::getValue).orElse(0.0));
-    metrics.put("Disk total (bytes)", metricsEndpoint.metric("disk.total", null)
-            .getMeasurements().stream().findFirst().map(MetricsEndpoint.Sample::getValue).orElse(0.0));
-    metrics.put("Disk free (bytes)", metricsEndpoint.metric("disk.free", null)
-            .getMeasurements().stream().findFirst().map(MetricsEndpoint.Sample::getValue).orElse(0.0));
-    metrics.put("Memory used (bytes)", Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
+        Map<String, String> javaInfo = new HashMap<>();
+        javaInfo.put("Java Version", System.getProperty("java.version"));
+        javaInfo.put("Java Vendor", System.getProperty("java.vendor"));
+        serverInfo.put("Java Info", javaInfo);
 
-    serverInfo.put("Metrics", metrics);
+        Map<String, Object> metrics = new HashMap<>();
+        metrics.put("Processors Available", Runtime.getRuntime().availableProcessors());
+        metrics.put("Uptime (seconds)", metricsEndpoint.metric("process.uptime", null)
+                .getMeasurements().stream().findFirst().map(MetricsEndpoint.Sample::getValue).orElse(0.0));
+        metrics.put("Disk Total (bytes)", metricsEndpoint.metric("disk.total", null)
+                .getMeasurements().stream().findFirst().map(MetricsEndpoint.Sample::getValue).orElse(0.0));
+        metrics.put("Disk Free (bytes)", metricsEndpoint.metric("disk.free", null)
+                .getMeasurements().stream().findFirst().map(MetricsEndpoint.Sample::getValue).orElse(0.0));
+        metrics.put("Memory Used (bytes)", Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
+        serverInfo.put("Metrics", metrics);
 
-    return ResponseEntity.ok(serverInfo);
-}
-//    @PreAuthorize("hasRole('ADMIN')")
+        return ResponseEntity.ok(serverInfo);
+    }
+
     @GetMapping("/requests")
     public ResponseEntity<Map<String, Integer>> getRequestsInfo(TimeInterval interval) {
         return ResponseEntity.ok(requestTracker.getRequestsInLastNTime(interval));

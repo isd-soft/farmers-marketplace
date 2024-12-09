@@ -3,8 +3,10 @@ package com.example.isdfarmersmarket.business.services;
 import com.example.isdfarmersmarket.business.mapper.ProductMapper;
 import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.services.interfaces.CreateReviewsService;
 import com.example.isdfarmersmarket.business.services.interfaces.ProductService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
+import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.example.isdfarmersmarket.dao.models.Category;
 import com.example.isdfarmersmarket.dao.models.Image;
 import com.example.isdfarmersmarket.dao.models.Product;
@@ -18,6 +20,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +37,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class ProductServiceImpl implements ProductService {
     ProductRepository productRepository;
     ProductMapper productMapper;
@@ -45,6 +49,7 @@ public class ProductServiceImpl implements ProductService {
     static String CATEGORY_FIND_FAILED_BY_ID = "Category with the specified id not found";
     UserRepository userRepository;
     OrderRepository orderRepository;
+    CreateReviewsService createReviewsService;
 
     @Override
     @Transactional
@@ -201,9 +206,13 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new EntityNotFoundException(PRODUCT_FIND_FAILED_BY_ID));
         ProductPageDTO productPageDTO = productMapper.mapToProductPage(product);
         if (principal != null) {
-            User user = userRepository.findById(principal.getId()).orElseThrow();
-            if (user.getWishlist().contains(product)) productPageDTO.setIsInWishlist(true);
+            User authenticatedUser = userRepository.findById(principal.getId()).orElseThrow();
+            productPageDTO.setIsInWishlist(authenticatedUser.getWishlist().contains(product));
+            productPageDTO.setCanReview(
+                    !principal.getRoles().contains(ERole.FARMER) &&
+                    createReviewsService.canReviewProduct(authenticatedUser, product));
         }
+
         return productPageDTO;
     }
 

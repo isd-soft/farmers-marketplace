@@ -2,9 +2,9 @@
   <div class="server-info-page">
     <Header class="navbar"></Header>
     <div class="server-info" v-if="serverInfo">
-    <h1 class="page-title">Server Information</h1>
-      <h2 class="section-title">General Information</h2>
+      <h1 class="page-title">Server Information</h1>
       <div class="info-card">
+        <h2 class="section-title">General Information</h2>
         <div v-for="(value, key) in serverInfo" :key="key" class="info-item">
           <span class="info-key">{{ key }}:</span>
           <span class="info-value">
@@ -27,69 +27,78 @@
           </span>
         </div>
       </div>
-    </div>
 
-    <!-- Requests Info Section -->
-    <div class="requests-info">
-      <h2 class="section-title">Number of Requests statistics</h2>
-      <Dropdown
-        v-model="selectedInterval"
-        :options="timeIntervals"
-        optionLabel="label"
-        class="p-mb-3"
-        placeholder="Select Time Interval"
-        @change="fetchRequestsInfo"
+      <div class="requests-info">
+        <h2 class="section-title">Number of Requests statistics</h2>
+        <Dropdown
+          v-model="selectedInterval"
+          :options="timeIntervals"
+          optionLabel="label"
+          class="p-mb-3"
+          placeholder="Select Time Interval"
+          @change="fetchRequestsInfo"
+        />
+        <table v-if="requestsInfo" class="info-table">
+          <thead>
+            <tr>
+              <th>Handler</th>
+              <th>Number of Requests</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(value, key) in requestsInfo" :key="key">
+              <td>{{ key }}</td>
+              <td>
+                <!-- Handle nested arrays or objects for requestsInfo -->
+                <template v-if="isObjectOrArray(value)">
+                  <div v-if="Array.isArray(value)">
+                    <ul class="value-list">
+                      <li v-for="(item, index) in value" :key="index">{{ item }}</li>
+                    </ul>
+                  </div>
+                  <div v-else>
+                    <div v-for="(subValue, subKey) in value" :key="subKey" class="nested-item">
+                      <span class="info-subkey">{{ subKey }}:</span> {{ subValue }}
+                    </div>
+                  </div>
+                </template>
+                <template v-else>
+                  {{ value }}
+                </template>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div v-else
+         style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+      <ProgressSpinner
+        style="width: 12rem; height: 12rem;"
+        strokeWidth="0.2rem"
+        animationDuration="0.8s"
       />
-      <table v-if="requestsInfo" class="info-table">
-        <thead>
-        <tr>
-          <th>Handler</th>
-          <th>Number of Requests</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr v-for="(value, key) in requestsInfo" :key="key">
-          <td>{{ key }}</td>
-          <td>
-            <!-- Handle nested arrays or objects for requestsInfo -->
-            <template v-if="isObjectOrArray(value)">
-              <div v-if="Array.isArray(value)">
-                <ul class="value-list">
-                  <li v-for="(item, index) in value" :key="index">{{ item }}</li>
-                </ul>
-              </div>
-              <div v-else>
-                <div v-for="(subValue, subKey) in value" :key="subKey" class="nested-item">
-                  <span class="info-subkey">{{ subKey }}:</span> {{ subValue }}
-                </div>
-              </div>
-            </template>
-            <template v-else>
-              {{ value }}
-            </template>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-      <Footer class="footer"></Footer>
-
     </div>
+
+
+    <Footer class="footer"></Footer>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import Dropdown from 'primevue/dropdown';
-import axiosInstance from '@/utils/axiosInstance.js';
-import Header from "@/components/Header.vue";
-import Footer from "@/components/Footer.vue";
+import { ref, onMounted } from 'vue'
+import Dropdown from 'primevue/dropdown'
+import axiosInstance from '@/utils/axiosInstance.js'
+import Header from '@/components/Header.vue'
+import Footer from '@/components/Footer.vue'
+import ProgressSpinner from 'primevue/progressspinner'
 
 export default {
-  components: {Footer, Header, Dropdown },
+  components: { ProgressSpinner, Footer, Header, Dropdown },
   setup() {
-    const serverInfo = ref(null);
-    const requestsInfo = ref(null);
-    const selectedInterval = ref(null);
+    const serverInfo = ref(null)
+    const requestsInfo = ref(null)
+    const selectedInterval = ref(null)
 
     // Time intervals matching the enum in the backend
     const timeIntervals = ref([
@@ -99,38 +108,38 @@ export default {
       { label: '5 Seconds', value: 'SECONDS_5' },
       { label: '24 Hours', value: 'HOURS_24' },
       { label: 'Reset Interval', value: 'RESET_INTERVAL' },
-    ]);
+    ])
 
     const fetchServerInfo = async () => {
       try {
-        const response = await axiosInstance.get('/server-info');
-        serverInfo.value = response.data;
+        const response = await axiosInstance.get('/server-info')
+        serverInfo.value = response.data
       } catch (error) {
-        console.error('Error fetching server info:', error);
+        console.error('Error fetching server info:', error)
       }
-    };
+    }
 
     const fetchRequestsInfo = async () => {
       if (!selectedInterval.value) {
-        return;
+        return
       }
       try {
         const response = await axiosInstance.get(`/server-info/requests`, {
           params: { interval: selectedInterval.value.value },
-        });
-        requestsInfo.value = response.data;
+        })
+        requestsInfo.value = response.data
       } catch (error) {
-        console.error('Error fetching requests info:', error);
+        console.error('Error fetching requests info:', error)
       }
-    };
+    }
 
     const isObjectOrArray = (value) => {
-      return value && (typeof value === 'object' || Array.isArray(value));
-    };
+      return value && (typeof value === 'object' || Array.isArray(value))
+    }
 
     onMounted(() => {
-      fetchServerInfo();
-    });
+      fetchServerInfo()
+    })
 
     return {
       serverInfo,
@@ -139,9 +148,9 @@ export default {
       timeIntervals,
       fetchRequestsInfo,
       isObjectOrArray,
-    };
+    }
   },
-};
+}
 </script>
 
 <style scoped>
@@ -150,10 +159,15 @@ export default {
   flex-direction: column;
   min-height: 100vh;
   overflow-x: hidden;
-  width: 70%;
+  width: 100%;
   height: max-content;
 }
-.footer {
+.server-info {
+  margin: 12em;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
 }
 
 .page-title {
@@ -183,7 +197,7 @@ export default {
 
 .info-item {
   display: flex;
-  flex-wrap: wrap; /* Allows wrapping when necessary */
+  flex-wrap: wrap;
   justify-content: space-between;
   margin: 1.2rem 0;
   font-size: 1.2rem;
@@ -192,14 +206,14 @@ export default {
 .info-key {
   font-weight: bold;
   color: #555;
-  min-width: 150px; /* Prevents the key from being too narrow */
+  min-width: 150px;
 }
 
 .info-value {
   color: #777;
   font-size: 1.2rem;
-  flex-grow: 1; /* Makes the value flexible and prevent it from pushing too far right */
-  padding-left: 15px; /* Ensures some spacing between key and value */
+  flex-grow: 1;
+  padding-left: 15px;
 }
 
 .value-list {
@@ -209,7 +223,7 @@ export default {
 }
 
 .value-list li {
-  padding-left: 15px; /* Adjust padding to align list items correctly */
+  padding-left: 15px;
 }
 
 .nested-item {
@@ -227,6 +241,7 @@ export default {
 
 .requests-info {
   margin-top: 2.5rem;
+  justify-content: flex-start;
 }
 
 .info-table {
@@ -331,5 +346,4 @@ export default {
     font-size: 1rem;
   }
 }
-
 </style>
