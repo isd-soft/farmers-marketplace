@@ -701,6 +701,10 @@ const addProductsToOrder = async () => {
     font-size: 0.7rem;
     max-width: 58vw;
   }
+  .product-image {
+    width: 100%;
+    height: 15vh;
+  }
 
   .product-price-quantity-container {
     display: flex;
@@ -710,10 +714,6 @@ const addProductsToOrder = async () => {
     min-width: 100%;
   }
 
-  .product-image {
-    width: 100%;
-    height: 15vh;
-  }
   .quantity-trash-container {
     display: flex;
     flex-direction: column;

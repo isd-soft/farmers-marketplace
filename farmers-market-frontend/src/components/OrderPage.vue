@@ -30,7 +30,6 @@
               <template #list="slotProps">
                 <div class="flex flex-col order-container">
                   <div v-for="order in orders" :key="order.id">
-                    <p>{{ order.orderStatus }}</p>
                     <div
                       class="flex flex-col sm:flex-row sm:items-center p-6 gap-4 product-container"
                     >
@@ -52,40 +51,52 @@
                             <div class="first-product-content-section">
                               <h3 class="product-title-text">{{ product.productTitle }}</h3>
                               <p class="product-description">{{ product.productDescription }}</p>
-                              <p class="product-quantity-type">{{ product.quantity }} {{ product.unitTypeShort }}</p>
+                              <p class="product-quantity-type">
+                                {{ product.quantity }} {{ product.unitTypeShort }}
+                              </p>
                             </div>
                           </div>
                           <div class="second-product-content-section">
                             <p>Order Created On:</p>
-                            <p class="order-date-text">{{formatOrderDate(order.createdDate) }}</p>
+                            <p class="order-date-text">{{ formatOrderDate(order.createdDate) }}</p>
+                            <div class="order-status-text-container">
+                              <p>Order Status:</p>
+                              <p class="order-date-text">{{ order.orderStatus }}</p>
+                            </div>
                           </div>
 
                           <i
                             :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
                             class="icons"
                             @click.stop="toggleWishlist(product)"
-                            :title="product.isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'"
+                            :title="
+                              product.isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'
+                            "
                           />
-
                         </div>
                       </div>
-                        <div class="flex flex-col md:items-end gap-8 buttons-price-container">
-                          <span class="text-xl font-semibold price-text"
-                            >{{ order.totalPrice }} MDL</span>
-                            <Button
-                              v-if="order.orderStatus!=='DELIVERED' && order.orderStatus!=='CANCELLED'&& order.orderStatus!=='PENDING'"
-                              icon="pi pi-check"
-                              label="Order Recieved"
-                              @click="orderDelivered(order)"
-                              class="flex-auto md:flex-initial whitespace-nowrap update-button"
-                            ></Button>
-                          <Button
-                            v-if="order.orderStatus==='DELIVERED'"
-                            label="Leave a comment"
-                            @click="leaveComment(order)"
-                            class="flex-auto md:flex-initial whitespace-nowrap update-button"
-                          ></Button>
-                        </div>
+                      <div class="flex flex-col md:items-end gap-8 buttons-price-container">
+                        <span class="text-xl font-semibold price-text"
+                          >{{ order.totalPrice }} MDL</span
+                        >
+                        <Button
+                          v-if="
+                            order.orderStatus !== 'DELIVERED' &&
+                            order.orderStatus !== 'CANCELLED' &&
+                            order.orderStatus !== 'PENDING'
+                          "
+                          icon="pi pi-check"
+                          label="Order Recieved"
+                          @click="orderDelivered(order)"
+                          class="flex-auto md:flex-initial whitespace-nowrap update-button"
+                        ></Button>
+                        <Button
+                          v-if="order.orderStatus === 'DELIVERED'"
+                          label="Leave a comment"
+                          @click="leaveComment(order)"
+                          class="flex-auto md:flex-initial whitespace-nowrap update-button"
+                        ></Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -116,8 +127,8 @@ import Button from 'primevue/button'
 import Select from 'primevue/select'
 import 'primeicons/primeicons.css'
 import Rating from 'primevue/rating'
-import Paginator from 'primevue/paginator';
-import router from "@/router/index.js";
+import Paginator from 'primevue/paginator'
+import router from '@/router/index.js'
 
 export default {
   name: 'SearchProducts',
@@ -131,197 +142,180 @@ export default {
     Paginator,
     Rating,
   },
-setup() {
-  const statuses = ref([
-    {id: null, type:null, name: "All", icon: "pi pi-list"},
-    {id: 1, type:"PENDING", name: "Pending", icon: "pi pi-ellipsis-h"},
-    {id: 2, type:"CONFIRMED", name: "Confirmed", icon: "pi pi-verified"},
-    {id: 3, type:"INPROGRESS", name: "In Progress", icon: "pi pi-spinner-dotted"},
-    {id: 4, type:"SHIPPED", name: "Shipped", icon: "pi pi-send"},
-    {id: 5, type:"DELIVERED", name: "Delivered", icon: "pi pi-box"},
-    {id: 6, type:"CANCELLED", name: "Cancelled", icon: "pi pi-times"},
-  ]);
+  setup() {
+    const statuses = ref([
+      { id: null, type: null, name: 'All', icon: 'pi pi-list' },
+      { id: 1, type: 'PENDING', name: 'Pending', icon: 'pi pi-ellipsis-h' },
+      { id: 2, type: 'CONFIRMED', name: 'Confirmed', icon: 'pi pi-verified' },
+      { id: 3, type: 'INPROGRESS', name: 'In Progress', icon: 'pi pi-spinner-dotted' },
+      { id: 4, type: 'SHIPPED', name: 'Shipped', icon: 'pi pi-send' },
+      { id: 5, type: 'DELIVERED', name: 'Delivered', icon: 'pi pi-box' },
+      { id: 6, type: 'CANCELLED', name: 'Cancelled', icon: 'pi pi-times' },
+    ])
 
+    const orders = ref([])
+    const currentPage = ref(0)
+    const selectedStatus = ref(null)
+    const pageSize = ref(3)
+    const totalRecords = ref(0)
+    const sortOptions = ref([
+      { label: 'Sort by', value: null },
+      { label: 'Price Asc', value: 'price_asc' },
+      { label: 'Price Desc', value: 'price_desc' },
+      { label: 'Old to new', value: 'date_asc' },
+      { label: 'New to old', value: 'date_desc' },
+    ])
+    const sortBy = ref('')
+    const isHovered = ref(false)
+    const modelValue = ref(4.5)
+    const intPart = computed(() => Math.floor(modelValue.value))
+    const decimalPart = computed(() => modelValue.value - Math.floor(modelValue.value))
+    const isPartial = computed(() => decimalPart.value !== 0)
+    const full = computed(() => `${decimalPart.value * 100}%`)
 
-  const orders = ref([])
-  const currentPage = ref(0);
-  const selectedStatus = ref(null);
-  const pageSize = ref(3);
-  const totalRecords = ref(0);
-  const sortOptions = ref([
-    {label: "Sort by", value: null},
-    {label: "Price Asc", value: "price_asc"},
-    {label: "Price Desc", value: "price_desc"},
-    {label: "Old to new", value: "date_asc"},
-    {label: "New to old", value: "date_desc"},
-  ]);
-  const sortBy = ref("")
-  const isHovered = ref(false)
-  const modelValue = ref(4.5)
-  const intPart = computed(() => Math.floor(modelValue.value))
-  const decimalPart = computed(() => modelValue.value - Math.floor(modelValue.value))
-  const isPartial = computed(() => decimalPart.value !== 0)
-  const full = computed(() => `${decimalPart.value * 100}%`)
-
-//   const isHovered = ref(false)
-
-// const modelValue = ref(4.5)
-// const intPart = computed(() => Math.floor(modelValue.value))
-// const decimalPart = computed(() => modelValue.value - Math.floor(modelValue.value))
-// const isPartial = computed(() => decimalPart.value !== 0)
-// const full = computed(() => `${decimalPart.value * 100}%`)
-
-
-function toastAdd(severity, summary, detail, life = 2000) {
-  toast.add({
-    severity: severity,
-    summary: summary,
-    detail: detail,
-    life: life,
-  })
-}
-
-
-function formatOrderDate(dateString) {
-  const options = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }
-  return new Date(dateString).toLocaleDateString(undefined, options)
-}
-
-
-
-const getSeverity = (product) => {
-  switch (product.inventoryStatus) {
-    case 'INSTOCK':
-      return 'success'
-    case 'LOWSTOCK':
-      return 'warn'
-    case 'OUTOFSTOCK':
-      return 'danger'
-    default:
-      return null
-  }
-}
-
-
-  const setStatusFilter = (status) => {
-    selectedStatus.value = status;
-    fetchOrders();
-  };
-
-
-function getBase64Image(base64String, imageType = 'jpeg') {
-  return `data:image/${imageType};base64,${base64String}`
-}
-
-const leaveComment = async (order) =>{
-  await router.push(`/id${order.farmer.id}`);
-}
-  const toggleWishlist = async (itemInCart) => {
-    if (!itemInCart) return;
-    try {
-      if (itemInCart.isInWishlist) {
-        await axiosInstance.delete(`/wishlist/${itemInCart.productId}`);
-        orders.value.forEach((order) => {
-          order.itemsInOrder.forEach((item) => {
-            if (item.productId === itemInCart.productId) {
-              item.isInWishlist = false;
-            }
-          });
-        });
-      } else {
-        await axiosInstance.post(`/wishlist/${itemInCart.productId}`);
-        orders.value.forEach((order) => {
-          order.itemsInOrder.forEach((item) => {
-            if (item.productId === itemInCart.productId) {
-              item.isInWishlist = true;
-            }
-          });
-        });
-      }
-    } catch (error) {
-      console.error(
-        `Failed to ${
-          itemInCart.isInWishlist ? "remove" : "add"
-        } product to/from wishlist:`,
-        error.message
-      );
+    function toastAdd(severity, summary, detail, life = 2000) {
+      toast.add({
+        severity: severity,
+        summary: summary,
+        detail: detail,
+        life: life,
+      })
     }
-  };
- const onPageChange = (event) => {
-    currentPage.value = event.page;
-    fetchOrders();
-  }
-  const orderDelivered = async (order) => {
-    const response = await axiosInstance.put(`/order/receive/${order.id}`)
-    order.orderStatus = response.data.orderStatus
-  }
-  const fetchOrders = async () => {
-    let sort = "createdDate";
-    let dir = "DESC";
-    try {
-      switch (sortBy.value.value) {
-        case "price_asc":
-          sort = "totalPrice"
-          dir = "ASC"
-          break;
-        case "price_desc":
-          sort = "totalPrice"
-          dir = "DESC"
-          break;
-        case "date_asc":
-          sort = "createdDate"
-          dir = "ASC"
-          break;
-        case "date_desc":
-          sort = "createdDate"
-          dir = "DESC"
-          break;
+
+    function formatOrderDate(dateString) {
+      const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
       }
-      let url = `/order/management?`;
-      if (selectedStatus.value) {
-        url += `status=${selectedStatus.value}`;
-      }
-      url +=`&page=${currentPage.value}&size=${pageSize.value}&sort=${sort},${dir}`
-      const response = await axiosInstance.get(url);
-      console.log(response)
-      orders.value = response.data.content;
-      totalRecords.value = response.data.totalElements;
-    } catch (error) {
+      return new Date(dateString).toLocaleDateString(undefined, options)
     }
-  }
-  onMounted(() => {
-    fetchOrders()
-  });
-  return {
-    orders,
-    toastAdd,
-    onPageChange,
-    formatOrderDate,
-    pageSize,
-    totalRecords,
-    currentPage,
-    sortOptions,
-    sortBy,
-    selectedStatus,
-    fetchOrders,
-    statuses,
-    setStatusFilter,
-    getBase64Image,
-    isHovered,
-    full,
-    getSeverity,
-    toggleWishlist,
-    intPart,
-    orderDelivered,
-    leaveComment,
-  }
-}}
+
+    const getSeverity = (product) => {
+      switch (product.inventoryStatus) {
+        case 'INSTOCK':
+          return 'success'
+        case 'LOWSTOCK':
+          return 'warn'
+        case 'OUTOFSTOCK':
+          return 'danger'
+        default:
+          return null
+      }
+    }
+
+    const setStatusFilter = (status) => {
+      selectedStatus.value = status
+      fetchOrders()
+    }
+
+    function getBase64Image(base64String, imageType = 'jpeg') {
+      return `data:image/${imageType};base64,${base64String}`
+    }
+
+    const leaveComment = async (order) => {
+      await router.push(`/id${order.farmer.id}`)
+    }
+    const toggleWishlist = async (itemInCart) => {
+      if (!itemInCart) return
+      try {
+        if (itemInCart.isInWishlist) {
+          await axiosInstance.delete(`/wishlist/${itemInCart.productId}`)
+          orders.value.forEach((order) => {
+            order.itemsInOrder.forEach((item) => {
+              if (item.productId === itemInCart.productId) {
+                item.isInWishlist = false
+              }
+            })
+          })
+        } else {
+          await axiosInstance.post(`/wishlist/${itemInCart.productId}`)
+          orders.value.forEach((order) => {
+            order.itemsInOrder.forEach((item) => {
+              if (item.productId === itemInCart.productId) {
+                item.isInWishlist = true
+              }
+            })
+          })
+        }
+      } catch (error) {
+        console.error(
+          `Failed to ${itemInCart.isInWishlist ? 'remove' : 'add'} product to/from wishlist:`,
+          error.message,
+        )
+      }
+    }
+    const onPageChange = (event) => {
+      currentPage.value = event.page
+      fetchOrders()
+    }
+    const orderDelivered = async (order) => {
+      const response = await axiosInstance.put(`/order/receive/${order.id}`)
+      order.orderStatus = response.data.orderStatus
+    }
+    const fetchOrders = async () => {
+      let sort = 'createdDate'
+      let dir = 'DESC'
+      try {
+        switch (sortBy.value.value) {
+          case 'price_asc':
+            sort = 'totalPrice'
+            dir = 'ASC'
+            break
+          case 'price_desc':
+            sort = 'totalPrice'
+            dir = 'DESC'
+            break
+          case 'date_asc':
+            sort = 'createdDate'
+            dir = 'ASC'
+            break
+          case 'date_desc':
+            sort = 'createdDate'
+            dir = 'DESC'
+            break
+        }
+        let url = `/order/management?`
+        if (selectedStatus.value) {
+          url += `status=${selectedStatus.value}`
+        }
+        url += `&page=${currentPage.value}&size=${pageSize.value}&sort=${sort},${dir}`
+        const response = await axiosInstance.get(url)
+        console.log(response)
+        orders.value = response.data.content
+        totalRecords.value = response.data.totalElements
+      } catch (error) {}
+    }
+    onMounted(() => {
+      fetchOrders()
+    })
+    return {
+      orders,
+      toastAdd,
+      onPageChange,
+      formatOrderDate,
+      pageSize,
+      totalRecords,
+      currentPage,
+      sortOptions,
+      sortBy,
+      selectedStatus,
+      fetchOrders,
+      statuses,
+      setStatusFilter,
+      getBase64Image,
+      isHovered,
+      full,
+      getSeverity,
+      toggleWishlist,
+      intPart,
+      orderDelivered,
+      leaveComment,
+    }
+  },
+}
 </script>
 
 <style scoped>
@@ -398,7 +392,7 @@ const leaveComment = async (order) =>{
   border-radius: 10px;
   min-width: 100px;
 }
-.product-quantity-type{
+.product-quantity-type {
   font-size: 0.9rem;
   font-weight: 600;
 }
@@ -407,17 +401,24 @@ const leaveComment = async (order) =>{
   flex-direction: column;
   justify-content: space-between;
 }
-.first-product-content-section{
+.first-product-content-section {
   width: 15vw;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
-.second-product-content-section{
+.second-product-content-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1vh;
   width: 15vw;
 }
-.order-date-text{
+.order-date-text {
   font-weight: 600;
+}
+.order-status-text-container {
+  display: flex;
+  gap: 1vw;
 }
 .product-title-text {
   font-size: 1.5rem;
@@ -438,7 +439,6 @@ const leaveComment = async (order) =>{
 .product-container {
   display: flex;
   flex-direction: column;
-  /* justify-content: flex-end; */
   gap: 2vh;
   padding: 3vh 3vh;
   border-radius: 15px;
@@ -450,30 +450,12 @@ const leaveComment = async (order) =>{
   justify-content: space-between;
   width: 100%;
 }
-/* .heart-button {
-  border: none;
-  background: transparent;
-}
-
-.heart-button .pi {
-  font-size: 1.5rem;
-  color: #ff6b6b;
-}
-
-.heart-button.heart-selected .pi {
-  color: #ff0000;
-}
-
-.heart-button:hover .pi {
-  color: #ff4040;
-} */
 .order-container {
   margin-top: 2vh;
   display: flex;
   flex-direction: column;
   gap: 4vh;
 }
-
 .price-text {
   font-size: 1.5rem;
   font-weight: 600;
@@ -512,9 +494,86 @@ const leaveComment = async (order) =>{
   margin: 0;
   padding-top: 20px;
 }
-.icons{
+.icons {
   font-size: 20px;
   cursor: pointer;
   color: #179739;
+}
+
+@media (max-width: 620px) {
+  .main-container {
+    width: 100%;
+  }
+  .main-orders-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    width: 100%;
+  }
+  .orders-container {
+    width: 100%;
+    padding: 7vw;
+  }
+  .order-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4vh;
+  }
+  .order-status-fitering-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 2vh 6vw;
+  }
+  .product-content {
+    max-width: 100%;
+  }
+  .product-container {
+    padding: 2vw;
+  }
+  .product-image {
+    width: 100%;
+    height: 15vh;
+  }
+  .product-image-title-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .product-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+  }
+  .product-content * {
+    min-width: 200px;
+  }
+  .buttons-price-container {
+    display: flex;
+    flex-direction: column;
+  }
+  .title-description-rating-container{
+    width: 100%;
+  }
+  .first-product-content-section {
+    width: 100%; 
+  }
+  .order-status-text-container *{
+    width: min-content;
+  }
+  .order-status-text-container{
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .product-description {
+    min-width: 200px;
+    font-size: 0.9rem; 
+    height: auto; 
+    overflow: visible; 
+    -webkit-line-clamp: unset; 
+  }
 }
 </style>
