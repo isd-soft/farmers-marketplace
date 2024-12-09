@@ -66,7 +66,7 @@ public class OrderServiceImpl implements OrderService {
             Order order = new Order(user, userRepository.findById(farmerId)
                     .orElseThrow(() -> new EntityNotFoundException(farmerId, Order.class)),
                     OrderStatus.PENDING,
-                    deliveryTypeRepository.findByFarmerIdAndType(farmerId, DeliveryTypes.valueOf(createOrderCommand.getDeliveryTypeFarmer()))
+                    deliveryTypeRepository.findByFarmerIdAndType(farmerId,createOrderCommand.getDeliveryTypeFarmer())
                             .orElseThrow(() -> new EntityNotFoundException(farmerId, DeliveryTypes.class)),
                     createOrderCommand.getTotalPriceOfDelivery(),
                     createOrderCommand.getTotalPriceOfProducts(),

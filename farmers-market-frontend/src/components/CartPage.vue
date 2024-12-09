@@ -105,10 +105,43 @@
                 @change="onDeliveryTypeChange"
               />
             </div>
+            <div class="payment-input-container">
+              <InputGroup class="input-group">
+                <label for="text" class="font-bold block mb-2">First Name</label>
+                <InputText v-model="firstName" placeholder="John" />
+              </InputGroup>
+
+              <InputGroup class="input-group">
+                <label for="text" class="font-bold block mb-2"> Last Name </label>
+                <InputText v-model="lastName" placeholder="Doe" />
+              </InputGroup>
+
+              <InputGroup class="input-group">
+                <label for="text" class="font-bold block mb-2"> Card Number </label>
+                <InputNumber
+                  class="input"
+                  inputId="withoutgrouping" 
+                  :useGrouping="false"
+                  v-model="cardNumber"
+                  placeholder="5574-6698-8877-7699"
+                  required
+                />
+              </InputGroup>
+
+              <InputGroup class="input-group">
+                <label for="text" class="font-bold block mb-2"> CVV </label>
+                <InputNumber class="input" v-model="cvv" placeholder="***" required />
+              </InputGroup>
+
+              <InputGroup class="input-group">
+                <label for="text" class="font-bold block mb-2"> Valid Until </label>
+                <DatePicker class="input" v-model="validUntil" placeholder="10/05" required />
+              </InputGroup>
+            </div>
 
             <div class="all-cart-price-container">
               <h3 class="total-price-text">Total</h3>
-              <p class="total-price-value"> {{ cart.totalPrice }} MDL</p>
+              <p class="total-price-value">{{ totalCartPrice }} MDL</p>
             </div>
 
             <div class="card flex justify-center">
@@ -147,7 +180,7 @@ import { isLoggedIn } from '@/shared/authState.js'
 import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
 import Select from 'primevue/select'
-
+import DatePicker from 'primevue/datepicker'
 
 const cart = ref([])
 const cartProducts = ref([])
@@ -157,6 +190,23 @@ let totalPrice = ref(0)
 let buttonBuyFor = ref('Buy for')
 const selectedDeliveryType = ref(null)
 const deliveryTypeValues = ref([])
+const firstName = ref('')
+const lastName = ref('')
+const cardNumber = ref(null)
+const cvv = ref(null)
+const validUntil = ref(null)
+
+const totalCartPrice = computed(() => {
+  const productTotal = cartProducts.value.reduce((total, product) => {
+    if (!isOutOfStock(product)) {
+      total += (product.pricePerUnit * product.quantity * (1 - product.discountPercents / 100));
+    }
+    return total;
+  }, 0);
+  const totalWithDelivery = (productTotal + cart.value.totalPriceOfDelivery).toFixed(2);
+  return totalWithDelivery;
+});
+
 
 function toastAdd(severity, summary, detail, life = 2000) {
   toast.add({
@@ -262,7 +312,7 @@ const fetchCartItems = async (deliveryType) => {
 
     cart.value = response.data
     cartProducts.value = response.data.itemInCartDTOS || []
-    console.log('Cart Response:', cart.value.totalPrice)
+    console.log('Cart Response:', cart.value)
   } catch (error) {
     console.error('Failed to fetch Cart Products', error)
   }
@@ -306,6 +356,11 @@ const removeItemFromCart = async (id) => {
 const addProductsToOrder = async () => {
   const outOfStockProducts = cartProducts.value.filter((product) => isOutOfStock(product))
 
+  if (cartProducts.value.length === 0) {
+    toastAdd('error', 'Empty Cart', 'Your cart is empty. Add items before proceeding.')
+    return
+  }
+
   if (outOfStockProducts.length > 0) {
     toastAdd(
       'error',
@@ -315,9 +370,28 @@ const addProductsToOrder = async () => {
     return
   }
 
-  if (cartProducts.value.length === 0) {
-    toastAdd('error', 'Empty Cart', 'Your cart is empty. Add items before proceeding.')
+  if (!cardNumber.value || !cvv.value || !validUntil.value) {
+    toastAdd(
+      'error',
+      'Incomplete Information',
+      'Please fill in all the required payment details before proceeding.',
+    )
+    let inputGroups = document.getElementsByClassName('input-group')
+    for (let inputGroup of inputGroups) {
+      let input = inputGroup.querySelector('.input')
+      if (input && (input.value === '' || input.value == null)) {
+        input.classList.add('highlight-error') 
+      }
+    }
     return
+  }
+
+  let inputGroups = document.getElementsByClassName('input-group')
+  for (let inputGroup of inputGroups) {
+    let input = inputGroup.querySelector('.input')
+    if (input && input.value) {
+      input.classList.remove('highlight-error')
+    }
   }
 
   loginValidation()
@@ -344,6 +418,7 @@ const addProductsToOrder = async () => {
     )
   }
 }
+
 </script>
 
 <style scoped>
@@ -395,7 +470,7 @@ const addProductsToOrder = async () => {
 }
 .cart-pay-container {
   position: relative;
-  width: 30%;
+  width: 50%;
   display: flex;
   flex-direction: column;
   gap: 2.5vh;
@@ -411,12 +486,13 @@ const addProductsToOrder = async () => {
   font-weight: 700;
   font-size: 1.2rem;
 }
-.delivery-type-container{
+.delivery-type-container {
   display: flex;
   justify-content: space-between;
 }
-.delivery-type-select{
-  max-width: 10vw;
+.delivery-type-select {
+  width: 12vw;
+  min-width: 7vw;
 }
 .total-price-text {
   font-size: 1.2rem;
@@ -424,6 +500,16 @@ const addProductsToOrder = async () => {
 .button-buy-for {
   width: 100%;
   font-size: 1.1rem;
+}
+.payment-input-container {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 1vw;
+  row-gap: 2vh;
+}
+.input-group {
+  display: flex;
+  flex-direction: column;
 }
 /* PAYMENT */
 .payment-methods-container {
@@ -571,6 +657,10 @@ const addProductsToOrder = async () => {
 }
 .pi-trash:hover {
   color: rgb(186, 0, 0);
+}
+.highlight-error {
+  border: 2px solid red;
+  border-radius: 8px;
 }
 
 .footer {
