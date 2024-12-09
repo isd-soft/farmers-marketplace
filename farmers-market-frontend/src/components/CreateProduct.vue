@@ -54,7 +54,7 @@
         Product unit type is required</span>
 
       <FloatLabel variant="on">
-        <InputNumberв
+        <InputNumber
           id="product-price"
           v-model="product.pricePerUnit"
           class="create-product-input"
