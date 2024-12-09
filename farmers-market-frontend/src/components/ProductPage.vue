@@ -7,8 +7,9 @@
         top: '10vh',
         width: 'auto',
         margin: '0 auto',
-        maxWidth: '100%',
+        maxWidth: '80%',
       }"
+      style="box-shadow: none; border-radius: 0"
     >
       <template #content>
         <div v-if="isLoading" class="loading-container">

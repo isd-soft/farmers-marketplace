@@ -1,16 +1,17 @@
 package com.example.isdfarmersmarket.business.services;
 
+import com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException;
 import com.example.isdfarmersmarket.business.mapper.PlannedOrderMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.interfaces.PlannedOrderService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
+import com.example.isdfarmersmarket.dao.enums.DeliveryTypes;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
 import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
 import com.example.isdfarmersmarket.web.commands.ScheduleOrderCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateScheduledOrderCommand;
 import com.example.isdfarmersmarket.web.dto.PlannedOrderDTO;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -39,19 +40,26 @@ public class PlannedOrderServiceImpl implements PlannedOrderService {
     UserRepository userRepository;
     PlannedOrderMapper plannedOrderMapper;
     ProductRepository productRepository;
+    private final DeliveryTypeRepository deliveryTypeRepository;
+    private final DeliveryTypeService deliveryTypeService;
 
     @Override
     @Transactional
     public PlannedOrderDTO scheduleOrder(ScheduleOrderCommand scheduleOrderCommand) {
         JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User customer = userRepository.findById(principal.getId()).orElse(null);
+        Product product = productRepository.findById(scheduleOrderCommand.getProductId()).orElse(null);
+        Long farmerId = product.getFarmer().getId();
 
         PlannedOrder plannedOrder = new PlannedOrder();
         plannedOrder.setCustomer(customer);
-        plannedOrder.setProduct(productRepository.findById(scheduleOrderCommand.getProductId()).orElse(null));
+        plannedOrder.setProduct(product);
         plannedOrder.setQuantity(scheduleOrderCommand.getQuantity());
         plannedOrder.setDayOfWeek(scheduleOrderCommand.getDayOfWeek());
         plannedOrder.setTime(scheduleOrderCommand.getTime());
+        plannedOrder.setDeliveryTypeFarmer(deliveryTypeRepository
+                .findByFarmerIdAndType(farmerId, scheduleOrderCommand.getDeliveryType())
+                .orElseThrow(() -> new EntityNotFoundException(farmerId, DeliveryTypes.class)));
 
         plannedOrderRepository.save(plannedOrder);
 
@@ -65,9 +73,13 @@ public class PlannedOrderServiceImpl implements PlannedOrderService {
         }
         PlannedOrder plannedOrder = plannedOrderRepository.findById(id).orElse(null);
         assert plannedOrder != null;
+        Long farmerId = plannedOrder.getProduct().getFarmer().getId();
         plannedOrder.setQuantity(updateScheduledOrderCommand.getQuantity());
         plannedOrder.setDayOfWeek(updateScheduledOrderCommand.getDayOfWeek());
         plannedOrder.setTime(updateScheduledOrderCommand.getTime());
+        plannedOrder.setDeliveryTypeFarmer(deliveryTypeRepository
+                .findByFarmerIdAndType(farmerId, updateScheduledOrderCommand.getDeliveryType())
+                .orElseThrow(() -> new EntityNotFoundException(farmerId, DeliveryTypes.class)));
 
         plannedOrderRepository.save(plannedOrder);
 
@@ -81,7 +93,7 @@ public class PlannedOrderServiceImpl implements PlannedOrderService {
             throw new AccessDeniedException("You are not the owner of this order");
         }
         PlannedOrder plannedOrder = plannedOrderRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new EntityNotFoundException(id, PlannedOrder.class));
         plannedOrder.setActive(state);
         plannedOrderRepository.save(plannedOrder);
         return plannedOrderMapper.map(plannedOrder);
@@ -93,7 +105,7 @@ public class PlannedOrderServiceImpl implements PlannedOrderService {
             throw new AccessDeniedException("You are not the owner of this order");
         }
         PlannedOrder plannedOrder = plannedOrderRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new EntityNotFoundException(id, PlannedOrder.class));
         plannedOrderRepository.delete(plannedOrder);
         return plannedOrderMapper.map(plannedOrder);
     }
@@ -104,7 +116,12 @@ public class PlannedOrderServiceImpl implements PlannedOrderService {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         User currentUser = userRepository.findById( principal.getId()).orElse(null);
         List<PlannedOrder> plannedOrders = plannedOrderRepository.findPlannedOrdersByCustomer(currentUser);
-        return plannedOrderMapper.mapToPlannedOrders(plannedOrders);
+        List<PlannedOrderDTO> plannedOrderDTOS = plannedOrderMapper.mapToPlannedOrders(plannedOrders);
+        plannedOrderDTOS.forEach(plannedOrderDTO -> {
+            plannedOrderDTO.setDeliveryPrice(
+                    deliveryTypeService.getDeliveryTypePrice(plannedOrderDTO.getProduct().getFarmer().getEmail(), plannedOrderDTO.getDeliveryTypeFarmer().getType()));
+        });
+        return plannedOrderDTOS;
     }
     @Transactional
     @Override
@@ -113,7 +130,7 @@ public class PlannedOrderServiceImpl implements PlannedOrderService {
             throw new AccessDeniedException("You are not the owner of this order");
         }
         PlannedOrder plannedOrder = plannedOrderRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new EntityNotFoundException(id, PlannedOrder.class));
         return plannedOrderMapper.map(plannedOrder);
     }
 
@@ -141,7 +158,10 @@ public class PlannedOrderServiceImpl implements PlannedOrderService {
                 newOrder.setCustomer(plannedOrder.getCustomer());
                 newOrder.setFarmer(plannedOrder.getProduct().getFarmer());
                 newOrder.setOrderStatus(OrderStatus.PENDING);
+                newOrder.setDeliveryTypeFarmer(plannedOrder.getDeliveryTypeFarmer());
                 newOrder.setTotalItemsPrice(newItem.getPricePerUnit().multiply(BigDecimal.valueOf(plannedOrder.getQuantity())));
+                newOrder.setTotalDeliveryPrice(plannedOrder.getDeliveryTypeFarmer().getPrice());
+                newOrder.setTotalPrice(newOrder.getTotalDeliveryPrice().add(newOrder.getTotalItemsPrice()));
                 newOrder.getItemsInOrder().add(newItem);
 
                 newItem.setOrder(newOrder);
