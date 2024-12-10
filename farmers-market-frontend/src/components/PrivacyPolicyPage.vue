@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="home">
     <Header class="navbar"></Header>
     <Card title="Privacy Policy" class="privacy-card">
       <template #title>Privacy Policy</template>
@@ -97,25 +97,29 @@ import Header from '@/components/Header.vue'
 </script>
 
 <style scoped>
-.page-container {
+body{
+  display: block !important;
+}
+.home{
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  overflow-x: hidden;
   width: 100%;
-  height: max-content;
+  padding-top: 120px;
   align-items: center;
-  justify-content: flex-start;
-  padding-top: 8em;
 }
-
 .privacy-card {
-  width: 100%;
-  max-width: 800px;
+  width: 80%;
   background-color: #ffffff;
-  border: 1px solid #d9d9d9;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
   padding: 20px;
+}
+@media (max-width: 380px) {
+  .privacy-card {
+    width: 90%;
+    padding: 5px;
+  }
 }
 
 .privacy-card p {
@@ -133,5 +137,10 @@ import Header from '@/components/Header.vue'
 .card {
   width: 100%;
   padding: 10px;
+}
+.footer {
+  margin: 0;
+  padding-top: 20px;
+  margin-top: 40px;
 }
 </style>
