@@ -16,7 +16,7 @@ public class CreateOrderCommand {
     BigDecimal totalPriceOfProducts;
     BigDecimal totalPriceOfDelivery;
     BigDecimal totalPrice;
-    String deliveryTypeFarmer;
+    DeliveryTypes deliveryTypeFarmer;
 }
 
 

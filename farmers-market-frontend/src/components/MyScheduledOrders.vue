@@ -34,7 +34,7 @@
           </div>
         </td>
         <td>{{plannedOrder.dayOfWeek.toLocaleLowerCase()}} {{plannedOrder.time}}</td>
-        <td>{{ getTotalPrice(plannedOrder.product, plannedOrder.quantity) }}</td>
+        <td>{{ getTotalPrice(plannedOrder.product, plannedOrder.quantity)+plannedOrder.deliveryPrice }}</td>
         <td>{{ plannedOrder.quantity }}</td>
         <td>
           <ToggleButton

@@ -1,7 +1,7 @@
 package com.example.isdfarmersmarket.web.controllers;
 
-import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.DeliveryTypeService;
+import com.example.isdfarmersmarket.dao.enums.DeliveryTypes;
 import com.example.isdfarmersmarket.web.commands.CreateDeliveryTypeCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateDeliveryTypeCommand;
 import com.example.isdfarmersmarket.web.dto.DeliveryTypeDTO;
@@ -9,9 +9,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
@@ -54,5 +54,10 @@ public class DeliveryTypeController {
     public ResponseEntity<List<String>> getCurrentFarmerDeliveryTypes() {
         return ResponseEntity.status(OK)
                 .body(deliveryTypeService.getAllCurrentUserDeliveryType());
+    }
+    @GetMapping("/price")
+    public ResponseEntity<BigDecimal> getDeliveryTypePrice(@RequestParam String farmerEmail, @RequestParam DeliveryTypes deliveryType) {
+        return ResponseEntity.status(OK)
+                .body(deliveryTypeService.getDeliveryTypePrice(farmerEmail, deliveryType));
     }
 }

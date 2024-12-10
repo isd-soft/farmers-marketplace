@@ -13,9 +13,7 @@ import com.example.isdfarmersmarket.web.commands.CreateDeliveryTypeCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateDeliveryTypeCommand;
 import com.example.isdfarmersmarket.web.dto.DeliveryTypeDTO;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -120,5 +118,11 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
                     return deliveryTypeFarmer.getType().name();
                 })
                 .toList();
+    }
+    @Transactional(readOnly = true)
+    @Override
+    public BigDecimal getDeliveryTypePrice(String email, DeliveryTypes deliveryType) {
+        Optional<DeliveryTypeFarmer> deliveryTypeOptional = deliveryTypeRepository.findByFarmerEmailAndType(email, deliveryType);
+        return deliveryTypeOptional.map(DeliveryTypeFarmer::getPrice).orElseThrow(() -> new EntityNotFoundException("Delivery type not found."));
     }
 }
