@@ -28,7 +28,7 @@ public class Conversation {
     @JoinColumn(name = "farmer_id", nullable = false)
     private User farmer;
 
-    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Message> messages = new ArrayList<>();
 
     @Column(name = "created_at")
