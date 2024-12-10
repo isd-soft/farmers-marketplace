@@ -12,7 +12,7 @@ public interface UserService {
 
     PageResponseDTO<UserProfileDTO> searchUsers(String fullName, SearchUserByRoleParams roleParams, Pageable pageable);
 
-    UserProfileDTO getUserById(Long id);
+    UserProfileDTO getUserProfile(Long id);
 
     UpdateUserDTO updateUser(UpdateUserCommand updateUserCommand);
 

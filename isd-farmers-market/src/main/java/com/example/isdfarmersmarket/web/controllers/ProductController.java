@@ -100,6 +100,12 @@ public class ProductController {
     public ResponseEntity<Page<CompactProductDTO>> getFarmersProducts(@PathVariable Long farmerId, Pageable pageable) {
         return ResponseEntity.status(OK).body(productService.getFarmersProducts(farmerId, pageable));
     }
-
+    @Operation(
+            description = "This endpoint is used to get products with certain discount ranges"
+    )
+    @GetMapping("/deals")
+    public ResponseEntity<ProductDealsDTO> getDeals(){
+        return ResponseEntity.status(OK).body(productService.getProductDeals());
+    }
 
 }

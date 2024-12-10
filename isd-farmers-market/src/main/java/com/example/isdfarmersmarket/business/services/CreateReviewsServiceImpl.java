@@ -13,7 +13,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.access.prepost.PreAuthorize;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,12 +22,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class CreateReviewsServiceImpl implements CreateReviewsService {
 
     UserRepository userRepository;
     ProductRepository productRepository;
     FarmerReviewRepository farmerReviewRepository;
     ProductReviewRepository productReviewRepository;
+    OrderRepository orderRepository;
     ReviewMapper reviewMapper;
 
     @Transactional
@@ -36,7 +39,11 @@ public class CreateReviewsServiceImpl implements CreateReviewsService {
                 .orElseThrow(EntityNotFoundException::new);
 
         User farmer = userRepository.findById(farmerReviewCommand.getFarmerId())
-                .orElseThrow(() -> new EntityNotFoundException("No such farmer found"));
+                .orElseThrow(EntityNotFoundException::new);
+
+        if(!canReviewFarmer(creator, farmer)) {
+            throw new AccessDeniedException("You don't have permission to review farmer");
+        }
 
         FarmerReview review = reviewMapper.map(farmerReviewCommand);
         review.setCreator(creator);
@@ -56,6 +63,10 @@ public class CreateReviewsServiceImpl implements CreateReviewsService {
         Product product = productRepository.findById(productReviewCommand.getProductId())
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
+        if(!canReviewProduct(creator, product)) {
+            throw new AccessDeniedException("You don't have permission to review product");
+        }
+
         ProductReview review = reviewMapper.map(productReviewCommand);
         review.setCreator(creator);
         review.setProduct(product);
@@ -64,7 +75,22 @@ public class CreateReviewsServiceImpl implements CreateReviewsService {
         updateProductRating(product);
         return reviewMapper.mapWithProductDetails(review);
     }
-    private void updateProductRating(Product product) {
+    public boolean canReviewFarmer(User creator, User farmer) {
+        boolean hasAlreadyReviewed = farmerReviewRepository.existsByCreatorAndFarmer(creator, farmer);
+        boolean hasCompletedOrder = orderRepository.hasCustomerDeliveredOrderWithFarmer(creator, farmer);
+
+        return !hasAlreadyReviewed && hasCompletedOrder;
+    }
+
+    public boolean canReviewProduct(User creator, Product product){
+        boolean hasAlreadyReviewed = productReviewRepository.existsByCreatorAndProduct(creator, product);
+        boolean hasCompletedOrder = orderRepository.hasCustomerDeliveredOrderWithProduct(creator, product);
+
+        return !hasAlreadyReviewed && hasCompletedOrder;
+    }
+
+
+    protected void updateProductRating(Product product) {
         ReviewStatsDTO reviewStatsDTO = productReviewRepository
                 .findReviewStatsByProduct(product);
 
