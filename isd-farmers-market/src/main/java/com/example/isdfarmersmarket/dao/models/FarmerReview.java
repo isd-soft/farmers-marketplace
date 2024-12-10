@@ -17,7 +17,7 @@ import java.util.Objects;
 @NoArgsConstructor
 public class FarmerReview {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String content;
     private float rating;

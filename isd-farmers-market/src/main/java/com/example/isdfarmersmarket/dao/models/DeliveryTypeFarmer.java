@@ -16,7 +16,7 @@ import java.util.Objects;
 @Builder
 public class DeliveryTypeFarmer {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private BigDecimal price;
     private DeliveryTypes type;

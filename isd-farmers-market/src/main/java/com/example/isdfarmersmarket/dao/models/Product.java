@@ -17,7 +17,7 @@ import java.util.*;
 @Builder
 public class Product {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_sequence")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(length = 80)
@@ -59,6 +59,7 @@ public class Product {
 
     @Column(name="created_date", columnDefinition = "TimeStamp")
     private LocalDateTime createdDate = LocalDateTime.now();
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
