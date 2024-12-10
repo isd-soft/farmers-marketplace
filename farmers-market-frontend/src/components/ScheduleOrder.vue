@@ -1,10 +1,10 @@
 <template>
   <div class="home">
     <Header class="navbar"></Header>
-    <h1 style="max-width: 80%">Schedule order</h1>
-    <p style="max-width: 80%; margin-top: 20px; text-align: center">When you schedule an order, it will be fulfilled each week on the day of the week and time of your choice.</p>
+    <h1  class="main-texts">Schedule order</h1>
+    <p class="main-texts" style="margin-top: 20px">When you schedule an order, it will be fulfilled each week on the day of the week and time of your choice.</p>
     <div class="main-container-schedule">
-      <div class="product-container-schedule" style="min-width: 260px">
+      <div class="product-container-schedule" style="min-width: 200px">
         <div class="product-inner-container-scheduler">
             <img
               style="cursor: pointer"
@@ -75,10 +75,9 @@
           </div>
         </div>
       </div>
-        <div class="product-container-schedule" style="min-width: 230px; max-width: 450px">
+        <div class="product-container-schedule" style="min-width: 120px;">
           <div class="day-time-container">
           <p>Choose day and time for scheduled order.</p>
-            <div class="input-error">
               <FloatLabel variant="on" class="schedule-input-labels">
               <Select
                 class="schedule-input"
@@ -91,6 +90,7 @@
               />
                 <label for="delivery-type">DeliveryType</label>
               </FloatLabel>
+            <div class="input-error">
             <FloatLabel variant="on" class="schedule-input-labels">
             <Select
               class="schedule-input"
@@ -328,36 +328,60 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+body{
+  display: block !important;
+}
+.home{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-top: 120px;
+  align-items: center;
+}
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-.home {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  justify-content: space-between;
-  min-height: 100vh;
-  overflow-x: hidden;
-  width: 100%;
-  height: max-content;
+.main-texts{
+  width: 80%;
+  text-align: center;
 }
 .main-container-schedule {
+  position: relative;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   gap: 20px;
   margin-top: 20px;
-  max-width: 80%;
-  width: calc(100% - 40px);
+  width: 80%;
+}
+@media (max-width: 380px) {
+  .main-container-schedule{
+    width: 90%;
+  }
+  .main-texts{
+    width: 90%;
+  }
+}
+.product-container-schedule {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
+}
+@media (max-width: 500px) {
+  .product-container-schedule {
+    padding: 13px;
+  }
 }
 .product-inner-container-scheduler {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  width: 100%;
   justify-content: space-between;
   flex-grow: 1;
   gap: 20px;
@@ -389,14 +413,6 @@ export default {
   flex-grow: 1;
   gap: 8px;
 }
-.product-container-schedule {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
-}
 .price-text-part {
   font-size: 1rem;
   font-weight: 500;
@@ -417,7 +433,7 @@ export default {
   max-width: 200px;
   width: 9rem;
   min-width: 6rem;
-  height: 2.5vh;
+  height: 20px;
   flex-shrink: 0;
 }
 .day-time-container{
