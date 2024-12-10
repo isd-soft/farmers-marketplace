@@ -15,7 +15,7 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Role implements GrantedAuthority {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Enumerated(EnumType.STRING)
     private ERole role;

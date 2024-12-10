@@ -15,7 +15,7 @@ import java.util.Objects;
 @NoArgsConstructor
 public class ItemInOrder {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_in_order_sequence")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
