@@ -1,7 +1,6 @@
 package com.example.isdfarmersmarket.business.mapper;
 
 import com.example.isdfarmersmarket.dao.models.Product;
-import com.example.isdfarmersmarket.dao.repositories.OrderRepository;
 import com.example.isdfarmersmarket.web.dto.ProductDTO;
 import com.example.isdfarmersmarket.web.dto.CompactProductDTO;
 import com.example.isdfarmersmarket.web.dto.ProductPageDTO;
@@ -30,6 +29,17 @@ public interface ProductMapper {
             }
             return compactProductDTO;
         });
+    }
+    default List<CompactProductDTO> mapToCompactProductsDTO(List<Product> products, Set<Product> wishlist) {
+        return products.stream().map(product -> {
+            CompactProductDTO compactProductDTO = this.mapToProductInWishlistDTO(product);
+            if (wishlist.contains(product)) {
+                compactProductDTO.setIsInWishlist(true);
+            } else {
+                compactProductDTO.setIsInWishlist(false);
+            }
+            return compactProductDTO;
+        }).toList();
     }
     default Page<CompactProductDTO> mapToCompactProductsDTO(Page<Product> products) {
         return products.map(this::mapToProductInWishlistDTO);

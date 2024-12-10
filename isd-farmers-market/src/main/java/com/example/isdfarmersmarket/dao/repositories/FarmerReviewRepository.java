@@ -17,4 +17,5 @@ public interface FarmerReviewRepository extends JpaRepository<FarmerReview, Long
     @Query("SELECT new com.example.isdfarmersmarket.web.dto.ReviewStatsDTO(AVG(r.rating), COUNT(r)) " +
             "FROM FarmerReview r WHERE r.farmer = :farmer")
     ReviewStatsDTO findReviewStatsByFarmer(@Param("farmer") User farmer);
+    boolean existsByCreatorAndFarmer(User creator, User farmer);
 }

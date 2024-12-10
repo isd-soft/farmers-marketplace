@@ -1,7 +1,5 @@
 package com.example.isdfarmersmarket.business.mapper;
 
-import com.example.isdfarmersmarket.business.security.JwtPrincipal;
-import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.web.dto.CompactUserDTO;

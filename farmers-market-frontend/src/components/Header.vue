@@ -37,10 +37,10 @@ import {useRoute, useRouter} from "vue-router";
 
 const searchQ = ref('');
 let currentUser = null;
+
 const items = ref([
   { label: 'Deals' },
   { label: "What's New" },
-  { label: 'Delivery' },
 ]);
 
 const accountMenu = ref([
@@ -48,11 +48,14 @@ const accountMenu = ref([
     label: 'Account',
     icon: 'pi pi-user',
     items: [
+      { label: 'My page', icon: 'pi pi-home', command: () => goToMyPage() },
       { label: 'Orders', icon: 'pi pi-shopping-cart', command: () => goToOrders() },
       { label: 'Messages', icon: 'pi pi-envelope', command: () => goToMessages() },
+      { label: 'Farmers Search', icon: 'pi pi-search', command: () => goToFarmersSearch()  },
       { label: 'Scheduled Orders', icon: 'pi pi-clock', command: () => goToScheduledOrders() },
       { label: 'Wishlist', icon: 'pi pi-heart', command: () => goToFavorites() },
       { label: 'Settings', icon: 'pi pi-cog', command: () => goToSettings() },
+      { label: 'Server Info', icon: 'pi pi-exclamation-triangle', command: () => goToServerInfo() },
       { label: 'Logout', icon: 'pi pi-sign-out', command: () => logout() },
     ],
   },
@@ -82,12 +85,12 @@ const fetchUserData = async () => {
     const response = await axiosInstance.get(`/current-user/`);
     currentUser = response.data;
     if (currentUser.isFarmer) {
-      accountMenu.value[0].items.unshift({
+      accountMenu.value[0].items.splice(1, 0, {
         label: 'My sales',
         icon: 'pi pi-credit-card',
         command: () => goToMySales(),
       }),
-      accountMenu.value[0].items.unshift({
+        accountMenu.value[0].items.splice(1, 0, {
         label: 'Products',
         icon: 'pi pi-clipboard',
         command: () => goToMyProducts(),
@@ -120,8 +123,18 @@ const goToMySales = () => {
   window.location.href = '/ordermanagement';
 };
 
+const goToMyPage = () => {
+  window.location.href = '/id' + currentUser.id;
+}
+
+function goToFarmersSearch() {
+  window.location.href = '/farmers-search';
+}
 const goToOrders = () => {
   window.location.href = '/orders';
+};
+const goToServerInfo = () => {
+  window.location.href = '/server-info';
 };
 const goToScheduledOrders = () => {
   window.location.href = '/schedule-order/management';
@@ -171,11 +184,13 @@ onMounted(() => {
 
 <style scoped>
 .navbar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: fixed;
   width: 100%;
-  height: 80px;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .menubar {

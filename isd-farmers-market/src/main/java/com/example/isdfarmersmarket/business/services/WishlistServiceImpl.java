@@ -17,7 +17,9 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -33,10 +35,9 @@ public class WishlistServiceImpl implements WishlistService {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No such user found"));
+        Set<Product> wishlist = user.getWishlist();
 
-        return user.getWishlist().stream()
-                .map(productMapper::mapToProductInWishlistDTO)
-                .toList();
+        return productMapper.mapToCompactProductsDTO( user.getWishlist().stream().toList(), wishlist);
     }
 
     @Transactional

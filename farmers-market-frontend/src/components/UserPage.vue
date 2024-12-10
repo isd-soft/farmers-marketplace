@@ -1,7 +1,26 @@
 <template>
   <Header class="navbar"></Header>
 
+  <Toast group="bc">
+    <template #message="slotProps">
+      <div class="custom-toast-container">
+        <div class="custom-toast-content">
+          <span class="custom-toast-summary">{{ slotProps.message.summary }}</span>
+          <div class="custom-toast-detail">{{ slotProps.message.detail }}</div>
+          <Button
+            size="big"
+            label="View Messages"
+            severity="success"
+            @click="redirectToMessages"
+            class="custom-toast-button"
+          />
+        </div>
+      </div>
+    </template>
+  </Toast>
+
   <div class="user-page">
+    <div class="user-info">
     <div class="user-header">
       <img
         :src="user.isFarmer ? farmerAvatar : customerAvatar"
@@ -10,8 +29,15 @@
       />
       <h1 class="user-name">{{ user.firstName + ' ' + user.lastName }}</h1>
 
-      <div v-if="user.isFarmer" class="user-rating">
-        <Rating v-model="user.rating" readonly :stars="5" />
+      <div v-if="user.isFarmer" style="margin-left: 2em; margin-top: 1.5em" class="user-rating">
+        <Rating
+          v-model="user.rating"
+          readonly
+          :stars="5"
+          :style="{
+        '--p-rating-icon-size': '2rem'
+      }"
+        />
         <p>Based on {{ user.reviewCount }} Reviews</p>
       </div>
     </div>
@@ -46,7 +72,7 @@
             icon="pi pi-check"
             class="p-button-success"
             @click="sendMessage"
-            style="max-width: 150px;"
+            style="max-width: 12em;"
           />
           <Button
             label="Cancel"
@@ -57,13 +83,14 @@
         </div>
       </div>
     </Dialog>
+
     <div v-if="user.isFarmer">
-    <TabView class="user-tabs">
-        <TabPanel header="Farmer Reviews" v-if="user.isFarmer">
-          <CustomerReviews :id="id" :review-type="'farmer'" />
+      <TabView class="user-tabs">
+        <TabPanel header="Farmer Reviews">
+          <CustomerReviews :id="id" :review-type="'farmer'" :canReview="user.canReview" />
         </TabPanel>
 
-        <TabPanel header="Products" v-if="user.isFarmer">
+        <TabPanel header="Products">
           <h2 class="header">Farmer Products</h2>
           <div class="products-panel">
             <div v-if="farmerProducts.length === 0">
@@ -73,6 +100,7 @@
               v-for="product in farmerProducts"
               :key="product.id"
               :product="product"
+              class="product-card"
             />
             <Button
               v-if="!isAllProductsLoaded"
@@ -80,16 +108,16 @@
               class="p-button-outlined load-more-button"
               @click="loadMoreProducts"
             />
-            </div>
+          </div>
         </TabPanel>
-    </TabView>
+      </TabView>
     </div>
     <div v-else>
       <ReviewsSection :userId="id" />
     </div>
+    </div>
     <Footer class="footer"></Footer>
   </div>
-
 </template>
 
 <script>
@@ -109,7 +137,9 @@ import Footer from '@/components/Footer.vue';
 import noPhotoImg from '@/assets/noPhoto.png';
 import router from "@/router/index.js";
 import ProductCard from "@/components/ProductCard.vue";
-import ReviewsSection from '@/components/ReviewsSection.vue'; // Import ReviewsSection component
+import ReviewsSection from '@/components/ReviewsSection.vue';
+import { useToast } from 'primevue/usetoast'
+import Toast from 'primevue/toast'
 
 export default {
   name: 'UserPage',
@@ -118,9 +148,10 @@ export default {
     Footer,
     Header,
     CustomerReviews,
-    ReviewsSection, // Register ReviewsSection component
+    ReviewsSection,
     Card,
     Rating,
+    Toast,
     TabView,
     TabPanel,
     Button,
@@ -133,6 +164,7 @@ export default {
     const isAllProductsLoaded = ref(false);
     const messageContent = ref('');
     const showDialog = ref(false);
+    const toast = useToast();
 
     const fetchUser = async () => {
       try {
@@ -143,7 +175,7 @@ export default {
       }
     };
 
-    const fetchFarmerProducts = async (page = 0, pageSize = 5) => {
+    const fetchFarmerProducts = async (page = 0, pageSize = 6) => {
       try {
         const response = await axiosInstance.get(`/product/farmer/${props.id}/products`, {
           params: { page, size: pageSize },
@@ -158,21 +190,36 @@ export default {
     };
 
     const loadMoreProducts = async () => {
-      const page = Math.ceil(farmerProducts.value.length / 5);
-      await fetchFarmerProducts(page, 5);
+      const page = Math.ceil(farmerProducts.value.length / 6);
+      await fetchFarmerProducts(page, 6);
     };
-
+    const redirectToMessages = () => {
+      router.push('/messages');
+    };
     const sendMessage = async () => {
       try {
         await axiosInstance.post('/messaging/user', {
           farmerId: user.value.id,
           content: messageContent.value,
         });
-        alert('Message sent successfully!');
+
+        toast.add({
+          severity: 'success',
+          summary: 'Message Sent',
+          detail: 'Your message was sent successfully!',
+          life: 4000,
+        });
+
         showDialog.value = false;
         messageContent.value = '';
       } catch (error) {
         console.error('Failed to send message:', error);
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to send your message. Please try again later.',
+          life: 4000,
+        });
       }
     };
 
@@ -194,12 +241,13 @@ export default {
       customerAvatar,
       noPhotoImg,
       loadMoreProducts,
+      redirectToMessages
     };
   },
 };
 </script>
 
-<style>
+<style scoped>
 .user-page {
   display: flex;
   flex-direction: column;
@@ -208,21 +256,12 @@ export default {
   width: 100%;
   padding-top: 80px;
 }
-
-.user-page > *:not(.footer) {
-  margin-left: 5em;
-  margin-right: 5em;
+.user-info{
+  margin-right: 12em;
+  margin-left: 12em;
 }
 
-.navbar {
-  position: fixed;
-  width: 100%;
-  top: 0;
-  left: 0;
-  z-index: 10;
-  background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+
 
 .user-header {
   display: flex;
@@ -232,9 +271,7 @@ export default {
   border-radius: 8px;
   margin-bottom: 2rem;
 }
-.user-rating {
-  margin-left: 2em;
-}
+
 .user-header-avatar {
   width: 120px;
   height: 120px;
@@ -253,19 +290,68 @@ export default {
 }
 
 .products-panel {
-  padding: 2rem 1rem;
+  padding: 2rem 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  justify-content: flex-start;
+  gap: 2rem;
+}
+
+.product-card {
+  width: 16em;
+  height: 23em;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-card img {
+  max-width: 100%;
+  max-height: 10em;
+  object-fit: contain;
 }
 
 .load-more-button {
-  margin-top: 1rem;
-  display: block;
+  margin-top: 2rem;
   width: 100%;
 }
 
 .footer {
   margin-top: 2rem;
 }
+
+.custom-toast-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-right: 16px;
+  padding-left: 8px;
+
+}
+
+.custom-toast-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 16px;
+}
+
+.custom-toast-summary {
+  font-weight: bold;
+  font-size: 1.125rem;
+}
+
+.custom-toast-detail {
+  font-weight: 500;
+  font-size: 1rem;
+  color: #555;
+}
+
+.custom-toast-button {
+  margin-top: 8px;
+}
+
 </style>

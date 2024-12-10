@@ -30,9 +30,6 @@
             </span>
           </span>
               </div>
-              <span class="price-text"
-              >{{totalPrice}} MDL</span
-              >
             </div>
             <p class="product-description">{{ plannedOrder.product.description }}</p>
             <div class="quantity-container">
@@ -55,6 +52,17 @@
               </InputNumber>
               <span v-if="v$.quantity.$error" class="error-message">Quantity in you order is required and must be minimum 1 maximum 1000</span>
             </div>
+            <div style="display: flex; flex-direction: column; width: 100%; align-items: end">
+            <span class="price-text-part"
+            >Items: {{totalItemsPrice}} MDL</span
+            >
+              <span class="price-text-part"
+              >+ Delivery {{deliveryPrice}} MDL</span
+              >
+              <span class="price-total-text"
+              >Total: {{totalPrice}} MDL</span
+              >
+            </div>
           </div>
         </div>
       </div>
@@ -62,6 +70,18 @@
         <div class="day-time-container">
           <p>Choose day and time for scheduled order.</p>
           <div class="input-error">
+            <FloatLabel variant="on" class="schedule-input-labels">
+              <Select
+                class="schedule-input"
+                id="delivery-type"
+                v-model="selectedDeliveryType"
+                :options="deliveryTypeValues"
+                optionLabel="label"
+                option-value="value"
+                @change = "totalDeliveryPrice"
+              />
+              <label for="delivery-type">DeliveryType</label>
+            </FloatLabel>
             <FloatLabel variant="on" class="schedule-input-labels">
               <Select
                 class="schedule-input"
@@ -161,6 +181,8 @@ export default {
 
     const v$ = useVuelidate(rules, order);
     const router = useRouter();
+    const selectedDeliveryType = ref(null)
+    const deliveryTypeValues = ref([])
 
     const daysOfWeek = ref([
       { label: "Monday", value: "MONDAY" },
@@ -177,9 +199,24 @@ export default {
         ((100 - (plannedOrder.value.product.discountPercents || 0)) / 100)
       ).toFixed(2);
     });
-    const totalPrice = computed(() => {
+    const totalItemsPrice = computed(() => {
       return (discountedPrice.value * order.quantity
       ).toFixed(2);
+    });
+    const deliveryPrice = ref(0);
+    const totalDeliveryPrice = (async () => {
+      console.log(selectedDeliveryType.value)
+      console.log(plannedOrder.value.product.farmer.email)
+      const resp = await axiosInstance.get("/deliverytypes/price", {
+        params: {
+          farmerEmail: plannedOrder.value.product.farmer.email,
+          deliveryType: selectedDeliveryType.value
+        }
+      });
+      deliveryPrice.value = resp.data;
+    });
+    const totalPrice = computed(() => {
+      return (Number(totalItemsPrice.value) + Number(deliveryPrice.value)).toFixed(2);
     });
     const hours = ref([
       { label: "0", value: "00" },
@@ -226,6 +263,7 @@ export default {
             quantity: order.quantity,
             dayOfWeek: order.dayOfWeek,
             time: `${order.hour}:${order.minute}:00`,
+            deliveryType: selectedDeliveryType.value,
           });
           await router.push("/schedule-order/management");
         } catch (error) {
@@ -247,6 +285,20 @@ export default {
         console.error('Failed to fetch Planned Order', err)
         await router.push(`/`);
       }
+      try {
+        const deliveryResponse = await axiosInstance.get('/delivery-types-enum')
+        if (Array.isArray(deliveryResponse.data)) {
+          deliveryTypeValues.value = deliveryResponse.data.map((type) => ({
+            label: type,
+            value: type,
+          }));
+          console.log("Unit types loaded:", deliveryTypeValues.value);
+          selectedDeliveryType.value = plannedOrder.value.deliveryTypeFarmer.type;
+        }
+      } catch (err) {
+        console.error('Failed to fetch Delivery Types or Cart Products', err)
+      }
+      await totalDeliveryPrice();
     })
 
     return {
@@ -257,8 +309,13 @@ export default {
       saveSchedule,
       order,
       discountedPrice,
-      totalPrice,
+      totalItemsPrice,
       v$,
+      selectedDeliveryType,
+      deliveryTypeValues,
+      totalPrice,
+      totalDeliveryPrice,
+      deliveryPrice,
     };
   },
   methods: {
