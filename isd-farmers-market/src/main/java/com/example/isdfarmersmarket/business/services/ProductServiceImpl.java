@@ -1,7 +1,9 @@
 package com.example.isdfarmersmarket.business.services;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException;
 import com.example.isdfarmersmarket.business.mapper.ProductMapper;
+import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.services.interfaces.CreateReviewsService;
 import com.example.isdfarmersmarket.business.services.interfaces.ProductService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.enums.DeliveryTypes;
@@ -43,6 +45,7 @@ public class ProductServiceImpl implements ProductService {
     UserRepository userRepository;
     OrderRepository orderRepository;
     ItemInCartRepository itemInCartRepository;
+    CreateReviewsService createReviewsService;
     private final PlannedOrderRepository plannedOrderRepository;
 
     @Override
@@ -242,6 +245,29 @@ public class ProductServiceImpl implements ProductService {
 
         return productPageDTO;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductDealsDTO getProductDeals() {
+        ProductDealsDTO productDealsDTO = new ProductDealsDTO();
+
+        Page<Product> productsAbove50 = productRepository
+                .findDiscountedAbove50(Pageable.ofSize(10));
+        Page<Product> productsAbove30AndBelow50 = productRepository
+                .findDiscountedAbove30AndBelow50(Pageable.ofSize(10));
+        Page<Product> productsAbove15AndBelow30 = productRepository
+                .findDiscountedAbove15AndBelow30(Pageable.ofSize(10));
+        Page<Product> productsAbove5AndBelow15 = productRepository
+                .findDiscountedAbove5AndBelow15(Pageable.ofSize(10));
+
+        productDealsDTO.setDiscountedAbove50Percent(productMapper.mapToCompactProductsDTO(productsAbove50));
+        productDealsDTO.setDiscountedAbove30Percent(productMapper.mapToCompactProductsDTO(productsAbove30AndBelow50));
+        productDealsDTO.setDiscountedAbove15Percent(productMapper.mapToCompactProductsDTO(productsAbove15AndBelow30));
+        productDealsDTO.setDiscountedAbove5Percent(productMapper.mapToCompactProductsDTO(productsAbove5AndBelow15));
+
+        return productDealsDTO;
+    }
+
 
     private Image toImageEntity(String base64Image) throws IOException {
         if (base64Image.contains(",")) {

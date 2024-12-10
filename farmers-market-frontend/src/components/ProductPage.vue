@@ -80,14 +80,14 @@
                     <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
                       {{ product.pricePerUnit }} MDL
                     </s>
-                    <span style="color: #007bff; font-size: 1.5rem">
+                    <span style="color: #179739; font-size: 1.5rem">
                       {{
                         product.pricePerUnit * ((100 - product.discountPercents) / 100).toFixed(2)
                       }} MDL
                     </span>
                   </span>
                   <span v-else
-                    ><span style="color: #007bff; font-size: 1.5rem">
+                    ><span style="color: #179739; font-size: 1.5rem">
                       {{ product.pricePerUnit }} MDL
                     </span>
                   </span>

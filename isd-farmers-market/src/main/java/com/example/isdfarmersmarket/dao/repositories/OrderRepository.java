@@ -1,6 +1,5 @@
 package com.example.isdfarmersmarket.dao.repositories;
 
-import com.example.isdfarmersmarket.dao.enums.OrderStatus;
 import com.example.isdfarmersmarket.dao.models.Order;
 import com.example.isdfarmersmarket.dao.models.Product;
 import com.example.isdfarmersmarket.dao.models.User;
@@ -12,8 +11,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 
 @Repository
@@ -28,9 +25,9 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             FROM Order o
             WHERE o.customer = :customer
               AND o.farmer = :farmer
-              AND o.orderStatus = 'COMPLETED'
+              AND o.orderStatus = 'DELIVERED'
             """)
-        boolean hasCustomerCompletedOrderWithFarmer(User customer, User farmer);
+        boolean hasCustomerDeliveredOrderWithFarmer(User customer, User farmer);
 
         @Query("""
             SELECT COUNT(1) > 0
@@ -38,7 +35,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             JOIN o.itemsInOrder i
             WHERE o.customer = :customer
               AND i.product = :product
-              AND o.orderStatus = 'COMPLETED'
+              AND o.orderStatus = 'DELIVERED'
             """)
-        boolean hasCustomerCompletedOrderWithProduct(User customer, Product product);
+        boolean hasCustomerDeliveredOrderWithProduct(User customer, Product product);
 }

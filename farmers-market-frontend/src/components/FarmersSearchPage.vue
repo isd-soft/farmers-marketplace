@@ -33,21 +33,25 @@
           :key="farmer.id"
           class="farmer-card"
         >
-          <router-link :to="`/id${farmer.id}`" class="profile-link">
-            <div class="farmer-profile">
-              <img :src="farmerPFP" alt="Profile Picture" class="farmer-avatar" />
-              <div class="farmer-details">
-                <p><b style="font-size: 1.2em">{{ farmer.firstName }} {{ farmer.lastName }}</b> </p>
-                <Rating
-                  v-model="farmer.rating"
-                  readonly
-                  :stars="5"
-                  :style="{
+          <Card>
+            <template #content>
+              <router-link :to="`/id${farmer.id}`" class="profile-link">
+                <div class="farmer-profile">
+                  <img :src="farmerPFP" alt="Profile Picture" class="farmer-avatar" />
+                  <div class="farmer-details">
+                    <p><b style="font-size: 1.2em">{{ farmer.firstName }} {{ farmer.lastName }}</b> </p>
+                    <Rating
+                      v-model="farmer.rating"
+                      readonly
+                      :stars="5"
+                      :style="{
           '--p-rating-icon-size': '1.2rem'
           }"/>
-              </div>
-            </div>
-          </router-link>
+                  </div>
+                </div>
+              </router-link>
+            </template>
+          </Card>
         </div>
         </div>
         <div v-else>
@@ -76,6 +80,7 @@ import Select from "primevue/select";
 import Paginator from "primevue/paginator";
 import { useRouter } from "vue-router";
 import farmerPFP from '@/assets/farmer.png';
+import Card from 'primevue/card'
 import Rating from 'primevue/rating'
 
 export default {
@@ -85,6 +90,7 @@ export default {
     Header,
     Footer,
     Select,
+    Card,
     Paginator,
   },
 
@@ -97,8 +103,9 @@ export default {
     const sortOptions = ref([
       { label: "Sort by", value: null },
       { label: "Rating", value: "rating_desc" },
-      { label: "Name Asc", value: "name_asc" },
-      { label: "Name Desc", value: "name_desc" },
+      { label: "Name", value: "name_asc" },
+      { label: "Registration Date", value: "register_date" },
+
     ]);
     const sortBy = ref();
     const router = useRouter();
@@ -115,11 +122,11 @@ export default {
           sort = "firstName";
           dir = "ASC";
           break;
-        case "name_desc":
-          sort = "firstName";
+        case "register_date":
+          sort = "createdDate";
           dir = "DESC";
           break;
-      }
+        }
       try {
         const url = `/users?search=${searchQ.value}&page=${currentPage.value}&size=${pageSize.value}&sort=${sort},${dir}&roleParams=FARMERS`;
         const response = await axiosInstance.get(url);
@@ -194,10 +201,8 @@ export default {
 
 .farmer-card {
   padding: 15px;
-  border: 1px solid #ccc;
   border-radius: 8px;
   width: 70em;
-  background-color: #f9f9f9;
   margin-bottom: 20px;
 }
 

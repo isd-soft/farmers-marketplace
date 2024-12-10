@@ -41,7 +41,6 @@ let currentUser = null;
 const items = ref([
   { label: 'Deals' },
   { label: "What's New" },
-  { label: 'Delivery' , command: () => goToDeliveries() },
 ]);
 
 const accountMenu = ref([
@@ -49,6 +48,7 @@ const accountMenu = ref([
     label: 'Account',
     icon: 'pi pi-user',
     items: [
+      { label: 'My page', icon: 'pi pi-home', command: () => goToMyPage() },
       { label: 'Orders', icon: 'pi pi-shopping-cart', command: () => goToOrders() },
       { label: 'Messages', icon: 'pi pi-envelope', command: () => goToMessages() },
       { label: 'Farmers Search', icon: 'pi pi-search', command: () => goToFarmersSearch()  },
@@ -85,12 +85,12 @@ const fetchUserData = async () => {
     const response = await axiosInstance.get(`/current-user/`);
     currentUser = response.data;
     if (currentUser.isFarmer) {
-      accountMenu.value[0].items.unshift({
+      accountMenu.value[0].items.splice(1, 0, {
         label: 'My sales',
         icon: 'pi pi-credit-card',
         command: () => goToMySales(),
       }),
-      accountMenu.value[0].items.unshift({
+        accountMenu.value[0].items.splice(1, 0, {
         label: 'Products',
         icon: 'pi pi-clipboard',
         command: () => goToMyProducts(),
@@ -123,8 +123,8 @@ const goToMySales = () => {
   window.location.href = '/ordermanagement';
 };
 
-function goToDeliveries() {
-  window.location.href = '/delivery';
+const goToMyPage = () => {
+  window.location.href = '/id' + currentUser.id;
 }
 
 function goToFarmersSearch() {

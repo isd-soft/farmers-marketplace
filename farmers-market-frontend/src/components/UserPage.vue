@@ -20,6 +20,7 @@
   </Toast>
 
   <div class="user-page">
+    <div class="user-info">
     <div class="user-header">
       <img
         :src="user.isFarmer ? farmerAvatar : customerAvatar"
@@ -71,7 +72,7 @@
             icon="pi pi-check"
             class="p-button-success"
             @click="sendMessage"
-            style="max-width: 150px;"
+            style="max-width: 12em;"
           />
           <Button
             label="Cancel"
@@ -113,6 +114,7 @@
     </div>
     <div v-else>
       <ReviewsSection :userId="id" />
+    </div>
     </div>
     <Footer class="footer"></Footer>
   </div>
@@ -206,7 +208,6 @@ export default {
           summary: 'Message Sent',
           detail: 'Your message was sent successfully!',
           life: 4000,
-          group: 'bc'
         });
 
         showDialog.value = false;
@@ -255,11 +256,11 @@ export default {
   width: 100%;
   padding-top: 80px;
 }
-
-.user-page > *:not(.footer) {
-  margin-left: 2rem;
-  margin-right: 2rem;
+.user-info{
+  margin-right: 12em;
+  margin-left: 12em;
 }
+
 
 
 .user-header {

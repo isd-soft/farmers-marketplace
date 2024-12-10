@@ -25,4 +25,5 @@ public interface ProductService {
     ProductDTO getProductById(Long id);
     Page<CompactProductDTO> getFarmersProducts(Long farmerId, Pageable pageable);
     ProductPageDTO getProductPageById(Long id);
+    ProductDealsDTO getProductDeals();
 }

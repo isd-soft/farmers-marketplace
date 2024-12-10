@@ -22,8 +22,8 @@ import AboutUsPage from '@/components/AboutUsPage.vue'
 import ContactUsPage from '@/components/ContactUsPage.vue'
 import FAQPage from '@/components/FAQPage.vue'
 import PrivacyPolicyPage from '@/components/PrivacyPolicyPage.vue'
-import DeliveryPage from '@/components/DeliveryPage.vue'
 import FarmersSearchPage from '@/components/FarmersSearchPage.vue'
+import DealsPage from '@/components/DealsPage.vue'
 
 const routes = [
   {
@@ -152,15 +152,15 @@ const routes = [
     component: PrivacyPolicyPage,
   },
   {
-    path: '/delivery',
-    name: 'Deliveries',
-    component: DeliveryPage,
-  },
-  {
     path: '/farmers-search',
     name: 'Farmers Search',
     component: FarmersSearchPage,
-  }
+  },
+  {
+    path: '/deals',
+    name: 'Deals',
+    component: DealsPage,
+  },
 ]
 
 const router = createRouter({

@@ -66,16 +66,15 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         var content = userProfileMapper.map(usersPage.getContent());
         return new PageResponseDTO<>(content, usersPage.getTotalElements());
     }
-
+    public UserProfileDTO getUserById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
+        return userProfileMapper.map(user);
+    }
     @Transactional(readOnly = true)
     public UserProfileDTO getUserProfile(Long id) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         User profileUser = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
         UserProfileDTO userProfileDTO = userProfileMapper.map(profileUser);
-
-    public UserProfileDTO getUserById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
-        return userProfileMapper.map(user);
         if (principal != null) {
             User authenticatedUser = userRepository.findById(principal.getId())
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));

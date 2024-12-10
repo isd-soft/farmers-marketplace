@@ -144,10 +144,9 @@ export default {
         isAllowedToReview.value = false
         toast.add({
           severity: 'success',
-          summary: 'Message Sent',
-          detail: 'Your message was sent successfully!',
+          summary: 'Review added',
+          detail: 'Thank you for review!',
           life: 4000,
-          group: 'bc',
         })
       } catch (error) {
         console.error('Failed to submit review:', error.message)

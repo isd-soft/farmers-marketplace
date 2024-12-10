@@ -4,7 +4,6 @@ import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.interfaces.CreateReviewsService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
-import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
 import com.example.isdfarmersmarket.web.commands.FarmerReviewCommand;
@@ -16,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,14 +77,14 @@ public class CreateReviewsServiceImpl implements CreateReviewsService {
     }
     public boolean canReviewFarmer(User creator, User farmer) {
         boolean hasAlreadyReviewed = farmerReviewRepository.existsByCreatorAndFarmer(creator, farmer);
-        boolean hasCompletedOrder = orderRepository.hasCustomerCompletedOrderWithFarmer(creator, farmer);
+        boolean hasCompletedOrder = orderRepository.hasCustomerDeliveredOrderWithFarmer(creator, farmer);
 
         return !hasAlreadyReviewed && hasCompletedOrder;
     }
 
     public boolean canReviewProduct(User creator, Product product){
         boolean hasAlreadyReviewed = productReviewRepository.existsByCreatorAndProduct(creator, product);
-        boolean hasCompletedOrder = orderRepository.hasCustomerCompletedOrderWithProduct(creator, product);
+        boolean hasCompletedOrder = orderRepository.hasCustomerDeliveredOrderWithProduct(creator, product);
 
         return !hasAlreadyReviewed && hasCompletedOrder;
     }
