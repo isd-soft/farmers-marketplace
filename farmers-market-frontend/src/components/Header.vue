@@ -266,20 +266,38 @@ const logout = () => {
 watch(isLoggedIn, (newValue) => {
   console.log('Login state changed:', newValue);
 });
+const handleResize = () => {
+  updateItems();
+  updateAccountMenu();
+};
+onMounted(async () => {
+  try {
+    await fetchUserData();
 
-onMounted(() => {
+    if (!isSearchPage.value) {
+      await fetchCategories();
+    }
 
-  fetchUserData();
-  if("!isSearchPage") {
-    fetchCategories();
+    updateItems();
+    updateAccountMenu();
+
+    window.addEventListener('resize', handleResize);
+  } catch (error) {
+    console.error(error);
   }
+});
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
 });
 </script>
 
 
 <style scoped>
+
 .navbar {
   position: fixed;
+  display: flex;
+  justify-content: center;
   width: 100%;
   top: 0;
   left: 0;
