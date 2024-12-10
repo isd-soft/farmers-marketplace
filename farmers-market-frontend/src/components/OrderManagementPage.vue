@@ -1,7 +1,6 @@
 <template>
-  <div class="order">
+  <div class="home">
     <Header class="navbar"></Header>
-    <div class="main-container">
       <div class="main-orders-container">
         <div class="order-status-fitering-container">
           <div
@@ -37,23 +36,18 @@
                       <div
                         v-for="product in order.itemsInOrder"
                         :key="product.id"
-                        class="md:w-40 relative product-image-title-container"
+                        class="product-image-title-container"
                       >
                         <img
-                          class="block xl:block mx-auto rounded w-full product-image"
+                          class="product-image"
                           :src="getBase64Image(product.imageBase64, product.imageType)"
                           :alt="product.productTitle"
                         />
-                        <div
-                          class="absolute bg-black/70 rounded-border product-content"
-                          style="left: 4px; top: 4px"
-                        >
+                        <div class="product-content" >
                           <div class="title-description-rating-container">
-                            <div class="first-product-content-section">
                               <h3 class="product-title-text">{{ product.productTitle }}</h3>
                               <p class="product-description">{{ product.productDescription }}</p>
                               <p class="product-quantity-type">{{ product.quantity }} {{ product.unitTypeShort }}</p>
-                            </div>
                           </div>
                           <div class="second-product-content-section">
                             <p>Order Created On:</p>
@@ -61,7 +55,7 @@
                           </div>
                         </div>
                       </div>
-                      <div class="flex flex-col md:items-end gap-8 buttons-price-container">
+                      <div class="buttons-price-container">
                           <span class="text-xl font-semibold price-text"
                           >{{ order.totalPrice }} MDL</span>
                         <Button
@@ -97,7 +91,6 @@
           </div>
         </div>
       </div>
-    </div>
     <Paginator
       style="margin-top: 30px"
       :rows="pageSize"
@@ -175,7 +168,6 @@ export default {
       })
     }
 
-
     function formatOrderDate(dateString) {
       const options = {
         year: 'numeric',
@@ -186,8 +178,6 @@ export default {
       }
       return new Date(dateString).toLocaleDateString(undefined, options)
     }
-
-
 
     const getSeverity = (product) => {
       switch (product.inventoryStatus) {
@@ -201,7 +191,6 @@ export default {
           return null
       }
     }
-
 
     const setStatusFilter = (status) => {
       selectedStatus.value = status;
@@ -304,62 +293,64 @@ export default {
 </script>
 
 <style scoped>
+body{
+  display: block !important;
+}
+.home{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-top: 120px;
+  align-items: center;
+}
+@media  (max-width: 1000px){
+  .home {
+    padding-top: 80px;
+  }
+}
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-.order {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-height: 50vh;
-  overflow-x: hidden;
-  width: 100%;
-  height: max-content;
-}
-.main-container {
-  position: relative;
-  margin-top: 80px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 5vh;
-  padding: 6vh;
-  width: 100%;
-  height: max-content;
-}
 .main-orders-container {
-  margin: 0 auto;
-  width: 80%;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 1vw;
   position: relative;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+  width: 80%;
+}
+@media (max-width: 380px) {
+  .main-orders-container{
+    width: 90%;
+  }
 }
 .order-status-fitering-container,
 .orders-container {
+  flex-grow: 1;
   border-radius: 15px;
   background-color: #fff;
   padding: 30px;
   height: max-content;
-  min-width: max-content;
-  width: 55%;
   box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
 }
 .order-status-fitering-container {
-  width: 20%;
+  min-width: 100px;
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 2.5vh;
-  background-color: #fff;
-  padding: 30px;
-  border-radius: 15px;
 }
 .orders-container {
-  width: 80%;
+  min-width: 250px;
+}
+@media (max-width: 500px) {
+  .order-status-fitering-container,
+  .orders-container {
+    padding: 13px !important;
+  }
 }
 .order-staus-icons {
   display: flex;
@@ -384,16 +375,14 @@ export default {
 .title-description-rating-container {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-}
-.first-product-content-section{
-  width: 15vw;
-  display: flex;
-  flex-direction: column;
+  flex-grow: 1;
   justify-content: space-between;
 }
 .second-product-content-section{
-  width: 15vw;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  max-width: 250px;
 }
 .order-date-text{
   font-weight: 600;
@@ -404,7 +393,7 @@ export default {
 .product-description {
   font-size: 0.7rem;
   height: max-content;
-  max-width: 15vw;
+  max-width: 200px;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -412,12 +401,13 @@ export default {
 }
 .product-image-title-container {
   display: flex;
-  gap: 2vw;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 .product-container {
   display: flex;
   flex-direction: column;
-  /* justify-content: flex-end; */
   gap: 2vh;
   padding: 3vh 3vh;
   border-radius: 15px;
@@ -426,26 +416,10 @@ export default {
 }
 .product-content {
   display: flex;
-  justify-content: space-between;
-  width: 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+  flex-grow: 1;
 }
-/* .heart-button {
-  border: none;
-  background: transparent;
-}
-
-.heart-button .pi {
-  font-size: 1.5rem;
-  color: #ff6b6b;
-}
-
-.heart-button.heart-selected .pi {
-  color: #ff0000;
-}
-
-.heart-button:hover .pi {
-  color: #ff4040;
-} */
 .order-container {
   margin-top: 2vh;
   display: flex;
@@ -458,14 +432,6 @@ export default {
   font-weight: 600;
   color: black;
 }
-
-.heart-button {
-  border: 1px solid #179739;
-  color: #179739;
-}
-.heart-button:hover {
-  border: 1px solid #0c4b1d;
-}
 .update-button {
   background-color: #179739;
 }
@@ -476,12 +442,8 @@ export default {
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
-  gap: 2vh;
-}
-.buttons-container {
-  display: flex;
-  align-items: flex-end;
-  gap: 1vw;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 .active-status {
   color: #179739;

@@ -1,7 +1,7 @@
 <template>
+  <div class="home">
   <Header class="navbar"></Header>
   <div class="wishlist-page">
-  <div class="wishlist-container">
     <h1 style="text-align: center;">My wishlist</h1>
         <div v-if="isLoading" class="loading-container">
           <ProgressSpinner
@@ -25,7 +25,6 @@
     <Footer class="footer"></Footer>
   </div>
 </template>
-
 <script>
 import { ref, onMounted } from 'vue'
 import axiosInstance from '@/utils/axiosInstance.js'
@@ -72,28 +71,23 @@ export default {
 </script>
 
 <style scoped>
-.wishlist-page{
+body{
+  display: block !important;
+}
+.home{
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  overflow-x: hidden;
   width: 100%;
-  height: max-content;
+  padding-top: 120px;
+  align-items: center;
+}
+.wishlist-page{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 80%;
 }
 
-.wishlist-page > *:not(.footer) {
-  margin-left: 5em;
-  margin-right: 5em;
-}
-.wishlist-container {
-  padding: 2rem;
-  margin-top: 10vh;
-}
-
-.wishlist-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
 
 .loading-container {
   text-align: center;
@@ -107,12 +101,23 @@ export default {
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 30px;
   margin-top: 30px;
   width:100%;
-  justify-content: center;
-  align-content: start;
+}
+@media (max-width: 380px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+}
+@media (max-width: 1000px) {
+  .products-grid {
+    gap: 20px !important;
+  }
+  .wishlist-page{
+    width: 90%;
+  }
 }
 @media (max-width: 64em) {
   /* 1024px and below (tablets) */
