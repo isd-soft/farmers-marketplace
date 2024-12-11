@@ -10,14 +10,20 @@ import InputText from 'primevue/inputtext'
 import FloatLabel from 'primevue/floatlabel';
 import ToastService from 'primevue/toastservice'
 import Toast from 'primevue/toast'
-
 import ConfirmationService from 'primevue/confirmationservice';
+import DialogService from 'primevue/dialogservice'
+import AOS from 'aos'
+import 'aos/dist/aos.css'
+
 
 import 'primeicons/primeicons.css';
 import './assets/main.css'
 import './assets/overrides.css';
 
+
 const app = createApp(App)
+
+AOS.init()
 
 app.use(PrimeVue, {
   theme: {

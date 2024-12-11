@@ -16,7 +16,6 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
-//    List<Order> getAllByUser(User user);
         @Query("SELECT COUNT(i) FROM ItemInOrder i WHERE i.product.id = :productId")
         long countOrdersByProductId(@Param("productId") Long productId);
 

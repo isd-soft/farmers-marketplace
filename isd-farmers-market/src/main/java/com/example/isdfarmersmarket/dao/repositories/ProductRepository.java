@@ -1,5 +1,6 @@
 package com.example.isdfarmersmarket.dao.repositories;
 
+import com.example.isdfarmersmarket.dao.models.Category;
 import com.example.isdfarmersmarket.dao.models.ItemInOrder;
 import com.example.isdfarmersmarket.dao.models.Product;
 import com.example.isdfarmersmarket.dao.models.User;

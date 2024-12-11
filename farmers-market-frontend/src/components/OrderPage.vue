@@ -283,7 +283,7 @@ export default {
         }
         url += `&page=${currentPage.value}&size=${pageSize.value}&sort=${sort},${dir}`
         const response = await axiosInstance.get(url)
-        console.log(response)
+        console.log(response.data)
         orders.value = response.data.content
         totalRecords.value = response.data.totalElements
       } catch (error) {}
@@ -385,7 +385,6 @@ export default {
 .order-staus-icons i {
   font-size: 1rem;
 }
-
 .product-image {
   width: 10vw;
   height: 12vh;
@@ -512,7 +511,7 @@ export default {
   }
   .orders-container {
     width: 100%;
-    padding: 7vw;
+    padding: 5vw;
   }
   .order-container {
     width: 100%;
@@ -530,10 +529,11 @@ export default {
     max-width: 100%;
   }
   .product-container {
-    padding: 2vw;
+    padding: 3vw;
+    width: 100%;
   }
   .product-image {
-    width: 100%;
+    width: 62vw;
     height: 15vh;
   }
   .product-image-title-container {

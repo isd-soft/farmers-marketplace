@@ -16,6 +16,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 @Slf4j
@@ -74,6 +76,17 @@ public class ProductController {
             ) {
         return ResponseEntity.status(OK).body(productService.getAllProducts(category, search, pageable));
     }
+
+    @Operation(
+            description = "This endpoint is used to get all products by category id"
+    )
+    @GetMapping("/getByCategory")
+    public ResponseEntity<List<CompactProductDTO>> getAllProductsByCategory(
+            @RequestParam(required = false) Long categoryId
+    ) {
+        return ResponseEntity.status(OK).body(productService.getAllProductsByCategory(categoryId));
+    }
+
     @GetMapping("/management")
     @PreAuthorize("hasRole('FARMER')")
     public ResponseEntity<Page<CompactProductDTO>> getCurrentUserProducts(Pageable pageable) {

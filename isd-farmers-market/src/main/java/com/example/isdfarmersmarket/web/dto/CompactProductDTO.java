@@ -1,6 +1,7 @@
 package com.example.isdfarmersmarket.web.dto;
 
 import com.example.isdfarmersmarket.dao.enums.UnitType;
+import com.example.isdfarmersmarket.dao.models.Category;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -23,4 +24,5 @@ public class CompactProductDTO {
     Float rating;
     ImageDTO image;
     long orders;
+    CategoryDTO category;
 }

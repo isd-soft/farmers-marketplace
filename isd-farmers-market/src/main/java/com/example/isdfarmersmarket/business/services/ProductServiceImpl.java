@@ -235,6 +235,24 @@ public class ProductServiceImpl implements ProductService {
         return productPageDTO;
     }
 
+    @Transactional
+    @Override
+    public List<CompactProductDTO> getAllProductsByCategory(Long categoryId) {
+        Specification<Product> filters = Specification
+                .where((categoryId == null || categoryId == 0L) ? null : ProductSpecification.categoryIs(categoryId))
+                .and(ProductSpecification.isVisible());
+        List<Product> products = productRepository.findAll(filters);
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+        Set<Product> wishlist = new HashSet<>();
+        if (principal != null) {
+            User user = userRepository.findById(principal.getId()).orElse(null);
+            if(user!=null) {
+                wishlist = user.getWishlist();
+            }
+        }
+        return productMapper.mapToCompactProductsDTO(products, wishlist);
+    }
+
     private Image toImageEntity(String base64Image) throws IOException {
         if (base64Image.contains(",")) {
             base64Image = base64Image.split(",")[1];
@@ -263,3 +281,5 @@ public class ProductServiceImpl implements ProductService {
                 .anyMatch(role -> role.getRole() == ERole.ADMIN);
     }
 }
+
+
