@@ -8,15 +8,27 @@
       <template #end>
         <div class="right-section">
           <div class="search-bar" v-if="!isSearchPage">
-            <InputText @keydown.enter="search" v-model="searchQ"/>
+            <InputText @keydown.enter="search" v-model="searchQ" class="input-search" />
             <Button @click="search" class="search-button">
               <i class="pi pi-search"></i>
             </Button>
           </div>
           <Menubar v-if="isLoggedIn" :model="accountMenu" class="menubar-item"></Menubar>
-          <Button v-if="!isLoggedIn" @click="goToLogin" class="login button" label="Login" severity="primary"
-            variant="text"></Button>
-          <Button @click="goToCart" class="cart button" label="Cart" severity="secondary" variant="text">
+          <Button
+            v-if="!isLoggedIn"
+            @click="goToLogin"
+            class="login button"
+            label="Login"
+            severity="primary"
+            variant="text"
+          ></Button>
+          <Button
+            @click="goToCart"
+            class="cart button"
+            label="Cart"
+            severity="secondary"
+            variant="text"
+          >
             <i class="pi pi-shopping-cart cart-icon"></i>
             <span class="cart-text">Cart</span>
           </Button>
@@ -27,21 +39,96 @@
 </template>
 
 <script setup>
-import {ref, onMounted, watch, computed} from 'vue';
+import { ref, onMounted, watch, computed, onUnmounted } from 'vue';
 import { isLoggedIn } from '@/shared/authState';
-import axiosInstance, {getUserId} from '@/utils/axiosInstance';
+import axiosInstance, { getUserId } from '@/utils/axiosInstance';
 import Menubar from 'primevue/menubar';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
-import {useRoute, useRouter} from "vue-router";
+import { useRoute, useRouter } from 'vue-router';
+import { nextTick } from 'vue';
 
+const hiddenItems = ref([]);
 const searchQ = ref('');
 let currentUser = null;
+const items = ref([{ label: 'Deals' }, { label: "What's New" }]);
+const updateItems = () => {
+  const windowWidth = window.innerWidth;
 
-const items = ref([
-  { label: 'Deals' },
-  { label: "What's New" },
-]);
+  if (windowWidth < 965) {
+    moveToAccountMenu('Categories');
+  } else {
+    moveToItems('Categories');
+  }
+
+  if (windowWidth < 1025) {
+    moveToAccountMenu('Deals');
+  } else {
+    moveToItems('Deals');
+  }
+
+  if (windowWidth < 1170) {
+    moveToAccountMenu("What's New");
+  } else {
+    moveToItems("What's New");
+  }
+};
+
+const updateAccountMenu = () => {
+  const windowWidth = window.innerWidth;
+  const account = accountMenu.value.find((menu) => menu.label === 'Account');
+
+  if (windowWidth <= 960) {
+    if (account) {
+      if (!account.items || account.items.length === 0) {
+        accountMenu.value = [...account.items];
+      }
+    }
+  } else {
+    const isAccountPresent = accountMenu.value.some((menu) => menu.label === 'Account');
+    if (!isAccountPresent) {
+      accountMenu.value = [
+        {
+          label: 'Account',
+          icon: 'pi pi-user',
+          items: accountMenu.value,
+        },
+      ];
+    }
+  }
+};
+
+const moveToAccountMenu = (label) => {
+  const itemIndex = items.value.findIndex((item) => item.label === label);
+  if (itemIndex !== -1) {
+    const item = items.value[itemIndex];
+    const account = accountMenu.value.find((menu) => menu.label === 'Account');
+
+    if (account) {
+      const isAlreadyInAccountMenu = account.items.some(
+        (existingItem) => existingItem.label === item.label,
+      );
+      if (!isAlreadyInAccountMenu) {
+        hiddenItems.value.push(item);
+        account.items.push(item);
+        items.value.splice(itemIndex, 1);
+      }
+    }
+  }
+};
+
+const moveToItems = (label) => {
+  const hiddenIndex = hiddenItems.value.findIndex((item) => item.label === label);
+  if (hiddenIndex !== -1) {
+    const item = hiddenItems.value[hiddenIndex];
+    const account = accountMenu.value.find((menu) => menu.label === 'Account');
+    if (account && account.items.some((existingItem) => existingItem.label === item.label)) {
+      items.value.push(item);
+      account.items = account.items.filter((existingItem) => existingItem.label !== label);
+      hiddenItems.value.splice(hiddenIndex, 1);
+    }
+  }
+};
 
 const accountMenu = ref([
   {
@@ -51,7 +138,7 @@ const accountMenu = ref([
       { label: 'My page', icon: 'pi pi-home', command: () => goToMyPage() },
       { label: 'Orders', icon: 'pi pi-shopping-cart', command: () => goToOrders() },
       { label: 'Messages', icon: 'pi pi-envelope', command: () => goToMessages() },
-      { label: 'Farmers Search', icon: 'pi pi-search', command: () => goToFarmersSearch()  },
+      { label: 'Farmers Search', icon: 'pi pi-search', command: () => goToFarmersSearch() },
       { label: 'Scheduled Orders', icon: 'pi pi-clock', command: () => goToScheduledOrders() },
       { label: 'Wishlist', icon: 'pi pi-heart', command: () => goToFavorites() },
       { label: 'Settings', icon: 'pi pi-cog', command: () => goToSettings() },
@@ -67,23 +154,46 @@ const search = () => {
   router.push({ name: 'SearchProducts', query: { search: searchQ.value } });
 };
 const fetchCategories = async () => {
-    try {
-      const response = await axiosInstance.get('/category');
-      const categories = response.data;
-      const categoryItems = categories.map(category => ({
-        label: category.title,
-        command: () => goToCategory(category.id),
-      }));
+  try {
+    const response = await axiosInstance.get('/category');
+    const categories = response.data;
 
-      items.value = [{label: 'Categories', items: categoryItems}, ...items.value];
-    } catch (error) {
-    }
+    items.value = [
+      {
+        label: 'Categories',
+        items: categories.map((category) => ({
+          label: category.title,
+          command: () => goToCategory(category.id),
+        })),
+      },
+      ...items.value,
+    ];
+
+    await nextTick();
+
+    updateItems();
+    updateAccountMenu();
+  } catch (error) {
+    console.error('Ошибка при загрузке категорий:', error);
+  }
 };
 const fetchUserData = async () => {
   const middleIndex = Math.floor(accountMenu.value[0].items.length / 2);
   try {
     const response = await axiosInstance.get(`/current-user/`);
     currentUser = response.data;
+
+    if (currentUser.isAdmin) {
+      accountMenu.value[0].items = accountMenu.value[0].items.filter(
+        (item) => !['Orders', 'Scheduled Orders', 'Wishlist'].includes(item.label),
+      );
+      accountMenu.value[0].items.splice(0, 0, {
+        label: 'Admin Panel',
+        icon: 'pi pi-microchip',
+        command: () => goToAdmin(),
+      });
+    }
+
     if (currentUser.isFarmer) {
       accountMenu.value[0].items.splice(1, 0, {
         label: 'My sales',
@@ -91,17 +201,21 @@ const fetchUserData = async () => {
         command: () => goToMySales(),
       }),
         accountMenu.value[0].items.splice(1, 0, {
-        label: 'Products',
-        icon: 'pi pi-clipboard',
-        command: () => goToMyProducts(),
-      }),
-      accountMenu.value[0].items.splice(middleIndex, 0,{
+          label: 'Products',
+          icon: 'pi pi-clipboard',
+          command: () => goToMyProducts(),
+        });
+
+      accountMenu.value[0].items.splice(middleIndex, 0, {
         label: 'Performance',
         icon: 'pi pi-chart-line',
         command: () => goToPerformance(),
       });
     }
+    await nextTick();
+    updateAccountMenu();
   } catch (error) {
+    console.error(error);
   }
 };
 
@@ -125,7 +239,7 @@ const goToMySales = () => {
 
 const goToMyPage = () => {
   window.location.href = '/id' + currentUser.id;
-}
+};
 
 function goToFarmersSearch() {
   window.location.href = '/farmers-search';
@@ -142,7 +256,11 @@ const goToScheduledOrders = () => {
 
 const goToMessages = () => {
   window.location.href = '/messages';
-}
+};
+
+const goToAdmin = () => {
+  window.location.href = '/admin/products';
+};
 
 const goToFavorites = () => {
   window.location.href = '/wishlist';
@@ -150,7 +268,6 @@ const goToFavorites = () => {
 
 const goToSettings = () => {
   window.location.href = '/settings';
-
 };
 
 const goToCategory = (categoryId) => {
@@ -171,20 +288,36 @@ const logout = () => {
 watch(isLoggedIn, (newValue) => {
   console.log('Login state changed:', newValue);
 });
+const handleResize = () => {
+  updateItems();
+  updateAccountMenu();
+};
+onMounted(async () => {
+  try {
+    await fetchUserData();
 
-onMounted(() => {
+    if (!isSearchPage.value) {
+      await fetchCategories();
+    }
 
-  fetchUserData();
-  if("!isSearchPage") {
-    fetchCategories();
+    updateItems();
+    updateAccountMenu();
+
+    window.addEventListener('resize', handleResize);
+  } catch (error) {
+    console.error(error);
   }
 });
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
 </script>
-
 
 <style scoped>
 .navbar {
   position: fixed;
+  display: flex;
+  justify-content: center;
   width: 100%;
   top: 0;
   left: 0;
@@ -197,12 +330,20 @@ onMounted(() => {
   display: flex;
   background-color: white;
   border-color: white;
-  width: 100%;
-  max-width: 80%;
+  width: 80%;
   z-index: 1000;
   border-radius: 0;
   height: 80px;
   justify-content: center;
+  padding: 0;
+}
+@media (max-width: 380px) {
+  .menubar {
+    width: 90%;
+  }
+  .menubar img.logo {
+    width: 50px !important;
+  }
 }
 
 .menubar img.logo {
@@ -273,5 +414,17 @@ onMounted(() => {
 .cart.button .cart-text,
 .login.button:hover {
   color: #334155 !important;
+}
+@media (max-width: 740px) {
+  .input-search {
+    display: none;
+  }
+}
+</style>
+<style>
+.p-menubar-mobile .p-menubar-root-list {
+  margin-left: -40px;
+  width: 190px !important;
+  top: auto !important;
 }
 </style>

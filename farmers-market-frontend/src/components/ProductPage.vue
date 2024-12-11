@@ -3,13 +3,7 @@
     <Header class="navbar"></Header>
     <Toast />
     <Card
-      :style="{
-        top: '10vh',
-        width: 'auto',
-        margin: '0 auto',
-        maxWidth: '80%',
-      }"
-      style="box-shadow: none; border-radius: 0"
+      style="box-shadow: none; border-radius: 0; top: 10vh; width: 80%"
     >
       <template #content>
         <div v-if="isLoading" class="loading-container">
@@ -356,6 +350,16 @@ export default {
 </script>
 
 <style scoped>
+body{
+  display: block !important;
+}
+.home{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-top: 120px;
+  align-items: center;
+}
 .product-page {
   display: flex;
   flex-direction: column;

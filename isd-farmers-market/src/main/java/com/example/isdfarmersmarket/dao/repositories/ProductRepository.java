@@ -1,5 +1,6 @@
 package com.example.isdfarmersmarket.dao.repositories;
 
+import com.example.isdfarmersmarket.dao.models.Category;
 import com.example.isdfarmersmarket.dao.models.ItemInOrder;
 import com.example.isdfarmersmarket.dao.models.Product;
 import com.example.isdfarmersmarket.dao.models.User;
@@ -20,6 +21,9 @@ import java.util.Set;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     Page<Product> findProductsByFarmer(User farmer, Pageable pageable);
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.category.id = :categoryId")
+    Integer countByCategoryId(@Param("categoryId") Long categoryId);
 
     @Query("SELECT p FROM Product p WHERE p.discountPercents >= 50 ORDER BY p.rating DESC")
     Page<Product> findDiscountedAbove50(Pageable pageable);

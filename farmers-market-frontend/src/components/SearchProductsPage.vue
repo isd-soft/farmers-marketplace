@@ -56,7 +56,7 @@
   </div>
 </template>
 <script>
-import {ref, onMounted, watch, computed} from "vue";
+import {ref, onMounted, watch} from "vue";
   import axiosInstance from "@/utils/axiosInstance.js";
   import Header from "@/components/Header.vue";
   import Footer from "@/components/Footer.vue";
@@ -64,8 +64,6 @@ import {ref, onMounted, watch, computed} from "vue";
   import ProductCard from "@/components/ProductCard.vue";
   import {useRoute} from "vue-router";
   import Paginator from 'primevue/paginator';
-import {maxLength, minLength, required} from "@vuelidate/validators";
-import useVuelidate from "@vuelidate/core";
   export default {
     name: 'SearchProducts',
     components: {
@@ -180,38 +178,72 @@ import useVuelidate from "@vuelidate/core";
     },
   }
 </script>
-<style>
+<style scoped>
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+body{
+  display: block !important;
+}
+.home{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-top: 120px;
+  align-items: center;
+}
 .main-container-products{
   position: relative;
   display: flex;
   flex-direction: column;
-  max-width: 80%;
-  width: calc(100% - 40px);
-  margin-left: 20px;
-  margin-right: 20px;
+  width: 80%;
 }
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 30px;
   margin-top: 30px;
   width:100%;
   justify-content: center;
   align-content: start;
 }
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+  width:100%;
+}
+@media (max-width: 380px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+  .search-products-input-inner {
+    min-width: 240px !important;
+  }
+  .main-container-products{
+    width: 90%;
+  }
+}
+@media (max-width: 1000px) {
+  .products-grid {
+    gap: 20px !important;
+  }
+  .search-filters{
+    column-gap: 20px !important;
+  }
+}
 
 .search-products-input{
   flex-grow: 1 !important;
 }
 .search-products-input-inner{
-  min-width: 280px;
+  min-width: 300px;
   max-width: none;
   width: 100%;
+  height: 40px;
 }
 .search-filters{
   width:100%;

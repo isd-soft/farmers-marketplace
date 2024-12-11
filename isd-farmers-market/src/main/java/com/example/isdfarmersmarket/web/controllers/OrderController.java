@@ -39,7 +39,7 @@ public class OrderController {
     @Operation(
             description = "This endpoint is used to update an order"
     )
-    @PreAuthorize("hasRole('FARMER')")
+    @PreAuthorize("hasRole('FARMER') or hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<OrderDTO> farmerStatusChangeOrder(@PathVariable Long id, @RequestBody @Valid UpdateOrderCommand updateOrderCommand) {
         return ResponseEntity.status(OK).body(orderService.farmerStatusChangeOrder(id, updateOrderCommand));
@@ -63,7 +63,7 @@ public class OrderController {
     @Operation(
             description = "This endpoint is used to get all orders"
     )
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
     @GetMapping()
     public ResponseEntity<List<OrderDTO>> getAllOrders() {
         return ResponseEntity.status(OK).body(orderService.getAllOrders());

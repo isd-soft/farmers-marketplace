@@ -4,6 +4,7 @@ import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.interfaces.CreateReviewsService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
+import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
 import com.example.isdfarmersmarket.web.commands.FarmerReviewCommand;
@@ -111,5 +112,38 @@ public class CreateReviewsServiceImpl implements CreateReviewsService {
         farmer.setRating(reviewStatsDTO.getAverageRating().floatValue());
         farmer.setReviewCount(reviewStatsDTO.getReviewCount().intValue());
     }
+
+    @Transactional
+    public void deleteFarmerReview(Long reviewId) {
+        FarmerReview review = farmerReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new EntityNotFoundException("Farmer review not found"));
+
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+
+        if (!review.getCreator().getId().equals(principal.getId()) && !principal.getRoles().contains(ERole.ADMIN)) {
+            throw new SecurityException("You are not authorized to delete this review.");
+        }
+
+        farmerReviewRepository.delete(review);
+
+        updateFarmerRating(review.getFarmer());
+    }
+
+    @Transactional
+    public void deleteProductReview(Long reviewId) {
+        ProductReview review = productReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new EntityNotFoundException("Product review not found"));
+
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+
+        if (!review.getCreator().getId().equals(principal.getId()) && !principal.getRoles().contains(ERole.ADMIN)) {
+            throw new SecurityException("You are not authorized to delete this review.");
+        }
+
+        productReviewRepository.delete(review);
+
+        updateProductRating(review.getProduct());
+    }
+
 
 }

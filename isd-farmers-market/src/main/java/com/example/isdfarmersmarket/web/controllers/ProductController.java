@@ -74,6 +74,17 @@ public class ProductController {
             ) {
         return ResponseEntity.status(OK).body(productService.getAllProducts(category, search, pageable));
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/adminall")
+    public ResponseEntity<Page<CompactProductDTO>> getAllProductsForAdmin(
+            Pageable pageable,
+            @RequestParam(required = false) Long category,
+            @RequestParam(required = false) String search
+            ) {
+        return ResponseEntity.status(OK).body(productService.getAllProductsForAdmin(category, search, pageable));
+    }
+
     @GetMapping("/management")
     @PreAuthorize("hasRole('FARMER')")
     public ResponseEntity<Page<CompactProductDTO>> getCurrentUserProducts(Pageable pageable) {

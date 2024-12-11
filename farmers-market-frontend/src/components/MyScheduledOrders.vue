@@ -4,6 +4,7 @@
     <div style="width: calc(100% - 40px); max-width: 80%;display: flex; flex-direction: row; justify-content: space-between; gap: 20px">
       <h1>My scheduled orders</h1>
     </div>
+    <div style="overflow-x:auto; width: 80%;">
     <table class="products-table">
       <thead>
       <tr>
@@ -52,6 +53,7 @@
       </tr>
       </tbody>
     </table>
+    </div>
     <h3 style="margin-top: 50px; margin-bottom: 50px; text-align: center; width: 1200px" v-if="plannedOrders.length===0">Looks like you have no scheduled orders yet</h3>
 
     <Dialog style="flex-grow: 1; max-width: 500px" v-model:visible="showConfirmation" modal header="Delete scheduled order" :position="'top'">
@@ -190,7 +192,7 @@ export default {
   },
 }
 </script>
-<style>
+<style scoped>
 body{
   display: block !important;
 }
@@ -203,8 +205,7 @@ body{
 }
 
 .products-table {
-  width: calc(100% - 40px);
-  max-width: 80%;
+  width: 100%;
   border-collapse: collapse;
   margin-top: 40px;
 }

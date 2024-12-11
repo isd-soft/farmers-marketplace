@@ -6,7 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.3.5</version>
-		<relativePath/>
+		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
 	<artifactId>isd-farmers-market</artifactId>
@@ -120,8 +120,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
-
-
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+			<version>10.10.0</version>
+		</dependency>
 
 	</dependencies>
 
@@ -137,6 +140,17 @@
 				<configuration>
 					<source>21</source>
 					<target>21</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>10.10.0</version>
+				<configuration>
+					<url>jdbc:postgresql://localhost:5433/farmer_market_database</url>
+					<user>postgres</user>
+					<password>postgres</password>
+					<cleanDisabled>false</cleanDisabled>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -41,6 +41,7 @@ public class UserSpecification {
                     // Returning resulting customers
                     yield builder.and(builder.equal(rolePath, ERole.CUSTOMER), builder.equal(subquery, 0L));
                 }
+                case ADMINS -> builder.equal(rolePath, ERole.ADMIN);
                 case ALL -> null;
             };
         };
