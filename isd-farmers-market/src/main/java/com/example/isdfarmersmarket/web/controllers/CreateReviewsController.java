@@ -8,6 +8,7 @@ import com.example.isdfarmersmarket.web.dto.ProductReviewDTO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,9 +17,10 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("reviews")
+@RequestMapping("/reviews")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class CreateReviewsController {
 
     CreateReviewsService reviewCommandService;
@@ -36,4 +38,19 @@ public class CreateReviewsController {
         ProductReviewDTO response = reviewCommandService.rateProduct(productReviewCommand);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
+    @DeleteMapping("/farmers/{reviewId}")
+    public ResponseEntity<Void> deleteFarmerReview(@PathVariable Long reviewId) {
+        reviewCommandService.deleteFarmerReview(reviewId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
+    @DeleteMapping("/products/{reviewId}")
+    public ResponseEntity<Void> deleteProductReview(@PathVariable Long reviewId) {
+        reviewCommandService.deleteProductReview(reviewId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
 }

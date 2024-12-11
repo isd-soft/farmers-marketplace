@@ -28,6 +28,11 @@
   --p-inputtext-hover-border-color: #334155 !important;
   --p-inputtext-focus-border-color: #334155 !important;
 
+    --p-select-color: #334155 !important;
+    --p-select-border-color: #334155 !important;
+    --p-select-hover-border-color: #334155 !important;
+    --p-select-focus-border-color: #334155 !important;
+
    /* Button Styles */
    --p-button-primary-background: #179739 !important;
    --p-button-primary-hover-background: #334155 !important;

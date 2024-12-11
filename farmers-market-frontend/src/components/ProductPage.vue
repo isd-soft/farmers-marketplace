@@ -3,13 +3,7 @@
     <Header class="navbar"></Header>
     <Toast />
     <Card
-      :style="{
-        top: '10vh',
-        width: 'auto',
-        margin: '0 auto',
-        maxWidth: '80%',
-      }"
-      style="box-shadow: none; border-radius: 0"
+      style="box-shadow: none; border-radius: 0; top: 10vh; width: 80%"
     >
       <template #content>
         <div v-if="isLoading" class="loading-container">
@@ -81,14 +75,14 @@
                     <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
                       {{ product.pricePerUnit }} MDL
                     </s>
-                    <span style="color: #007bff; font-size: 1.5rem">
+                    <span style="color: #179739; font-size: 1.5rem">
                       {{
                         product.pricePerUnit * ((100 - product.discountPercents) / 100).toFixed(2)
                       }} MDL
                     </span>
                   </span>
                   <span v-else
-                    ><span style="color: #007bff; font-size: 1.5rem">
+                    ><span style="color: #179739; font-size: 1.5rem">
                       {{ product.pricePerUnit }} MDL
                     </span>
                   </span>
@@ -163,7 +157,7 @@
               </TabPanel>
 
               <TabPanel header="Reviews">
-                <CustomerReviews :id="id" :review-type="'product'" />
+                <CustomerReviews :id="id" :review-type="'product'" :canReview="product.canReview" />
               </TabPanel>
 
               <TabPanel header="Shipping">
@@ -356,6 +350,16 @@ export default {
 </script>
 
 <style scoped>
+body{
+  display: block !important;
+}
+.home{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-top: 120px;
+  align-items: center;
+}
 .product-page {
   display: flex;
   flex-direction: column;

@@ -10,6 +10,7 @@ import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.EventPublisher;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.enums.DeliveryTypes;
+import com.example.isdfarmersmarket.dao.enums.ERole;
 import com.example.isdfarmersmarket.dao.enums.OrderStatus;
 import com.example.isdfarmersmarket.dao.models.*;
 import com.example.isdfarmersmarket.dao.repositories.*;
@@ -89,7 +90,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderDTO farmerStatusChangeOrder(Long id, UpdateOrderCommand updateOrderCommand) {
-        if(!isOrderFarmer(id)){
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+
+        if(!isOrderFarmer(id) && !principal.getRoles().contains(ERole.ADMIN)){
             throw new AccessDeniedException("You are not able to change status of this order");
         }
         Order order = orderRepository.findById(id)

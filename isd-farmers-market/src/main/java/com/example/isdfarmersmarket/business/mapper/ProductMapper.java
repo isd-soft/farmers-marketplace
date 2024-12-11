@@ -1,7 +1,6 @@
 package com.example.isdfarmersmarket.business.mapper;
 
 import com.example.isdfarmersmarket.dao.models.Product;
-import com.example.isdfarmersmarket.dao.repositories.OrderRepository;
 import com.example.isdfarmersmarket.web.dto.ProductDTO;
 import com.example.isdfarmersmarket.web.dto.CompactProductDTO;
 import com.example.isdfarmersmarket.web.dto.ProductPageDTO;

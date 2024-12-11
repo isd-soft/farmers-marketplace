@@ -10,13 +10,15 @@ import java.util.Date;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "verification_tokens")
 public class VerificationToken {
     private static final int EXPIRATION = 60 * 24;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String token;
 
     @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)

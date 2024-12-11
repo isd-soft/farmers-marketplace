@@ -17,7 +17,7 @@ import java.util.Objects;
 @Table(name = "conversations")
 public class Conversation {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,7 +28,7 @@ public class Conversation {
     @JoinColumn(name = "farmer_id", nullable = false)
     private User farmer;
 
-    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Message> messages = new ArrayList<>();
 
     @Column(name = "created_at")

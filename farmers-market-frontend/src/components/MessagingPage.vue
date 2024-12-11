@@ -3,66 +3,78 @@
     <Header class="navbar"></Header>
     <div class="messaging-page">
       <div class="conversations-sidebar">
-        <h2>Conversations</h2>
+        <h2 class="sidebar-header">Conversations</h2>
         <ul class="conversation-list">
           <li
             v-for="conversation in conversations"
             :key="conversation.id"
-            :class="{ 'selected-conversation': selectedConversation?.id === conversation.id }"
+            :class="['conversation-item', { 'selected-conversation': selectedConversation?.id === conversation.id }]"
             @click="selectConversation(conversation)"
           >
-            <Card class="conversation-card">
-              <template #title>
-                {{ conversation.farmer.firstName }} {{ conversation.farmer.lastName }}
+            <Card class="conversation-card p-card" :style="{ borderLeft: selectedConversation?.id === conversation.id ? '4px solid #42a5f5' : 'none' }">
+              <template #header>
+                <div class="card-header">
+<!--                  <img-->
+<!--                    :src="conversation.farmer.avatar || 'https://via.placeholder.com/50'"-->
+<!--                    alt="Farmer Avatar"-->
+<!--                    class="avatar"-->
+<!--                  />-->
+                  <span class="conversation-name">
+              {{ conversation.farmer.firstName }} {{ conversation.farmer.lastName }}
+            </span>
+                </div>
               </template>
               <template #content>
-                <p>{{ conversation.lastMessage || 'No messages yet' }}</p>
+                <p class="last-message">{{ conversation.lastMessage || 'No messages yet...' }}</p>
               </template>
             </Card>
           </li>
         </ul>
       </div>
 
-      <!-- Messages Section -->
-      <div class="messages-section" v-if="selectedConversation">
-        <h2>
-          Chat with
-          {{ selectedConversation.farmer.id == this.userId
-          ? selectedConversation.customer.firstName
-          : selectedConversation.farmer.firstName }}
-        </h2>
-        <div ref="messageList" class="messages-list" @scroll="handleScroll">
-          <ul>
-            <li
-              v-for="message in messages.slice().reverse()"
-              :key="message.id"
-              :class="[
-                { 'sent-message': message.sender.id == this.userId },
-                { 'received-message': message.sender.id != this.userId },
-                { 'farmer-message': message.sender.isFarmer },
-                { 'non-farmer-message': !message.sender.isFarmer }
-              ]"
-            >
-              <div class="message-bubble">
-                <strong>{{ message.sender.firstName }}:</strong> {{ message.content }}
-              </div>
-            </li>
-          </ul>
-        </div>
-        <div class="message-input-container">
-          <InputText
-            v-model="newMessage"
-            placeholder="Type a message..."
-            class="message-input"
-            @keyup.enter="sendMessage"
-          />
-          <Button
-            icon="pi pi-send"
-            class="p-button-rounded p-button-primary send-button"
-            @click="sendMessage"
-          />
-        </div>
-      </div>
+
+      <Card class="messages-section" v-if="selectedConversation">
+        <template #content>
+          <h2 style="text-align: center; color: #007bff;">
+            Chat with
+            {{ selectedConversation.farmer.id == this.userId
+            ? selectedConversation.customer.firstName
+            : selectedConversation.farmer.firstName }}
+          </h2>
+          <div ref="messageListRef" class="messages-list" @scroll="handleScroll">
+            <ul>
+              <li
+                v-for="message in messages"
+                :key="message.id"
+                :class="[
+                  { 'sent-message': message.sender.id == this.userId },
+                  { 'received-message': message.sender.id != this.userId },
+                  { 'farmer-message': message.sender.isFarmer },
+                  { 'non-farmer-message': !message.sender.isFarmer }
+                ]"
+              >
+                <Card class="message-bubble">
+                  <template #content>
+                    <strong>{{ message.sender.firstName }}:</strong> {{ message.content }}
+                  </template>
+                </Card>
+              </li>
+            </ul>
+          </div>
+          <div class="message-input-container">
+            <Textarea v-model="newMessage"
+                      class="message-input"
+                      size="small"
+                      placeholder="Type a message..."
+                      rows="3" />
+            <Button
+              icon="pi pi-send"
+              class="p-button-rounded p-button-primary send-button"
+              @click="sendMessage"
+            />
+          </div>
+        </template>
+      </Card>
 
       <!-- Placeholder if no conversation is selected -->
       <div class="messages-section no-conversation-selected" v-else>
@@ -75,13 +87,13 @@
 
 
 <script>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, nextTick } from 'vue';
 import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import axiosInstance, { getUserId } from '@/utils/axiosInstance.js';
 import Card from 'primevue/card';
 import Button from 'primevue/button';
-import InputText from 'primevue/inputtext';
+import Textarea from 'primevue/textarea';
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
 
@@ -92,7 +104,7 @@ export default {
     Header,
     Card,
     Button,
-    InputText,
+    Textarea,
   },
   setup() {
     const conversations = ref([]);
@@ -103,6 +115,15 @@ export default {
     const page = ref(0);
     const size = ref(50);
     const loadingMessages = ref(false);
+    const messageListRef = ref(null);
+
+    const scrollToBottom = () => {
+      nextTick(() => {
+        if (messageListRef.value) {
+          messageListRef.value.scrollTop = messageListRef.value.scrollHeight;
+        }
+      });
+    };
 
     const fetchConversations = async () => {
       const response = await axiosInstance.get('/messaging/conversations', {
@@ -124,14 +145,18 @@ export default {
       if (stompClient.value) {
         stompClient.value.disconnect();
       }
-
-      const socket = new SockJS('http://localhost:8080/ws');
+        const socket = new SockJS(`${import.meta.env.VITE_BASE_URL}/ws`);
       stompClient.value = Stomp.over(socket);
       stompClient.value.connect({}, () => {
         if (selectedConversation.value) {
           stompClient.value.subscribe(`/topic/messages/${selectedConversation.value.id}`, (message) => {
             const receivedMessage = JSON.parse(message.body);
-            messages.value.unshift(receivedMessage);
+            messages.value.push(receivedMessage);
+            const conversationToUpdate = conversations.value.find(convo => convo.id === receivedMessage.conversationId);
+            if (conversationToUpdate&&conversationToUpdate.lastMessage) {
+                conversationToUpdate.lastMessage = receivedMessage.content;
+            }
+            scrollToBottom();
           });
         }
       });
@@ -142,35 +167,40 @@ export default {
       page.value = 0;
 
       const response = await axiosInstance.get(`/messaging/conversations/${conversation.id}`, {
-        params: { page: page.value, size: size.value, sort: 'sentAt,desc' },
+        params: { page: page.value, size: size.value, sort: 'sentAt,asc' }, // Ensure ascending order
       });
       messages.value = response.data;
-
       connectWebSocket();
+      scrollToBottom();
     };
 
     const loadMoreMessages = async () => {
       if (loadingMessages.value || page.value === null) return;
       page.value++;
       loadingMessages.value = true;
+
       const response = await axiosInstance.get(`/messaging/conversations/${selectedConversation.value.id}`, {
-        params: { page: page.value, size: size.value, sort: 'sentAt,desc' },
+        params: { page: page.value, size: size.value, sort: 'sentAt,asc' },
       });
 
       if (response.data.length > 0) {
-        messages.value = [...messages.value, ...response.data];
+        messages.value = [...response.data, ...messages.value];
       } else {
         page.value = null;
       }
+
       loadingMessages.value = false;
     };
 
     const handleScroll = () => {
-      const messageList = document.querySelector('.messages-list');
-      if (messageList.scrollTop === 0) {
+      if (messageListRef.value.scrollTop === 0) {
         loadMoreMessages();
       }
     };
+
+    watch(messages, () => {
+      scrollToBottom();
+    });
 
     onMounted(() => {
       fetchConversations();
@@ -184,6 +214,7 @@ export default {
       selectConversation,
       sendMessage,
       handleScroll,
+      messageListRef,
     };
   },
   data() {
@@ -193,7 +224,6 @@ export default {
   },
   created() {
     this.userId = getUserId();
-    console.log(this.userId);
   },
 };
 </script>
@@ -224,10 +254,18 @@ export default {
 
 .conversations-sidebar {
   width: 25%;
-  background-color: #ffffff;
+  background-color: #f9fafb;
   border-right: 1px solid #ddd;
   padding: 1rem;
   overflow-y: auto;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #42a5f5;
+  margin-bottom: 1rem;
 }
 
 .conversation-list {
@@ -236,18 +274,54 @@ export default {
   margin: 0;
 }
 
-.conversation-card {
+.conversation-item {
   margin-bottom: 1rem;
   cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.conversation-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .selected-conversation .conversation-card {
-  background-color: #e0f7fa;
+  background-color: #e3f2fd;
 }
 
+.card-header {
+  display: flex;
+  padding-top: 2rem;
+  font-size: 1.5em;
+  align-items: center; /* Vertically centers content */
+  justify-content: center; /* Horizontally centers content */
+  gap: 10px; /* Adds spacing between the avatar and the name */
+}
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  object-fit: cover;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.conversation-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.last-message {
+  font-size: 1.2rem;
+  color: deepskyblue;
+  margin-top: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .messages-section {
+  width: 60%;
   flex: 1;
-  height: 80vh;
   display: flex;
   flex-direction: column;
   padding-top: 1rem;
@@ -265,9 +339,11 @@ export default {
 
 .messages-list {
   flex: 1;
+  height: 40vw;
+  scrollbar-width: none;
   overflow-y: auto;
   margin-bottom: 1rem;
-  max-height: calc(100vh - 200px);
+  max-height: calc(100vh - 15em);
 }
 
 .messages-list ul {
@@ -276,11 +352,13 @@ export default {
 }
 
 .message-bubble {
-  padding: 0.8rem;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 0.5rem;
-  max-width: 70%;
+  max-width: 20%; /* Max width of the bubble */
+  word-wrap: break-word; /* Ensure words break if they're too long */
+  overflow-wrap: break-word; /* Alternative way to handle word wrapping */
 }
+
 
 .sent-message {
   display: flex;
@@ -308,6 +386,7 @@ export default {
 }
 
 .message-input {
+  width: 100%;
   flex: 1;
   margin-right: 0.5rem;
 }

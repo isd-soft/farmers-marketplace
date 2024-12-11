@@ -7,6 +7,7 @@ import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.models.VerificationToken;
 import com.example.isdfarmersmarket.web.commands.SendEmailCommand;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.context.Context;
@@ -20,6 +21,9 @@ public class RegistrationListener {
     private final EmailSenderService emailSenderService;
     private final SpringTemplateEngine templateEngine;
 
+    @Value("${spring.backend.url}")
+    private String backendUrl;
+
     @EventListener
     private void confirmRegistration(RegistrationCompleteEvent event) {
         User user = event.getUser();
@@ -28,8 +32,7 @@ public class RegistrationListener {
 
         String recipientAddress = user.getEmail();
         String subject = "Registration Confirmation";
-        String appUrl = "http://localhost:8080";
-        String confirmationUrl = appUrl + "/auth/register/confirm?token=" + token.getToken();
+        String confirmationUrl = backendUrl + "/auth/register/confirm?token=" + token.getToken();
 
         Context context = new Context();
         context.setVariable("confirmationUrl", confirmationUrl);

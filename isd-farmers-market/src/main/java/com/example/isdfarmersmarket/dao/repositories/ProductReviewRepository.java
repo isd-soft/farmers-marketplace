@@ -17,5 +17,7 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, Lo
     @Query("SELECT new com.example.isdfarmersmarket.web.dto.ReviewStatsDTO(AVG(r.rating), COUNT(r)) " +
             "FROM ProductReview r WHERE r.product = :product")
     ReviewStatsDTO findReviewStatsByProduct(@Param("product") Product product);
+    boolean existsByCreatorAndProduct(User creator, Product product);
+
 
 }

@@ -1,23 +1,35 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import LoginPage from '@/components/LoginPage.vue'
-import HomePage from '@/components/HomePage.vue'
-import OrderPage from '@/components/OrderPage.vue'
-import CartPage from '@/components/CartPage.vue'
-import ProductPage from "@/components/ProductPage.vue";
-import WishlistPage from "@/components/WishlistPage.vue";
-import UserPage from "@/components/UserPage.vue";
-import SearchProductsPage from "@/components/SearchProductsPage.vue";
+import { createRouter, createWebHistory } from 'vue-router';
+import LoginPage from '@/components/LoginPage.vue';
+import HomePage from '@/components/HomePage.vue';
+import OrderPage from '@/components/OrderPage.vue';
+import CartPage from '@/components/CartPage.vue';
+import ProductPage from '@/components/ProductPage.vue';
+import WishlistPage from '@/components/WishlistPage.vue';
+import UserPage from '@/components/UserPage.vue';
+import SearchProductsPage from '@/components/SearchProductsPage.vue';
 import OrderManagementPage from '@/components/OrderManagementPage.vue';
-import MyProductsPage from "@/components/MyProductsPage.vue";
-import UpdateProduct from "@/components/UpdateProduct.vue";
+import MyProductsPage from '@/components/MyProductsPage.vue';
+import UpdateProduct from '@/components/UpdateProduct.vue';
 import SettingsPage from '@/components/SettingsPage.vue';
-import MessagingPage from '@/components/MessagingPage.vue'
-import CreateProduct from '@/components/CreateProduct.vue'
-import ScheduleOrder from "@/components/ScheduleOrder.vue";
-import UpdateScheduledOrder from "@/components/UpdateScheduledOrder.vue";
-import MyScheduledOrders from "@/components/MyScheduledOrders.vue";
-import ServerInfoPage from '@/components/ServerInfoPage.vue'
+import MessagingPage from '@/components/MessagingPage.vue';
+import CreateProduct from '@/components/CreateProduct.vue';
+import ScheduleOrder from '@/components/ScheduleOrder.vue';
+import UpdateScheduledOrder from '@/components/UpdateScheduledOrder.vue';
+import MyScheduledOrders from '@/components/MyScheduledOrders.vue';
+import ServerInfoPage from '@/components/ServerInfoPage.vue';
 import PerformancePage from '@/components/PerformancePage.vue';
+import AboutUsPage from '@/components/AboutUsPage.vue';
+import ContactUsPage from '@/components/ContactUsPage.vue';
+import FAQPage from '@/components/FAQPage.vue';
+import PrivacyPolicyPage from '@/components/PrivacyPolicyPage.vue';
+import FarmersSearchPage from '@/components/FarmersSearchPage.vue';
+import DealsPage from '@/components/DealsPage.vue';
+import AdminProducts from '@/components/Admin/AdminProducts.vue';
+import AdminOrders from '@/components/Admin/AdminOrders.vue';
+import AdminUsers from '@/components/Admin/AdminUsers.vue';
+import AdminCategories from '@/components/Admin/AdminCategories.vue';
+import AdminProductReviews from '@/components/Admin/AdminProductReviews.vue';
+import AdminFarmerReviews from '@/components/Admin/AdminFarmerReviews.vue';
 
 const routes = [
   {
@@ -125,8 +137,67 @@ const routes = [
     name: 'Performance',
     component: PerformancePage,
   },
-  
-]
+  {
+    path: '/about',
+    name: 'About Us',
+    component: AboutUsPage,
+  },
+  {
+    path: '/contact',
+    name: 'Contact Us',
+    component: ContactUsPage,
+  },
+  {
+    path: '/faq',
+    name: 'FAQ',
+    component: FAQPage,
+  },
+  {
+    path: '/privacy',
+    name: 'Privacy Policy',
+    component: PrivacyPolicyPage,
+  },
+  {
+    path: '/farmers-search',
+    name: 'Farmers Search',
+    component: FarmersSearchPage,
+  },
+  {
+    path: '/deals',
+    name: 'Deals',
+    component: DealsPage,
+  },
+  {
+    path: '/admin/products',
+    name: 'Product Administration',
+    component: AdminProducts,
+  },
+  {
+    path: '/admin/orders',
+    name: 'Order Administration',
+    component: AdminOrders,
+  },
+  {
+    path: '/admin/users',
+    name: 'Users Administration',
+    component: AdminUsers,
+  },
+  {
+    path: '/admin/categories',
+    name: 'Category Administration',
+    component: AdminCategories,
+  },
+  {
+    path: '/admin/productreviews',
+    name: 'Product Review Administration',
+    component: AdminProductReviews,
+  },
+  {
+    path: '/admin/farmerreviews',
+    name: 'Farmer Reiew Administration',
+    component: AdminFarmerReviews,
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -140,6 +211,6 @@ router.beforeEach((to, from, next) => {
     document.body.classList.remove('login-bg');
   }
   next();
-})
+});
 
-export default router
+export default router;

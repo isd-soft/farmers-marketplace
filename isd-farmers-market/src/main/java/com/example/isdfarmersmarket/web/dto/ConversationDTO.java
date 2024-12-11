@@ -10,4 +10,5 @@ public class ConversationDTO {
     private CompactUserDTO customer;
     private CompactUserDTO farmer;
     private LocalDateTime createdAt;
+    private String lastMessage;
 }

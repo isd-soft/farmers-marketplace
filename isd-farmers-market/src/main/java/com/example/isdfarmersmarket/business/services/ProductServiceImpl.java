@@ -1,7 +1,9 @@
 package com.example.isdfarmersmarket.business.services;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException;
 import com.example.isdfarmersmarket.business.mapper.ProductMapper;
+import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
+import com.example.isdfarmersmarket.business.services.interfaces.CreateReviewsService;
 import com.example.isdfarmersmarket.business.services.interfaces.ProductService;
 import com.example.isdfarmersmarket.business.utils.SecurityUtils;
 import com.example.isdfarmersmarket.dao.enums.DeliveryTypes;
@@ -36,9 +38,14 @@ public class ProductServiceImpl implements ProductService {
     ProductMapper productMapper;
     CategoryRepository categoryRepository;
     ImageRepository imageRepository;
+    ProductReviewRepository productReviewRepository;
+    ReviewMapper reviewMapper;
+    static String PRODUCT_FIND_FAILED_BY_ID = "Product with the specified id not found";
+    static String CATEGORY_FIND_FAILED_BY_ID = "Category with the specified id not found";
     UserRepository userRepository;
     OrderRepository orderRepository;
     ItemInCartRepository itemInCartRepository;
+    CreateReviewsService createReviewsService;
     private final PlannedOrderRepository plannedOrderRepository;
 
     @Override
@@ -189,6 +196,23 @@ public class ProductServiceImpl implements ProductService {
     }
     @Override
     @Transactional
+    public Page<CompactProductDTO> getAllProductsForAdmin(Long category, String search, Pageable pageable) {
+        Specification<Product> filters = Specification
+                .where(StringUtils.isBlank(search) ? null : ProductSpecification.titleOrDescLike(search))
+                .and((category == null || category == 0L) ? null : ProductSpecification.categoryIs(category));
+        Page<Product> products = productRepository.findAll(filters, pageable);
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+        Set<Product> wishlist = new HashSet<>();
+        if (principal != null) {
+            User user = userRepository.findById(principal.getId()).orElse(null);
+            if(user!=null) {
+                wishlist = user.getWishlist();
+            }
+        }
+        return productMapper.mapToCompactProductsDTO(products);
+    }
+    @Override
+    @Transactional
     public Page<CompactProductDTO> getCurrentUserProducts(Pageable pageable) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         Long creator = principal.getId();
@@ -229,8 +253,11 @@ public class ProductServiceImpl implements ProductService {
         }
         ProductPageDTO productPageDTO = productMapper.mapToProductPage(product);
         if (principal != null) {
-            User user = userRepository.findById(principal.getId()).orElseThrow();
-            if (user.getWishlist().contains(product)) productPageDTO.setIsInWishlist(true);
+            User authenticatedUser = userRepository.findById(principal.getId()).orElseThrow();
+            productPageDTO.setIsInWishlist(authenticatedUser.getWishlist().contains(product));
+            productPageDTO.setCanReview(
+                    !principal.getRoles().contains(ERole.FARMER) &&
+                    createReviewsService.canReviewProduct(authenticatedUser, product));
         }
         return productPageDTO;
     }
@@ -252,6 +279,29 @@ public class ProductServiceImpl implements ProductService {
         }
         return productMapper.mapToCompactProductsDTO(products, wishlist);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductDealsDTO getProductDeals() {
+        ProductDealsDTO productDealsDTO = new ProductDealsDTO();
+
+        Page<Product> productsAbove50 = productRepository
+                .findDiscountedAbove50(Pageable.ofSize(10));
+        Page<Product> productsAbove30AndBelow50 = productRepository
+                .findDiscountedAbove30AndBelow50(Pageable.ofSize(10));
+        Page<Product> productsAbove15AndBelow30 = productRepository
+                .findDiscountedAbove15AndBelow30(Pageable.ofSize(10));
+        Page<Product> productsAbove5AndBelow15 = productRepository
+                .findDiscountedAbove5AndBelow15(Pageable.ofSize(10));
+
+        productDealsDTO.setDiscountedAbove50Percent(productMapper.mapToCompactProductsDTO(productsAbove50));
+        productDealsDTO.setDiscountedAbove30Percent(productMapper.mapToCompactProductsDTO(productsAbove30AndBelow50));
+        productDealsDTO.setDiscountedAbove15Percent(productMapper.mapToCompactProductsDTO(productsAbove15AndBelow30));
+        productDealsDTO.setDiscountedAbove5Percent(productMapper.mapToCompactProductsDTO(productsAbove5AndBelow15));
+
+        return productDealsDTO;
+    }
+
 
     private Image toImageEntity(String base64Image) throws IOException {
         if (base64Image.contains(",")) {
@@ -281,5 +331,3 @@ public class ProductServiceImpl implements ProductService {
                 .anyMatch(role -> role.getRole() == ERole.ADMIN);
     }
 }
-
-

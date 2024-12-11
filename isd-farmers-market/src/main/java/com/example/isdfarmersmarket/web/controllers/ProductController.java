@@ -87,6 +87,17 @@ public class ProductController {
         return ResponseEntity.status(OK).body(productService.getAllProductsByCategory(categoryId));
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/adminall")
+    public ResponseEntity<Page<CompactProductDTO>> getAllProductsForAdmin(
+            Pageable pageable,
+            @RequestParam(required = false) Long category,
+            @RequestParam(required = false) String search
+            ) {
+        return ResponseEntity.status(OK).body(productService.getAllProductsForAdmin(category, search, pageable));
+    }
+
     @GetMapping("/management")
     @PreAuthorize("hasRole('FARMER')")
     public ResponseEntity<Page<CompactProductDTO>> getCurrentUserProducts(Pageable pageable) {
@@ -113,6 +124,12 @@ public class ProductController {
     public ResponseEntity<Page<CompactProductDTO>> getFarmersProducts(@PathVariable Long farmerId, Pageable pageable) {
         return ResponseEntity.status(OK).body(productService.getFarmersProducts(farmerId, pageable));
     }
-
+    @Operation(
+            description = "This endpoint is used to get products with certain discount ranges"
+    )
+    @GetMapping("/deals")
+    public ResponseEntity<ProductDealsDTO> getDeals(){
+        return ResponseEntity.status(OK).body(productService.getProductDeals());
+    }
 
 }

@@ -331,6 +331,16 @@ export default {
 </script>
 
 <style scoped>
+body{
+  display: block !important;
+}
+.home{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-top: 120px;
+  align-items: center;
+}
 .popup-actions-button{
   margin-top: 20px;
   margin-left: auto;
@@ -339,14 +349,16 @@ export default {
   flex-grow: 1;
 }
 .create-product-container {
-  margin-left: 20px;
-  margin-right: 20px;
-  width: calc(100% - 40px);
-  max-width: 80%;
+  width: 80%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   row-gap: 12px;
+}
+@media (max-width: 380px) {
+  .create-product-container{
+    width: 90%;
+  }
 }
 .create-product-form {
   display: flex;
@@ -400,15 +412,6 @@ export default {
   border-radius: 50%;
   padding: 2px 5px;
   cursor: pointer;
-}
-.home{
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-  width: 100%;
-  padding-top: 100px;
-  justify-content: space-between;
-  align-items: center;
 }
 .footer{
   text-align: center;

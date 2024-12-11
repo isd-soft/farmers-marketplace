@@ -19,7 +19,7 @@ import java.util.Set;
 @Builder
 public class PlannedOrder {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "planned_order_sequence")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
