@@ -13,6 +13,16 @@
             outlined
             @click="confirmDeleteSelected"
             :disabled="!selectedUsers || !selectedUsers.length"
+            style="margin-right: 10px"
+          />
+          <Button
+            class="toolbar-buttons"
+            label="Admin"
+            icon="pi pi-user-plus"
+            severity="help"
+            outlined
+            @click="confirmUpgradeSelected"
+            :disabled="!selectedUsers || !selectedUsers.length"
           />
         </template>
         <template #center>
@@ -137,7 +147,7 @@
         </Column>
         <Column field="role" header="Role" :showFilterMatchModes="false" sortable>
           <template #body="{ data }">
-            {{ data.role }}
+            <Tag :value="data.role" :severity="getRoleColor(data.role)" />
           </template>
           <template #filter="{ filterModel }">
             <Multiselect
@@ -145,6 +155,9 @@
               :options="roles.map((role) => role.value)"
               placeholder="Filter by role"
             >
+              <template #option="slotProps">
+                <Tag :value="slotProps.option" :severity="getRoleColor(slotProps.option)" />
+              </template>
             </Multiselect>
           </template>
         </Column>
@@ -187,6 +200,21 @@
         <Button label="Yes" icon="pi pi-check" text @click="deleteSelectedUsers" />
       </template>
     </Dialog>
+    <Dialog
+      v-model:visible="upgradeUsersDialog"
+      :style="{ width: '450px' }"
+      header="Confirm"
+      :modal="true"
+    >
+      <div class="flex items-center gap-4">
+        <i class="pi pi-exclamation-triangle !text-3xl" />
+        <span v-if="user">Are you sure you want to upgrade the selected users?</span>
+      </div>
+      <template #footer>
+        <Button label="No" icon="pi pi-times" text @click="upgradeUsersDialog = false" />
+        <Button label="Yes" icon="pi pi-check" text @click="upgradeSelectedUsers" />
+      </template>
+    </Dialog>
     <Footer class="footer"></Footer>
   </div>
 </template>
@@ -214,16 +242,29 @@ import Password from 'primevue/password';
 import Select from 'primevue/select';
 import FloatLabel from 'primevue/floatlabel';
 import Tag from 'primevue/tag';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
 
 export default {
   name: 'Adminusers',
   setup() {
+    const toast = useToast();
+    function toastAdd(severity, summary, detail, life = 2000) {
+      toast.add({
+        severity: severity,
+        summary: summary,
+        detail: detail,
+        life: life,
+      });
+    }
+
     const dt = ref();
     const loading = ref(true);
     const user = ref({});
     const users = ref([]);
     const selectedUsers = ref();
     const deleteUsersDialog = ref(false);
+    const upgradeUsersDialog = ref(false);
     const editingRows = ref([]);
 
     const exportCSV = () => {
@@ -268,6 +309,15 @@ export default {
     const confirmDeleteSelected = () => {
       deleteUsersDialog.value = true;
     };
+    const confirmUpgradeSelected = () => {
+      const allAreCustomers = selectedUsers.value.every((user) => !user.isAdmin && !user.isFarmer);
+      if (!allAreCustomers) {
+        toastAdd('error', 'Upgrade failed', 'Not all selected users are customers.');
+        return;
+      }
+      upgradeUsersDialog.value = true;
+    };
+
     const deleteSelectedUsers = async () => {
       try {
         await Promise.all(
@@ -276,6 +326,26 @@ export default {
 
         users.value = users.value.filter((val) => !selectedUsers.value.includes(val));
         deleteUsersDialog.value = false;
+        selectedUsers.value = null;
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const upgradeSelectedUsers = async () => {
+      try {
+        await Promise.all(
+          selectedUsers.value.map((user) =>
+            axiosInstance.post(`/users/upgrade-to-admin/${user.id}`),
+          ),
+        );
+        selectedUsers.value.forEach((selectedUser) => {
+          const user = users.value.find((u) => u.id === selectedUser.id);
+          if (user) {
+            user.role = 'Admin';
+          }
+        });
+        upgradeUsersDialog.value = false;
         selectedUsers.value = null;
       } catch (error) {
         console.error(error);
@@ -309,6 +379,16 @@ export default {
           return 'danger';
       }
     };
+    const getRoleColor = (role) => {
+      switch (role) {
+        case 'Admin':
+          return 'contrast';
+        case 'Farmer':
+          return 'warn';
+        case 'Customer':
+          return 'info';
+      }
+    };
 
     fetchUsers();
 
@@ -324,6 +404,7 @@ export default {
     return {
       dt,
       getSeverity,
+      getRoleColor,
       filters,
       roles,
       values,
@@ -331,10 +412,13 @@ export default {
       loading,
       fetchUsers,
       confirmDeleteSelected,
+      confirmUpgradeSelected,
       selectedUsers,
       deleteUsersDialog,
+      upgradeUsersDialog,
       user,
       deleteSelectedUsers,
+      upgradeSelectedUsers,
       roleOptions,
       onRowEditSave,
       editingRows,
