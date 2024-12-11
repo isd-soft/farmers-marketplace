@@ -1,7 +1,7 @@
 package com.example.isdfarmersmarket.business.services;
 
 import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
-import com.example.isdfarmersmarket.business.services.interfaces.GetReviewsService;
+import com.example.isdfarmersmarket.business.services.interfaces.ReviewQueryService;
 import com.example.isdfarmersmarket.dao.models.Product;
 import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.repositories.FarmerReviewRepository;
@@ -17,10 +17,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class GetReviewsServiceImpl implements GetReviewsService {
+public class GetReviewsServiceImpl implements ReviewQueryService {
     ProductReviewRepository productReviewRepository;
     ReviewMapper reviewMapper;
     UserRepository userRepository;
@@ -44,6 +46,22 @@ public class GetReviewsServiceImpl implements GetReviewsService {
                 .toList();
 
         return new PageResponseDTO<>(content,totalReviews);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductReviewDTO> getAllProductReviews() {
+        var reviews = productReviewRepository.findAll();
+
+        return reviews.stream().map(reviewMapper::mapWithProductDetails).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FarmerReviewDTO> getAllFarmerReviews() {
+        var reviews = farmerReviewRepository.findAll();
+
+        return reviews.stream().map(reviewMapper::map).toList();
     }
 
 

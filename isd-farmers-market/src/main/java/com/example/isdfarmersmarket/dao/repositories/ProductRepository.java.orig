@@ -21,9 +21,7 @@ import java.util.Set;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     Page<Product> findProductsByFarmer(User farmer, Pageable pageable);
-
-    @Query("SELECT COUNT(p) FROM Product p WHERE p.category.id = :categoryId")
-    Integer countByCategoryId(@Param("categoryId") Long categoryId);
+<<<<<<< Updated upstream
 
     @Query("SELECT p FROM Product p WHERE p.discountPercents >= 50 ORDER BY p.rating DESC")
     Page<Product> findDiscountedAbove50(Pageable pageable);
@@ -37,4 +35,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT p FROM Product p WHERE p.discountPercents >= 5 AND p.discountPercents < 15 ORDER BY p.rating DESC")
     Page<Product> findDiscountedAbove5AndBelow15(Pageable pageable);
 
+=======
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.category.id = :categoryId")
+    Integer countByCategoryId(@Param("categoryId") Long categoryId);
+>>>>>>> Stashed changes
 }

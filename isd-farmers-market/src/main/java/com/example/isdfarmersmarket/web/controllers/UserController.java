@@ -53,4 +53,30 @@ public class UserController {
         UserProfileDTO upgradedUser = userService.upgradeToFarmer(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(upgradedUser);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<UserProfileDTO> deleteUser(@PathVariable Long id) {
+        userService.deleteUserById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UpdateUserDTO> updateUser(@PathVariable Long id, @RequestBody UpdateUserDTO updateUserDTO) {
+
+        UpdateUserCommand updateUserCommand = new UpdateUserCommand();
+        updateUserCommand.setId(id);
+        updateUserCommand.setFirstName(updateUserDTO.getFirstName());
+        updateUserCommand.setLastName(updateUserDTO.getLastName());
+        updateUserCommand.setEmail(updateUserDTO.getEmail());
+        updateUserCommand.setPhoneNumber(updateUserDTO.getPhoneNumber());
+        updateUserCommand.setDescription(updateUserDTO.getDescription());
+        updateUserCommand.setAddress(updateUserDTO.getAddress());
+
+        UpdateUserDTO updatedUserDTO = userService.updateUser(updateUserCommand);
+
+        return ResponseEntity.ok(updatedUserDTO);
+    }
+
+
+
 }

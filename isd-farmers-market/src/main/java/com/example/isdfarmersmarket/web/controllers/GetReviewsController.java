@@ -1,6 +1,6 @@
 package com.example.isdfarmersmarket.web.controllers;
 
-import com.example.isdfarmersmarket.business.services.interfaces.GetReviewsService;
+import com.example.isdfarmersmarket.business.services.interfaces.ReviewQueryService;
 import com.example.isdfarmersmarket.web.dto.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -9,19 +9,33 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GetReviewsController {
 
-    GetReviewsService reviewQueryService;
+    ReviewQueryService reviewQueryService;
 
     @GetMapping("/products/{productId}")
     public ResponseEntity<PageResponseDTO<ProductReviewDTO>> getProductReviews(
             @PathVariable Long productId,
             Pageable pageable) {
         PageResponseDTO<ProductReviewDTO> response = reviewQueryService.getProductReviews(productId, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/allproducts")
+    public ResponseEntity<List<ProductReviewDTO>> getAllProductReviews() {
+        List<ProductReviewDTO> response = reviewQueryService.getAllProductReviews();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/allfarmers")
+    public ResponseEntity<List<FarmerReviewDTO>> getAllFarmerReviews() {
+        List<FarmerReviewDTO> response = reviewQueryService.getAllFarmerReviews();
         return ResponseEntity.ok(response);
     }
 
