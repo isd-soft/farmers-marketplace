@@ -233,3 +233,9 @@ export default {
   },
 };
 </script>
+<style scoped>
+.footer {
+  margin: 0;
+  padding: 20px;
+}
+</style>

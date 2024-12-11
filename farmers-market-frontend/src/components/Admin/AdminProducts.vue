@@ -350,19 +350,20 @@ export default {
 </script>
 <style>
 .admin-home {
-  margin-top: 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
   width: 100%;
-  height: max-content;
+  gap: 5vh;
 }
 .admin-content {
-  padding: 6vh;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 5vh;
+  gap: 2em;
+  margin-top: 80px;
+  padding: 6vh;
   width: 80%;
 }
 .admin-product-image {
@@ -383,5 +384,10 @@ export default {
 .searchbar {
   width: 100% !important;
   max-width: 100% !important;
+}
+</style>
+<style scoped>
+.footer {
+  padding: 20px;
 }
 </style>

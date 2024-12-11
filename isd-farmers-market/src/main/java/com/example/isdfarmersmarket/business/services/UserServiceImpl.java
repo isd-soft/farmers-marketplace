@@ -132,6 +132,22 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Transactional
+    @Override
+    public UserProfileDTO upgradeToAdmin(Long id) {
+        User customer = userRepository.findById(id)
+                .orElseThrow(CustomUsernameNotFoundException::new);
+        Role role = roleRepository.findByRole(ERole.ADMIN)
+                .orElseThrow(RoleDoesntExistException::new);
+        if (customer.getRoles().contains(role)) {
+            throw new RoleAlreadyExistsException();
+        }
+        customer.addRole(role);
+
+        userRepository.save(customer);
+        return userProfileMapper.map(customer);
+    }
+
+    @Transactional
     public void deleteUserById(Long id) {
         if (!userRepository.existsById(id)) {
             throw new EntityNotFoundException("User with the specified ID not found");
