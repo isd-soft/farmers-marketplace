@@ -93,9 +93,13 @@
         ></Column>
 
         <template #expansion="slotProps">
-          <DataTable :value="slotProps.data.itemsInOrder">
+          <DataTable :value="slotProps.data.itemsInOrder" removableSort>
             <Column field="productId" header="Product ID" sortable></Column>
             <Column field="productTitle" header="Title" sortable></Column>
+            <Column field="rating" header="Rating" sortable>
+              <template #body="slotProps">
+                <Rating v-model="slotProps.data.rating" readonly /> </template
+            ></Column>
             <Column field="pricePerUnit" header="Price" sortable></Column>
             <Column field="quantity" header="Quantity" sortable></Column>
             <Column header="Total">
@@ -139,6 +143,7 @@ import { FilterMatchMode } from '@primevue/core/api';
 import Header from '@/components/Header.vue';
 import Footer from '@/components/Footer.vue';
 
+import Rating from 'primevue/rating';
 import InputIcon from 'primevue/inputicon';
 import IconField from 'primevue/iconfield';
 import Image from 'primevue/image';
@@ -264,6 +269,7 @@ export default {
   },
 
   components: {
+    Rating,
     Select,
     Header,
     Footer,

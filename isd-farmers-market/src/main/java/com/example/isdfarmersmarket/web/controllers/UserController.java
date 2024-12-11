@@ -14,6 +14,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -51,6 +52,13 @@ public class UserController {
     @PostMapping("/upgrade-to-farmer")
     public ResponseEntity<UserProfileDTO> upgradeToFarmer(@RequestBody CustomerUpgradeCommand command) {
         UserProfileDTO upgradedUser = userService.upgradeToFarmer(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(upgradedUser);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/upgrade-to-admin/{id}")
+    public ResponseEntity<UserProfileDTO> upgradeToAdmin(@PathVariable Long id) {
+        UserProfileDTO upgradedUser = userService.upgradeToAdmin(id);
         return ResponseEntity.status(HttpStatus.CREATED).body(upgradedUser);
     }
 
