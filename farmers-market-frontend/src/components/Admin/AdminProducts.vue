@@ -32,9 +32,9 @@
               <i class="pi pi-search" />
             </InputIcon>
             <InputText
-              class="searchbar"
               v-model="filters['global'].value"
               placeholder="Keyword Search"
+              class="searchbar"
             />
           </IconField>
         </template>
