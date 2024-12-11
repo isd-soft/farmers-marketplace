@@ -1,7 +1,7 @@
 package com.example.isdfarmersmarket.business.services;
 
 import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
-import com.example.isdfarmersmarket.business.services.interfaces.ReviewQueryService;
+import com.example.isdfarmersmarket.business.services.interfaces.GetReviewsService;
 import com.example.isdfarmersmarket.dao.models.Product;
 import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.repositories.FarmerReviewRepository;
@@ -22,7 +22,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class GetReviewsServiceImpl implements ReviewQueryService {
+public class GetReviewsServiceImpl implements GetReviewsService {
     ProductReviewRepository productReviewRepository;
     ReviewMapper reviewMapper;
     UserRepository userRepository;
