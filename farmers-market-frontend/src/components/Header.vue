@@ -151,7 +151,6 @@ const accountMenu = ref([
       { label: 'Scheduled Orders', icon: 'pi pi-clock', command: () => goToScheduledOrders() },
       { label: 'Wishlist', icon: 'pi pi-heart', command: () => goToFavorites() },
       { label: 'Settings', icon: 'pi pi-cog', command: () => goToSettings() },
-      { label: 'Server Info', icon: 'pi pi-exclamation-triangle', command: () => goToServerInfo() },
       { label: 'Logout', icon: 'pi pi-sign-out', command: () => logout() },
     ],
   },
@@ -195,6 +194,13 @@ const fetchUserData = async () => {
     if (currentUser.isAdmin) {
       accountMenu.value[0].items = accountMenu.value[0].items.filter(
         (item) => !['Orders', 'Scheduled Orders', 'Wishlist'].includes(item.label),
+      );
+      accountMenu.value[0].items.splice(0, 0,
+        {
+          label: 'Server Info',
+          icon: 'pi pi-exclamation-triangle',
+          command: () => goToServerInfo()
+        },
       );
       accountMenu.value[0].items.splice(0, 0, {
         label: 'Admin Panel',

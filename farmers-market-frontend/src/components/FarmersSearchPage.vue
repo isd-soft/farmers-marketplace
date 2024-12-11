@@ -182,6 +182,7 @@ export default {
   width: calc(100% - 40px);
   margin-left: 20px;
   margin-right: 20px;
+  min-height: 100vh;
 }
 .search-farmers-input{
   flex-grow: 1 !important;

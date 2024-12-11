@@ -272,46 +272,41 @@ export default {
   margin-bottom: 2rem;
   text-align: center;
 }
-/* Custom Toast Container */
 .custom-toast-container {
   display: flex;
-  flex-direction: column; /* Ensure the content is stacked vertically */
-  padding: 1rem 1.5rem; /* Added padding to the toast */
+  flex-direction: column;
+  padding: 1rem 1.5rem;
   border-radius: 8px;
-  font-family: Arial, sans-serif; /* Set a consistent font */
+  font-family: Arial, sans-serif;
   font-size: 1rem;
   color: #333;
-  position: relative; /* Ensure close button is positioned correctly */
+  position: relative;
 }
 
-/* Toast Summary (title) */
 .custom-toast-summary {
   font-weight: bold;
-  font-size: 1.1rem; /* Slightly larger text for the summary */
-  margin-bottom: 0.5rem; /* Space between summary and detail */
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
 }
 
-/* Toast Detail (description) */
 .custom-toast-detail {
   font-size: 1rem;
-  color: #666; /* Softer color for details */
+  color: #666;
 }
 
-/* Close Button (X) */
 .custom-toast-container .p-toast-close {
   position: absolute;
   top: 10px;
   right: 10px;
-  font-size: 1.5rem; /* Larger close icon */
-  background-color: transparent; /* Make background transparent */
+  font-size: 1.5rem;
+  background-color: transparent;
   border: none;
-  cursor: pointer; /* Make the button clickable */
+  cursor: pointer;
 }
 
-/* Custom Button in Toast */
 .custom-toast-button {
   margin-top: 1rem;
-  padding: 0.5rem 1.5rem; /* Ensure the button has some padding */
+  padding: 0.5rem 1.5rem;
   font-weight: bold;
 }
 
