@@ -145,14 +145,17 @@ export default {
       if (stompClient.value) {
         stompClient.value.disconnect();
       }
-
-      const socket = new SockJS('http://localhost:8080/ws');
+        const socket = new SockJS(`${import.meta.env.VITE_BASE_URL}/ws`);
       stompClient.value = Stomp.over(socket);
       stompClient.value.connect({}, () => {
         if (selectedConversation.value) {
           stompClient.value.subscribe(`/topic/messages/${selectedConversation.value.id}`, (message) => {
             const receivedMessage = JSON.parse(message.body);
             messages.value.push(receivedMessage);
+            const conversationToUpdate = conversations.value.find(convo => convo.id === receivedMessage.conversationId);
+            if (conversationToUpdate&&conversationToUpdate.lastMessage) {
+                conversationToUpdate.lastMessage = receivedMessage.content;
+            }
             scrollToBottom();
           });
         }

@@ -2,7 +2,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: import.meta.env.VITE_BASE_URL,
   headers: {
     "Content-Type": "application/json",
     "Accept": "application/json",
@@ -31,7 +31,8 @@ const refreshTokens = async () => {
       throw new Error("No refresh token available");
     }
 
-    const response = await axios.post("http://localhost:8080/auth/refresh", {},
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const response = await axios.post(`${apiUrl}/auth/refresh`, {},
       {
         headers: {
           Authorization: `Bearer ${refreshToken}`,
