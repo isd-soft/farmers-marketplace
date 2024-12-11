@@ -1,4 +1,4 @@
-<template>
+  <template>
   <div class="deals-page">
   <Header/>
   <div class="carousels">
