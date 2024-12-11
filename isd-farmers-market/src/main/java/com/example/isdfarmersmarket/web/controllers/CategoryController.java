@@ -4,7 +4,9 @@ import com.example.isdfarmersmarket.business.services.CategoryServiceImpl;
 import com.example.isdfarmersmarket.web.commands.CreateCategoryCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateCategoryCommand;
 import com.example.isdfarmersmarket.web.dto.CategoryDTO;
+import com.example.isdfarmersmarket.web.dto.CategoryWithNrDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +53,11 @@ public class CategoryController {
     @GetMapping()
     public ResponseEntity<List<CategoryDTO>> getAllCategories() {
         return ResponseEntity.status(OK).body(categoryServiceImpl.getAllCategories());
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<List<CategoryWithNrDTO>> getAllCategoriesWithNr() {
+        return ResponseEntity.status(OK).body(categoryServiceImpl.getAllCategoriesWithNr());
     }
 }
 

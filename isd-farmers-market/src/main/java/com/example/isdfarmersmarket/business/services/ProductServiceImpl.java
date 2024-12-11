@@ -196,6 +196,23 @@ public class ProductServiceImpl implements ProductService {
     }
     @Override
     @Transactional
+    public Page<CompactProductDTO> getAllProductsForAdmin(Long category, String search, Pageable pageable) {
+        Specification<Product> filters = Specification
+                .where(StringUtils.isBlank(search) ? null : ProductSpecification.titleOrDescLike(search))
+                .and((category == null || category == 0L) ? null : ProductSpecification.categoryIs(category));
+        Page<Product> products = productRepository.findAll(filters, pageable);
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+        Set<Product> wishlist = new HashSet<>();
+        if (principal != null) {
+            User user = userRepository.findById(principal.getId()).orElse(null);
+            if(user!=null) {
+                wishlist = user.getWishlist();
+            }
+        }
+        return productMapper.mapToCompactProductsDTO(products);
+    }
+    @Override
+    @Transactional
     public Page<CompactProductDTO> getCurrentUserProducts(Pageable pageable) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         Long creator = principal.getId();

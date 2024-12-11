@@ -3,6 +3,7 @@ package com.example.isdfarmersmarket.business.services.interfaces;
 import com.example.isdfarmersmarket.web.dto.CategoryDTO;
 import com.example.isdfarmersmarket.web.commands.CreateCategoryCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateCategoryCommand;
+import com.example.isdfarmersmarket.web.dto.CategoryWithNrDTO;
 
 import java.util.List;
 
@@ -14,4 +15,6 @@ public interface CategoryService {
     CategoryDTO deleteCategory(Long id);
 
     List<CategoryDTO> getAllCategories();
+
+    List<CategoryWithNrDTO> getAllCategoriesWithNr();
 }

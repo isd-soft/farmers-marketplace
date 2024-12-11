@@ -16,6 +16,7 @@ import java.util.List;
 public interface UserProfileMapper {
 
     @Mapping(target = "isFarmer", expression = "java(isFarmer(user))")
+    @Mapping(target = "isAdmin", expression = "java(isAdmin(user))")
     @Mapping(target = "canMessage", expression = "java(canMessage(user))")
     @Mapping(target = "isCurrentUser", expression = "java(isCurrentUser(user))")
     UserProfileDTO map(User user);
@@ -27,6 +28,11 @@ public interface UserProfileMapper {
     default boolean isFarmer(User user) {
         return user.getRoles().stream()
                 .anyMatch(role -> role.getAuthority().equals(ERole.FARMER.name()));
+    }
+
+    default boolean isAdmin(User user) {
+        return user.getRoles().stream()
+                .anyMatch(role -> role.getAuthority().equals(ERole.ADMIN.name()));
     }
 
     default boolean canMessage(User user) {

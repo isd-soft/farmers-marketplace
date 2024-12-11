@@ -21,6 +21,7 @@ public interface ProductService {
 
     ProductDTO deleteProduct(Long id);
     Page<CompactProductDTO> getAllProducts(Long category, String search, Pageable pageable);
+    Page<CompactProductDTO> getAllProductsForAdmin(Long category, String search, Pageable pageable);
     Page<CompactProductDTO> getCurrentUserProducts(Pageable pageable);
     ProductDTO getProductById(Long id);
     Page<CompactProductDTO> getFarmersProducts(Long farmerId, Pageable pageable);
