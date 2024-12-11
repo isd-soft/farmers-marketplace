@@ -46,7 +46,7 @@
       v-if="user.isFarmer && user.canMessage"
       label="Send Message"
       icon="pi pi-envelope"
-      style="width: 15%; margin-bottom: 1%"
+      style="width: 15%; margin-bottom: 1%;min-width: 8em"
       class="p-button-rounded p-button-success"
       @click="showDialog = true"
     />
@@ -208,6 +208,7 @@ export default {
           summary: 'Message Sent',
           detail: 'Your message was sent successfully!',
           life: 4000,
+          group: 'bc'
         });
 
         showDialog.value = false;
@@ -256,50 +257,93 @@ export default {
   width: 100%;
   padding-top: 80px;
 }
-.user-info{
-  margin-right: 12em;
-  margin-left: 12em;
+
+.user-info {
+  margin: 0 2rem;
 }
-
-
 
 .user-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 2rem 1rem;
+  padding: 1.5rem;
   background-color: #f8f9fa;
   border-radius: 8px;
   margin-bottom: 2rem;
+  text-align: center;
+}
+/* Custom Toast Container */
+.custom-toast-container {
+  display: flex;
+  flex-direction: column; /* Ensure the content is stacked vertically */
+  padding: 1rem 1.5rem; /* Added padding to the toast */
+  border-radius: 8px;
+  font-family: Arial, sans-serif; /* Set a consistent font */
+  font-size: 1rem;
+  color: #333;
+  position: relative; /* Ensure close button is positioned correctly */
+}
+
+/* Toast Summary (title) */
+.custom-toast-summary {
+  font-weight: bold;
+  font-size: 1.1rem; /* Slightly larger text for the summary */
+  margin-bottom: 0.5rem; /* Space between summary and detail */
+}
+
+/* Toast Detail (description) */
+.custom-toast-detail {
+  font-size: 1rem;
+  color: #666; /* Softer color for details */
+}
+
+/* Close Button (X) */
+.custom-toast-container .p-toast-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5rem; /* Larger close icon */
+  background-color: transparent; /* Make background transparent */
+  border: none;
+  cursor: pointer; /* Make the button clickable */
+}
+
+/* Custom Button in Toast */
+.custom-toast-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1.5rem; /* Ensure the button has some padding */
+  font-weight: bold;
 }
 
 .user-header-avatar {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  margin-right: 2rem;
+  margin-bottom: 1rem;
 }
 
 .user-name {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   font-weight: bold;
-  margin: 0;
+  margin-bottom: 0.5rem;
 }
 
-.user-tabs {
-  font-size: 1.2rem;
+.user-rating {
+  margin-top: 0.5rem;
 }
 
 .products-panel {
-  padding: 2rem 0;
+  padding: 1rem;
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 2rem;
+  justify-content: center;
+  gap: 1.5rem;
 }
 
 .product-card {
-  width: 16em;
-  height: 23em;
+  width: 100%;
+  max-width: 16em;
+  height: auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -308,50 +352,48 @@ export default {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.product-card img {
-  max-width: 100%;
-  max-height: 10em;
-  object-fit: contain;
-}
-
 .load-more-button {
   margin-top: 2rem;
   width: 100%;
 }
 
-.footer {
-  margin-top: 2rem;
+@media (min-width: 768px) {
+  .user-info {
+    margin: 0 6rem;
+  }
+
+  .user-header {
+    flex-direction: row;
+    text-align: left;
+  }
+
+  .user-header-avatar {
+    width: 120px;
+    height: 120px;
+    margin-right: 2rem;
+    margin-bottom: 0;
+  }
+
+  .user-name {
+    font-size: 2.5rem;
+  }
+
+  .user-rating {
+    margin-top: 1.5rem;
+    margin-left: 2em;
+  }
+
+  .products-panel {
+    justify-content: flex-start;
+    gap: 2rem;
+  }
 }
 
-.custom-toast-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-right: 16px;
-  padding-left: 8px;
-
+@media (min-width: 1024px) {
+  .user-info {
+    margin: 0 12rem;
+  }
 }
 
-.custom-toast-content {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 16px;
-}
-
-.custom-toast-summary {
-  font-weight: bold;
-  font-size: 1.125rem;
-}
-
-.custom-toast-detail {
-  font-weight: 500;
-  font-size: 1rem;
-  color: #555;
-}
-
-.custom-toast-button {
-  margin-top: 8px;
-}
 
 </style>

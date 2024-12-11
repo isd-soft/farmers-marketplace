@@ -463,10 +463,5 @@ body{
   flex-grow: 1 !important;
   gap: 5px;
 }
-.footer{
-  text-align: center;
-  padding: 10px;
-  margin-top: 50px;
-  bottom: 0;
-}
+
 </style>

@@ -293,21 +293,14 @@ export default {
   display: flex;
   padding-top: 2rem;
   font-size: 1.5em;
-  align-items: center; /* Vertically centers content */
-  justify-content: center; /* Horizontally centers content */
-  gap: 10px; /* Adds spacing between the avatar and the name */
-}
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
-  object-fit: cover;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .conversation-name {
   font-weight: bold;
+  margin-left: 1em;
   color: #333;
 }
 
@@ -402,5 +395,62 @@ export default {
   text-align: center;
   padding: 1rem;
   border-top: 1px solid #ddd;
+}
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .messaging-page {
+    flex-direction: column; /* Stack sections vertically */
+  }
+
+  .conversations-sidebar {
+    width: 100%; /* Take full width on smaller screens */
+    border-right: none;
+    box-shadow: none;
+  }
+
+  .messages-section {
+    width: 100%; /* Take full width on smaller screens */
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar-header {
+    font-size: 1.2rem;
+  }
+
+  .conversation-item {
+    margin-bottom: 0.5rem;
+  }
+
+  .messages-list {
+    max-height: calc(100vh - 10em); /* Adjust max-height for smaller screens */
+  }
+
+  .message-bubble {
+    max-width: 90%; /* Increase max width on smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .app-container {
+    padding: 0.5em;
+  }
+
+  .sidebar-header {
+    font-size: 1rem;
+  }
+
+  .last-message {
+    font-size: 0.8rem;
+  }
+
+  .messages-list {
+    margin-bottom: 0.5rem;
+  }
+
+  .send-button {
+    font-size: 0.8rem;
+  }
 }
 </style>

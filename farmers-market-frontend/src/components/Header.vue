@@ -13,6 +13,16 @@
               <i class="pi pi-search"></i>
             </Button>
           </div>
+          <Button
+            @click="goToFarmersSearch"
+            class="farmers-search-button"
+            label="Farmers Search"
+            severity="secondary"
+            variant="text"
+          >
+            <p>Farmers  </p>
+            <i class="pi pi-users"></i>
+          </Button>
           <Menubar v-if="isLoggedIn" :model="accountMenu" class="menubar-item"></Menubar>
           <Button
             v-if="!isLoggedIn"
@@ -138,7 +148,6 @@ const accountMenu = ref([
       { label: 'My page', icon: 'pi pi-home', command: () => goToMyPage() },
       { label: 'Orders', icon: 'pi pi-shopping-cart', command: () => goToOrders() },
       { label: 'Messages', icon: 'pi pi-envelope', command: () => goToMessages() },
-      { label: 'Farmers Search', icon: 'pi pi-search', command: () => goToFarmersSearch() },
       { label: 'Scheduled Orders', icon: 'pi pi-clock', command: () => goToScheduledOrders() },
       { label: 'Wishlist', icon: 'pi pi-heart', command: () => goToFavorites() },
       { label: 'Settings', icon: 'pi pi-cog', command: () => goToSettings() },
