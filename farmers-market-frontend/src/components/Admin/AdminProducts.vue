@@ -359,7 +359,8 @@ export default {
 }
 .admin-content {
   flex: 1;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 2em;
   margin-top: 80px;
   padding: 6vh;
