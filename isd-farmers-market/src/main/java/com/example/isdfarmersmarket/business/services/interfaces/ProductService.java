@@ -16,14 +16,16 @@ public interface ProductService {
     ProductDTO updateProduct(Long id, UpdateProductCommand updateProductCommand);
     ProductDTO setDiscountProduct(Long id, int discount);
 
-    @Transactional
     ProductDTO changeVisible(Long id, boolean visible);
 
     ProductDTO deleteProduct(Long id);
     Page<CompactProductDTO> getAllProducts(Long category, String search, Pageable pageable);
+    Page<CompactProductDTO> getAllProductsForAdmin(Long category, String search, Pageable pageable);
     Page<CompactProductDTO> getCurrentUserProducts(Pageable pageable);
     ProductDTO getProductById(Long id);
     Page<CompactProductDTO> getFarmersProducts(Long farmerId, Pageable pageable);
     ProductPageDTO getProductPageById(Long id);
     ProductDealsDTO getProductDeals();
+
+    List<CompactProductDTO> getAllProductsByCategory(Long categoryId);
 }

@@ -14,6 +14,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +26,13 @@ import static org.springframework.http.HttpStatus.*;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Slf4j
 public class AuthController {
-    AuthServiceImpl authService;
-    JwtServiceImpl jwtService;
+    final AuthServiceImpl authService;
+    final JwtServiceImpl jwtService;
+    @Value("${spring.frontend.url}")
+    String frontendUrl;
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> userRegister(@RequestBody UserRegisterCommand registerRequestDTO,
@@ -44,7 +47,7 @@ public class AuthController {
         try {
             authService.validateAndEnableUser(token);
             return ResponseEntity.status(FOUND)
-                    .header("Location", "http://localhost:5173/login")
+                    .header("Location", frontendUrl + "/login")
                     .build();
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(BAD_REQUEST).body("Invalid or expired token. Please request a new one.");

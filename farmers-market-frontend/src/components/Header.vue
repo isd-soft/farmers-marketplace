@@ -8,15 +8,37 @@
       <template #end>
         <div class="right-section">
           <div class="search-bar" v-if="!isSearchPage">
-            <InputText @keydown.enter="search" v-model="searchQ" class="input-search"/>
+            <InputText @keydown.enter="search" v-model="searchQ" class="input-search" />
             <Button @click="search" class="search-button">
               <i class="pi pi-search"></i>
             </Button>
           </div>
+          <Button
+            @click="goToFarmersSearch"
+            class="farmers-search-button"
+            label="Farmers Search"
+            severity="secondary"
+            variant="text"
+          >
+            <p>Farmers  </p>
+            <i class="pi pi-users"></i>
+          </Button>
           <Menubar v-if="isLoggedIn" :model="accountMenu" class="menubar-item"></Menubar>
-          <Button v-if="!isLoggedIn" @click="goToLogin" class="login button" label="Login" severity="primary"
-            variant="text"></Button>
-          <Button @click="goToCart" class="cart button" label="Cart" severity="secondary" variant="text">
+          <Button
+            v-if="!isLoggedIn"
+            @click="goToLogin"
+            class="login button"
+            label="Login"
+            severity="primary"
+            variant="text"
+          ></Button>
+          <Button
+            @click="goToCart"
+            class="cart button"
+            label="Cart"
+            severity="secondary"
+            variant="text"
+          >
             <i class="pi pi-shopping-cart cart-icon"></i>
             <span class="cart-text">Cart</span>
           </Button>
@@ -27,22 +49,19 @@
 </template>
 
 <script setup>
-import {ref, onMounted, watch, computed, onUnmounted} from 'vue';
+import { ref, onMounted, watch, computed, onUnmounted } from 'vue';
 import { isLoggedIn } from '@/shared/authState';
-import axiosInstance, {getUserId} from '@/utils/axiosInstance';
+import axiosInstance, { getUserId } from '@/utils/axiosInstance';
 import Menubar from 'primevue/menubar';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
-import {useRoute, useRouter} from "vue-router";
+import { useRoute, useRouter } from 'vue-router';
 import { nextTick } from 'vue';
 
 const hiddenItems = ref([]);
 const searchQ = ref('');
 let currentUser = null;
-const items = ref([
-  { label: 'Deals' },
-  { label: "What's New" },
-]);
+const items = ref([{ label: 'Deals' }, { label: "What's New" }]);
 const updateItems = () => {
   const windowWidth = window.innerWidth;
 
@@ -64,8 +83,6 @@ const updateItems = () => {
     moveToItems("What's New");
   }
 };
-
-
 
 const updateAccountMenu = () => {
   const windowWidth = window.innerWidth;
@@ -91,8 +108,6 @@ const updateAccountMenu = () => {
   }
 };
 
-
-
 const moveToAccountMenu = (label) => {
   const itemIndex = items.value.findIndex((item) => item.label === label);
   if (itemIndex !== -1) {
@@ -100,7 +115,9 @@ const moveToAccountMenu = (label) => {
     const account = accountMenu.value.find((menu) => menu.label === 'Account');
 
     if (account) {
-      const isAlreadyInAccountMenu = account.items.some(existingItem => existingItem.label === item.label);
+      const isAlreadyInAccountMenu = account.items.some(
+        (existingItem) => existingItem.label === item.label,
+      );
       if (!isAlreadyInAccountMenu) {
         hiddenItems.value.push(item);
         account.items.push(item);
@@ -110,21 +127,18 @@ const moveToAccountMenu = (label) => {
   }
 };
 
-
 const moveToItems = (label) => {
   const hiddenIndex = hiddenItems.value.findIndex((item) => item.label === label);
   if (hiddenIndex !== -1) {
     const item = hiddenItems.value[hiddenIndex];
     const account = accountMenu.value.find((menu) => menu.label === 'Account');
-    if (account && account.items.some(existingItem => existingItem.label === item.label)) {
+    if (account && account.items.some((existingItem) => existingItem.label === item.label)) {
       items.value.push(item);
       account.items = account.items.filter((existingItem) => existingItem.label !== label);
       hiddenItems.value.splice(hiddenIndex, 1);
     }
   }
 };
-
-
 
 const accountMenu = ref([
   {
@@ -134,11 +148,9 @@ const accountMenu = ref([
       { label: 'My page', icon: 'pi pi-home', command: () => goToMyPage() },
       { label: 'Orders', icon: 'pi pi-shopping-cart', command: () => goToOrders() },
       { label: 'Messages', icon: 'pi pi-envelope', command: () => goToMessages() },
-      { label: 'Farmers Search', icon: 'pi pi-search', command: () => goToFarmersSearch()  },
       { label: 'Scheduled Orders', icon: 'pi pi-clock', command: () => goToScheduledOrders() },
       { label: 'Wishlist', icon: 'pi pi-heart', command: () => goToFavorites() },
       { label: 'Settings', icon: 'pi pi-cog', command: () => goToSettings() },
-      { label: 'Server Info', icon: 'pi pi-exclamation-triangle', command: () => goToServerInfo() },
       { label: 'Logout', icon: 'pi pi-sign-out', command: () => logout() },
     ],
   },
@@ -155,11 +167,14 @@ const fetchCategories = async () => {
     const categories = response.data;
 
     items.value = [
-      { label: 'Categories', items: categories.map(category => ({
+      {
+        label: 'Categories',
+        items: categories.map((category) => ({
           label: category.title,
           command: () => goToCategory(category.id),
-        })) },
-      ...items.value
+        })),
+      },
+      ...items.value,
     ];
 
     await nextTick();
@@ -175,6 +190,25 @@ const fetchUserData = async () => {
   try {
     const response = await axiosInstance.get(`/current-user/`);
     currentUser = response.data;
+
+    if (currentUser.isAdmin) {
+      accountMenu.value[0].items = accountMenu.value[0].items.filter(
+        (item) => !['Orders', 'Scheduled Orders', 'Wishlist'].includes(item.label),
+      );
+      accountMenu.value[0].items.splice(0, 0,
+        {
+          label: 'Server Info',
+          icon: 'pi pi-exclamation-triangle',
+          command: () => goToServerInfo()
+        },
+      );
+      accountMenu.value[0].items.splice(0, 0, {
+        label: 'Admin Panel',
+        icon: 'pi pi-microchip',
+        command: () => goToAdmin(),
+      });
+    }
+
     if (currentUser.isFarmer) {
       accountMenu.value[0].items.splice(1, 0, {
         label: 'My sales',
@@ -182,10 +216,10 @@ const fetchUserData = async () => {
         command: () => goToMySales(),
       }),
         accountMenu.value[0].items.splice(1, 0, {
-        label: 'Products',
-        icon: 'pi pi-clipboard',
-        command: () => goToMyProducts(),
-      });
+          label: 'Products',
+          icon: 'pi pi-clipboard',
+          command: () => goToMyProducts(),
+        });
 
       accountMenu.value[0].items.splice(middleIndex, 0, {
         label: 'Performance',
@@ -220,7 +254,7 @@ const goToMySales = () => {
 
 const goToMyPage = () => {
   window.location.href = '/id' + currentUser.id;
-}
+};
 
 function goToFarmersSearch() {
   window.location.href = '/farmers-search';
@@ -237,7 +271,11 @@ const goToScheduledOrders = () => {
 
 const goToMessages = () => {
   window.location.href = '/messages';
-}
+};
+
+const goToAdmin = () => {
+  window.location.href = '/admin/products';
+};
 
 const goToFavorites = () => {
   window.location.href = '/wishlist';
@@ -245,7 +283,6 @@ const goToFavorites = () => {
 
 const goToSettings = () => {
   window.location.href = '/settings';
-
 };
 
 const goToCategory = (categoryId) => {
@@ -260,6 +297,7 @@ const logout = () => {
   console.log('Logging out...');
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
+  localStorage.removeItem('userRole');
   window.location.href = '/login';
 };
 
@@ -291,9 +329,7 @@ onUnmounted(() => {
 });
 </script>
 
-
 <style scoped>
-
 .navbar {
   position: fixed;
   display: flex;
@@ -400,7 +436,6 @@ onUnmounted(() => {
     display: none;
   }
 }
-
 </style>
 <style>
 .p-menubar-mobile .p-menubar-root-list {

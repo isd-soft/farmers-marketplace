@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="farmers-search-page">
     <Header class="navbar"></Header>
     <div class="main-container-farmers">
       <div class="search-filters">
@@ -165,6 +165,15 @@ export default {
 </script>
 
 <style scoped>
+.farmers-search-page{
+  display: flex;
+  margin-top: 10em;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+  width: 100%;
+  height: max-content;
+}
 .main-container-farmers {
   position: relative;
   display: flex;
@@ -173,6 +182,7 @@ export default {
   width: calc(100% - 40px);
   margin-left: 20px;
   margin-right: 20px;
+  min-height: 100vh;
 }
 .search-farmers-input{
   flex-grow: 1 !important;

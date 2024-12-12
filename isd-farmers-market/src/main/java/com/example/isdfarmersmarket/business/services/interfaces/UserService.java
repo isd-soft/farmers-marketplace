@@ -18,4 +18,8 @@ public interface UserService {
 
     UserProfileDTO upgradeToFarmer(CustomerUpgradeCommand command);
 
+    UserProfileDTO upgradeToAdmin(Long id);
+
+    void deleteUserById(Long id);
+
 }

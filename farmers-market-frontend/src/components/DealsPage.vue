@@ -1,4 +1,4 @@
-<template>
+  <template>
   <div class="deals-page">
   <Header/>
   <div class="carousels">
@@ -6,7 +6,7 @@
     <Carousel :value="productDeals.discountedAbove50Percent.content" :numVisible="3" :numScroll="1" class="custom-carousel">
       <template #item="slotProps">
         <div class="product-card">
-<!--          <img :src="toBase64Image(slotProps.data.image.bytes)" alt="Product Image" />-->
+          <img :src="toBase64Image(slotProps.data.image.bytes)" alt="Product Image" />
           <h3>{{ slotProps.data.title }}</h3>
           <p>{{ slotProps.data.description }}</p>
           <span class="price">{{ slotProps.data.pricePerUnit | currency }}</span>
@@ -126,7 +126,7 @@ export default {
   height: max-content;
 }
 .carousels {
-  margin: 20px;
+  margin-top: 6em;
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;

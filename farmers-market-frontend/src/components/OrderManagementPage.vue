@@ -337,6 +337,7 @@ body{
   box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
 }
 .order-status-fitering-container {
+  width: 10%;
   min-width: 100px;
   position: relative;
   display: flex;
@@ -345,6 +346,7 @@ body{
 }
 .orders-container {
   min-width: 250px;
+  width: 70%;
 }
 @media (max-width: 500px) {
   .order-status-fitering-container,
@@ -367,6 +369,7 @@ body{
   height: 12vh;
   border-radius: 10px;
   min-width: 100px;
+  object-fit: cover;
 }
 .product-quantity-type{
   font-size: 0.9rem;

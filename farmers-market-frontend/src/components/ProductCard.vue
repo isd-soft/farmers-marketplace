@@ -1,6 +1,6 @@
 <template>
   <div class="product-card" @click="goToProductPage">
-    <td>
+    <div>
       <div class="image-container">
         <img
           v-if="product.image"
@@ -10,7 +10,7 @@
         />
         <div v-else class="no-image">No Image</div>
       </div>
-    </td>
+    </div>
     <div class="product-info">
       <h3 class="product-title">{{ product.title }}</h3>
       <p class="product-description">{{ product.description }}</p>
@@ -20,18 +20,14 @@
             <s style="color: #a0a0a0; font-size: 1.2rem; margin-right: 10px">
               {{ product.pricePerUnit }} MDL
             </s>
-            <span style="color: #179739; font-size: 1.5rem">
-              {{ discountedPrice }} MDL
-            </span>
+            <span style="color: #179739; font-size: 1.5rem"> {{ discountedPrice }} MDL </span>
           </span>
           <span v-else>
-            <span style="color: #179739; font-size: 1.5rem">
-              {{ product.pricePerUnit }} MDL
-            </span>
+            <span style="color: #179739; font-size: 1.5rem"> {{ product.pricePerUnit }} MDL </span>
           </span>
         </div>
         <div class="product-icons">
-          <i id="addToCart" @click.stop="addToCart" class="pi pi-shopping-cart cart-icon icons" ></i>
+          <i id="addToCart" @click.stop="addToCart" class="pi pi-shopping-cart cart-icon icons"></i>
           <i
             :class="product.isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'"
             class="icons"
@@ -45,13 +41,13 @@
 </template>
 
 <script>
-import {computed, ref} from "vue";
-import axiosInstance from "@/utils/axiosInstance.js";
-import {isLoggedIn} from "@/shared/authState.js";
-import {useToast} from "primevue/usetoast";
+import { computed, ref } from 'vue';
+import axiosInstance from '@/utils/axiosInstance.js';
+import { isLoggedIn } from '@/shared/authState.js';
+import { useToast } from 'primevue/usetoast';
 
 export default {
-  name: "ProductCard",
+  name: 'ProductCard',
   props: {
     product: {
       type: Object,
@@ -59,7 +55,7 @@ export default {
     },
   },
   setup(props) {
-    const toast = useToast()
+    const toast = useToast();
     const toggleWishlist = async () => {
       if (!props.product.id) return;
       try {
@@ -71,10 +67,8 @@ export default {
         props.product.isInWishlist = !props.product.isInWishlist;
       } catch (error) {
         console.error(
-          `Failed to ${
-            props.product.isInWishlist ? "remove" : "add"
-          } product to/from wishlist:`,
-          error.message
+          `Failed to ${props.product.isInWishlist ? 'remove' : 'add'} product to/from wishlist:`,
+          error.message,
         );
       }
     };
@@ -84,43 +78,47 @@ export default {
         summary: summary,
         detail: detail,
         life: life,
-      })
+      });
     }
     const addToCart = async () => {
       if (!props.product.id || props.product.quantity < 1) {
-        toastAdd('error', 'Unavailable Quantity', 'Product is out of stock or invalid quantity.')
-        return
+        toastAdd('error', 'Unavailable Quantity', 'Product is out of stock or invalid quantity.');
+        return;
       }
 
       if (!props.product.id || !props.product) {
-        alert('Invalid product or quantity')
-        return
+        alert('Invalid product or quantity');
+        return;
       }
       if (!isLoggedIn.value) {
-        window.location.href = '/login'
-        return
+        window.location.href = '/login';
+        return;
       }
 
       const itemInCart = {
         productId: props.product.id,
         quantity: 1,
-      }
+      };
       try {
-        const response = await axiosInstance.post('/cart', itemInCart)
-        console.log('Added to cart:', response.data)
+        const response = await axiosInstance.post('/cart', itemInCart);
+        console.log('Added to cart:', response.data);
 
-        toastAdd('success', 'Item Added to cart', 'This item was successfully added to cart.', 1000)
-
+        toastAdd(
+          'success',
+          'Item Added to cart',
+          'This item was successfully added to cart.',
+          1000,
+        );
       } catch (error) {
-        console.error('Error adding to cart:', error)
+        console.error('Error adding to cart:', error);
 
         if (error.response && error.response.status === 409) {
-          toastAdd('warn', 'Item Already in Cart', 'This item is already in your cart.')
+          toastAdd('warn', 'Item Already in Cart', 'This item is already in your cart.');
         } else {
-          toastAdd('error', 'Error', 'Failed to add item to cart. Please try again later.')
+          toastAdd('error', 'Error', 'Failed to add item to cart. Please try again later.');
         }
       }
-    }
+    };
 
     const discountedPrice = computed(() => {
       return (
@@ -143,7 +141,7 @@ export default {
       if (image) {
         return `data:image/jpeg;base64,${image.bytes}`;
       }
-      return "";
+      return '';
     },
   },
 };
@@ -159,7 +157,9 @@ export default {
   border-radius: 15px;
   box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
   max-width: 387px;
   vertical-align: central;
 }
@@ -220,18 +220,18 @@ export default {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
-.icons{
+.icons {
   font-size: 20px;
   cursor: pointer;
   color: #179739;
 }
-.product-cost-icons{
+.product-cost-icons {
   display: flex;
   flex-direction: row;
   gap: 10px;
   justify-content: space-between;
 }
-.product-icons{
+.product-icons {
   display: flex;
   flex-direction: row;
   gap: 10px;

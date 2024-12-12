@@ -16,6 +16,7 @@ import java.util.List;
 public interface UserProfileMapper {
 
     @Mapping(target = "isFarmer", expression = "java(isFarmer(user))")
+    @Mapping(target = "isAdmin", expression = "java(isAdmin(user))")
     @Mapping(target = "canMessage", expression = "java(canMessage(user))")
     @Mapping(target = "isCurrentUser", expression = "java(isCurrentUser(user))")
     UserProfileDTO map(User user);
@@ -29,8 +30,14 @@ public interface UserProfileMapper {
                 .anyMatch(role -> role.getAuthority().equals(ERole.FARMER.name()));
     }
 
+    default boolean isAdmin(User user) {
+        return user.getRoles().stream()
+                .anyMatch(role -> role.getAuthority().equals(ERole.ADMIN.name()));
+    }
+
     default boolean canMessage(User user) {
         JwtPrincipal currentUser = SecurityUtils.getPrincipal();
+        if(currentUser == null) return false;
         return !currentUser.getRoles().contains(ERole.FARMER)
                 && user.getRoles().stream()
                 .anyMatch(role -> role.getAuthority().equals(ERole.FARMER.name()));
@@ -38,6 +45,7 @@ public interface UserProfileMapper {
 
     default boolean isCurrentUser(User user) {
         JwtPrincipal currentUser = SecurityUtils.getPrincipal();
+        if(currentUser == null) return false;
         return currentUser.getId().equals(user.getId());
     }
 

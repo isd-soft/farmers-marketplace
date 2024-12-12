@@ -15,4 +15,7 @@ public interface CreateReviewsService {
     boolean canReviewFarmer(User creator, User farmer);
     boolean canReviewProduct(User creator, Product product);
 
+    void deleteFarmerReview(Long reviewId);
+
+    void deleteProductReview(Long reviewId);
 }

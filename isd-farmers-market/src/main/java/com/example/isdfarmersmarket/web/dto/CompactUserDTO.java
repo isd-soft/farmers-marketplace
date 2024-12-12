@@ -13,4 +13,5 @@ public class CompactUserDTO {
     String firstName;
     String lastName;
     Boolean isFarmer;
+    Boolean isAdmin;
 }

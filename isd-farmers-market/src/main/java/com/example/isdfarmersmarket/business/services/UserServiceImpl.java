@@ -3,6 +3,7 @@ package com.example.isdfarmersmarket.business.services;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.CustomUsernameNotFoundException;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.RoleAlreadyExistsException;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.RoleDoesntExistException;
+import com.example.isdfarmersmarket.business.mapper.UserMapper;
 import com.example.isdfarmersmarket.business.mapper.UserProfileMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.interfaces.CreateReviewsService;
@@ -13,6 +14,7 @@ import com.example.isdfarmersmarket.dao.enums.SearchUserByRoleParams;
 import com.example.isdfarmersmarket.dao.models.Role;
 import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.dao.repositories.FarmerReviewRepository;
+import com.example.isdfarmersmarket.dao.repositories.RefreshTokenRepository;
 import com.example.isdfarmersmarket.dao.repositories.OrderRepository;
 import com.example.isdfarmersmarket.dao.repositories.RoleRepository;
 import com.example.isdfarmersmarket.dao.repositories.UserRepository;
@@ -50,6 +52,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     RoleRepository roleRepository;
     OrderRepository orderRepository;
     FarmerReviewRepository farmerReviewRepository;
+    UserMapper userMapper;
+    RefreshTokenRepository refreshTokenRepository;
     CreateReviewsService createReviewsService;
 
     @Transactional(readOnly = true)
@@ -66,6 +70,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         var content = userProfileMapper.map(usersPage.getContent());
         return new PageResponseDTO<>(content, usersPage.getTotalElements());
     }
+
     public UserProfileDTO getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
         return userProfileMapper.map(user);
@@ -90,6 +95,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     @Transactional
     public UpdateUserDTO updateUser(UpdateUserCommand updateUserCommand) {
+        System.out.println(updateUserCommand);
         User user = userRepository.findById(updateUserCommand.getId())
                 .orElseThrow(() -> new EntityNotFoundException("User with the specified ID not found")
                 );
@@ -123,6 +129,32 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
         userRepository.save(customer);
         return userProfileMapper.map(customer);
+    }
+
+    @Transactional
+    @Override
+    public UserProfileDTO upgradeToAdmin(Long id) {
+        User customer = userRepository.findById(id)
+                .orElseThrow(CustomUsernameNotFoundException::new);
+        Role role = roleRepository.findByRole(ERole.ADMIN)
+                .orElseThrow(RoleDoesntExistException::new);
+        if (customer.getRoles().contains(role)) {
+            throw new RoleAlreadyExistsException();
+        }
+        customer.addRole(role);
+
+        userRepository.save(customer);
+        return userProfileMapper.map(customer);
+    }
+
+    @Transactional
+    public void deleteUserById(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new EntityNotFoundException("User with the specified ID not found");
+        }
+        refreshTokenRepository.deleteByUserId(id);
+
+        userRepository.deleteById(id);
     }
 
 

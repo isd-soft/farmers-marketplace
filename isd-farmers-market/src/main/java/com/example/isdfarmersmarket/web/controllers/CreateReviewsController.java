@@ -38,4 +38,19 @@ public class CreateReviewsController {
         ProductReviewDTO response = reviewCommandService.rateProduct(productReviewCommand);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
+    @DeleteMapping("/farmers/{reviewId}")
+    public ResponseEntity<Void> deleteFarmerReview(@PathVariable Long reviewId) {
+        reviewCommandService.deleteFarmerReview(reviewId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
+    @DeleteMapping("/products/{reviewId}")
+    public ResponseEntity<Void> deleteProductReview(@PathVariable Long reviewId) {
+        reviewCommandService.deleteProductReview(reviewId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
 }
