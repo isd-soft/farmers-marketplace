@@ -117,7 +117,7 @@ export default {
 
     const rules = computed(() => ({
       rating: { required, minValue: minValue(1) },
-      content: { required, minLength: minLength(10), maxLength: maxLength(300) },
+      content: { required, minLength: minLength(2), maxLength: maxLength(300) },
     }))
 
     const v$ = useVuelidate(rules, newReview)
