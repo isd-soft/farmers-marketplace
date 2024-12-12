@@ -320,6 +320,17 @@ export default {
 
     const deleteSelectedUsers = async () => {
       try {
+        const currentUserResponse = await axiosInstance.get(`/current-user/`);
+        const currentUserEmail = currentUserResponse.data.email;
+
+        const containsCurrentUser = selectedUsers.value.some(
+          (user) => user.email === currentUserEmail,
+        );
+        if (containsCurrentUser) {
+          toastAdd('error', 'Delete failed', 'You cannot delete your user.');
+          deleteUsersDialog.value = false;
+          return;
+        }
         await Promise.all(
           selectedUsers.value.map((user) => axiosInstance.delete(`/users/${user.id}`)),
         );
