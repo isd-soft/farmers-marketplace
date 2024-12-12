@@ -23,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.*;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -136,7 +138,7 @@ public class PlannedOrderServiceImpl implements PlannedOrderService {
     @Transactional
     @Scheduled(cron = "0 */10 * * * *")
     public void processPlannedOrders() {
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Chisinau"));
+        LocalDateTime now = LocalDateTime.now();
         DayOfWeek currentDay = now.getDayOfWeek();
         LocalTime currentTime = now.toLocalTime().truncatedTo(ChronoUnit.MINUTES);
 

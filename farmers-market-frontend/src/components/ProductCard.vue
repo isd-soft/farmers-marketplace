@@ -168,7 +168,19 @@ export default {
   transform: translateY(-5px);
   box-shadow: 0 1px 15px rgba(51, 65, 85, 0.3);
 }
+@media (max-width: 380px) {
+  .image-container {
+    height: 180px!important;
+  }
 
+  .product-image {
+    height: 180px!important;
+  }
+
+  .no-image {
+    height: 180px!important;
+  }
+}
 .image-container {
   width: 100%;
   height: 250px;

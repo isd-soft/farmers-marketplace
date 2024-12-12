@@ -51,7 +51,7 @@ import { nextTick } from 'vue';
 const hiddenItems = ref([]);
 const searchQ = ref('');
 let currentUser = null;
-const items = ref([{ label: 'Deals' }, { label: "What's New" }, {icon: 'pi pi-users', label: "Farmers", command: () => goToFarmersSearch()}]);
+const items = ref([ {icon: 'pi pi-tags', label: "Products", command: () => search()}, {icon: 'pi pi-users', label: "Farmers", command: () => goToFarmersSearch()}]);
 const updateItems = () => {
   const windowWidth = window.innerWidth;
   if (windowWidth < 965) {
@@ -59,19 +59,12 @@ const updateItems = () => {
   } else {
     moveToItems('Categories');
   }
-
-  if (windowWidth < 1025) {
-    moveToAccountMenu('Deals');
+  if (windowWidth < 1035) {
+    moveToAccountMenu("Products");
   } else {
-    moveToItems('Deals');
+    moveToItems("Products");
   }
-
   if (windowWidth < 1170) {
-    moveToAccountMenu("What's New");
-  } else {
-    moveToItems("What's New");
-  }
-  if (windowWidth < 1250) {
     moveToAccountMenu("Farmers");
   } else {
     moveToItems("Farmers");

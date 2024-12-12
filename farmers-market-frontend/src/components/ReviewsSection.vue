@@ -3,10 +3,10 @@
     <TabPanel header="Product Reviews">
       <div class="reviews-panel">
         <h2>Product Reviews</h2>
-        <div v-if="productReviews.length > 0">
+        <div style="margin-top: 15px" v-if="productReviews.length > 0">
           <ul class="review-list">
             <li v-for="review in productReviews" :key="review.id" class="review-item">
-              <Card>
+              <Card style="  box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);">
                 <template #content>
                   <Rating v-model="review.rating" :readOnly="true" :stars="5" />
                   <p>{{ review.content }}</p>
@@ -35,10 +35,10 @@
     <TabPanel header="Farmer Reviews">
       <div class="reviews-panel">
         <h2>Farmer Reviews</h2>
-        <div v-if="farmerReviews.length > 0">
+        <div style="margin-top: 15px" v-if="farmerReviews.length > 0">
           <ul class="review-list">
             <li v-for="review in farmerReviews" :key="review.id" class="review-item">
-              <Card>
+              <Card style="  box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);">
                 <template #content>
                   <Rating v-model="review.rating" :readOnly="true" :stars="5" />
                   <p>{{ review.content }}</p>

@@ -28,10 +28,11 @@
     </div>
 
     <div class="reviews-section">
-      <div v-if="reviews.length > 0">
+      <h3>Customer Reviews</h3>
+      <div style="margin-top: 15px" v-if="reviews.length > 0">
         <ul class="review-list">
           <li v-for="review in reviews" :key="review.id" class="review-item">
-            <Card>
+            <Card style="  box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);">
               <template #content>
                 <Rating v-model="review.rating" readonly :stars="5" />
                 <div class="author-name" :data-prefix="'Farmer:'">
@@ -117,7 +118,7 @@ export default {
 
     const rules = computed(() => ({
       rating: { required, minValue: minValue(1) },
-      content: { required, minLength: minLength(2), maxLength: maxLength(300) },
+      content: { required, minLength: minLength(10), maxLength: maxLength(300) },
     }))
 
     const v$ = useVuelidate(rules, newReview)

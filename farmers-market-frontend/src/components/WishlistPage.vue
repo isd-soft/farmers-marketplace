@@ -12,7 +12,7 @@
           <p>Loading your wishlist...</p>
         </div>
         <div v-else-if="wishlist.length === 0">
-          <p>No items in your wishlist yet.</p>
+          <h1 style="text-align: center; margin-top: 50px; margin-bottom: 50px">No items in your wishlist yet.</h1>
         </div>
     <div class="products-grid">
       <ProductCard
@@ -86,6 +86,7 @@ body{
   display: flex;
   flex-direction: column;
   width: 80%;
+  min-height: 80vh;
 }
 
 

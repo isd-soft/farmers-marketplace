@@ -204,7 +204,7 @@ body{
   display: flex;
   flex-direction: column;
   width: 80%;
-  min-height: 100vh;
+  min-height: 80vh;
 }
 .products-grid {
   display: grid;
@@ -214,13 +214,6 @@ body{
   width:100%;
   justify-content: center;
   align-content: start;
-}
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  margin-top: 30px;
-  width:100%;
 }
 @media (max-width: 380px) {
   .products-grid {

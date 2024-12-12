@@ -1,6 +1,7 @@
 <template>
   <div class="home">
     <Header class="navbar"></Header>
+    <div class="content">
     <Card title="Frequently Asked Questions" class="faq-card">
       <template #title>Frequently Asked Questions</template>
       <template #content>
@@ -89,6 +90,7 @@
         </div>
       </template>
     </Card>
+    </div>
     <Footer class="footer"></Footer>
   </div>
 </template>
@@ -114,8 +116,12 @@ body{
   padding-top: 120px;
   align-items: center;
 }
-.faq-card {
+.content{
+  min-height: 80vh;
   width: 80%;
+}
+.faq-card {
+  width: 100%;
   background-color: #ffffff;
   background-color: #fff;
   border-radius: 15px;
@@ -124,8 +130,10 @@ body{
 }
 @media (max-width: 380px) {
   .faq-card {
-    width: 90%;
     padding: 5px;
+  }
+  .content{
+    width: 90%;
   }
 }
 

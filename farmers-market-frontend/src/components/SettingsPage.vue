@@ -5,8 +5,6 @@
       <div>
         <h1 class="p-card-title">User Settings</h1>
       </div>
-
-      <div class="settings-content">
       <Card class="custom-card">
         <template #content>
           <div v-if="!isLoading">
@@ -187,7 +185,6 @@
           </template>
         </Card>
       </div>
-    </div>
   </div>
     <Footer class="footer"></Footer>
   </div>
@@ -471,10 +468,10 @@ export default {
 .settings-page {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
   overflow-x: hidden;
   width: 100%;
   height: max-content;
+  align-items: center;
 }
 
 .main-content {
@@ -483,9 +480,9 @@ export default {
   margin-bottom: 30px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  width: 100%;
-  height: max-content;
+  width: 80%;
+  min-height: 80vh;
+  align-items: center;
 }
 
 .profile {
@@ -515,13 +512,21 @@ export default {
 }
 
 .custom-card {
-  width: 80vh;
+  width: 100%;
+  max-width: 80vh;
   padding: 20px;
-  margin: 20px auto;
+  margin: 20px 0;
   box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
   font-family: inherit;
 }
-
+@media (max-width: 380px) {
+  .custom-card {
+    padding: 5px;
+  }
+  .main-content{
+    width: 90%;
+  }
+}
 .profile-info {
   font-size: 1rem;
 }
