@@ -15,13 +15,13 @@
           </div>
           <Button
             @click="goToFarmersSearch"
-            class="farmers-search-button"
-            label="Farmers Search"
+            class="farmer button"
+            label="Farmer"
             severity="secondary"
             variant="text"
           >
-            <p>Farmers  </p>
-            <i class="pi pi-users"></i>
+            <i class="pi pi-users farmer-icon"></i>
+            <span class="farmer-text">Farmers</span>
           </Button>
           <Menubar v-if="isLoggedIn" :model="accountMenu" class="menubar-item"></Menubar>
           <Button
@@ -431,6 +431,25 @@ onUnmounted(() => {
 .login.button:hover {
   color: #334155 !important;
 }
+
+.farmer.button {
+  display: inline-flex;
+  align-items: center;
+}
+
+.farmer.button:hover .farmer-icon,
+.farmer.button:hover .farmer-text
+ {
+  color: #179739 !important;
+  background-color: transparent !important;
+}
+
+.farmer.button .farmer-icon,
+.farmer.button .farmer-text
+ {
+  color: #334155 !important;
+}
+
 @media (max-width: 740px) {
   .input-search {
     display: none;
