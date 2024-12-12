@@ -248,7 +248,7 @@ function getSeverity(product) {
 }
 
 function iconClass(product) {
-  const severity = this.getSeverity(product)
+  const severity = getSeverity(product)
   switch (severity) {
     case 'INSTOCK':
       return 'pi pi-check-circle'
@@ -261,7 +261,7 @@ function iconClass(product) {
   }
 }
 function severityClass(product) {
-  const severity = this.getSeverity(product)
+  const severity = getSeverity(product)
   switch (severity) {
     case 'INSTOCK':
       return 'in-stock'

@@ -18,4 +18,6 @@ public interface AuthService {
 
     void updatePassword(UpdatePasswordCommand updatePasswordCommand);
 
+    void validateAndEnableUser(String token);
+
 }

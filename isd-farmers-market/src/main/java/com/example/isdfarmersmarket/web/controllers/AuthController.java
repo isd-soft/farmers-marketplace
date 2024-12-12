@@ -2,6 +2,8 @@ package com.example.isdfarmersmarket.web.controllers;
 
 import com.example.isdfarmersmarket.business.services.AuthServiceImpl;
 import com.example.isdfarmersmarket.business.services.JwtServiceImpl;
+import com.example.isdfarmersmarket.business.services.interfaces.AuthService;
+import com.example.isdfarmersmarket.business.services.interfaces.JwtService;
 import com.example.isdfarmersmarket.dao.models.User;
 import com.example.isdfarmersmarket.web.commands.UpdatePasswordCommand;
 import com.example.isdfarmersmarket.web.commands.UserLoginCommand;
@@ -29,8 +31,8 @@ import static org.springframework.http.HttpStatus.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Slf4j
 public class AuthController {
-    final AuthServiceImpl authService;
-    final JwtServiceImpl jwtService;
+    final AuthService authService;
+    final JwtService jwtService;
     @Value("${spring.frontend.url}")
     String frontendUrl;
 
