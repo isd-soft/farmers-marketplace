@@ -1,9 +1,9 @@
 package com.example.isdfarmersmarket.dao.enums;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.AccessLevel;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -29,7 +29,8 @@ public enum AuthError {
     ACCESS_DENIED(HttpStatus.FORBIDDEN),
     BAD_CREDENTIALS(HttpStatus.UNAUTHORIZED),
     AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED),
-    ACCOUNT_NOT_ACTIVATED(HttpStatus.FORBIDDEN);
+    ACCOUNT_NOT_ACTIVATED(HttpStatus.FORBIDDEN),
+    INVALID_APPLICATION_STATE(HttpStatus.CONFLICT);
 
     HttpStatus httpStatus;
 }

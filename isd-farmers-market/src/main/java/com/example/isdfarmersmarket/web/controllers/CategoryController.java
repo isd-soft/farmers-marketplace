@@ -6,16 +6,17 @@ import com.example.isdfarmersmarket.web.commands.UpdateCategoryCommand;
 import com.example.isdfarmersmarket.web.dto.CategoryDTO;
 import com.example.isdfarmersmarket.web.dto.CategoryWithNrDTO;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+
 
 @RestController
 @RequestMapping("/category")
@@ -26,6 +27,7 @@ public class CategoryController {
     @Operation(
             description = "This endpoint is used to create a category"
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping()
     public ResponseEntity<CategoryDTO> createCategory(@RequestBody @Valid CreateCategoryCommand createCategoryCommand) {
         return ResponseEntity.status(CREATED).body(categoryServiceImpl.createCategory(createCategoryCommand));
@@ -34,6 +36,7 @@ public class CategoryController {
     @Operation(
             description = "This endpoint is used to update a category"
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<CategoryDTO> updateCategory(@PathVariable Long id, @RequestBody @Valid UpdateCategoryCommand updateCategoryCommand) {
         return ResponseEntity.status(OK).body(categoryServiceImpl.updateCategory(id, updateCategoryCommand));
@@ -42,6 +45,7 @@ public class CategoryController {
     @Operation(
             description = "This endpoint is used to delete a category"
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<CategoryDTO> deleteCategory(@PathVariable Long id) {
         return ResponseEntity.status(OK).body(categoryServiceImpl.deleteCategory(id));

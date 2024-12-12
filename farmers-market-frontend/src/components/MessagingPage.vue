@@ -20,8 +20,10 @@
 <!--                    class="avatar"-->
 <!--                  />-->
                   <span class="conversation-name">
-              {{ conversation.farmer.firstName }} {{ conversation.farmer.lastName }}
-            </span>
+                    {{ conversation.farmer.id == this.userId
+                    ? conversation.customer.firstName + ' ' + conversation.customer.lastName
+                    : conversation.farmer.firstName + ' ' + conversation.farmer.lastName }}
+                  </span>
                 </div>
               </template>
               <template #content>
@@ -55,7 +57,7 @@
               >
                 <Card class="message-bubble">
                   <template #content>
-                    <strong>{{ message.sender.firstName }}:</strong> {{ message.content }}
+                    {{ message.content }}
                   </template>
                 </Card>
               </li>
