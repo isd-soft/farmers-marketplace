@@ -1,13 +1,13 @@
 package com.example.isdfarmersmarket.business.services;
 
+import com.example.isdfarmersmarket.business.mapper.DaoMapper;
 import com.example.isdfarmersmarket.business.services.interfaces.CategoryService;
 import com.example.isdfarmersmarket.dao.models.Category;
 import com.example.isdfarmersmarket.dao.repositories.CategoryRepository;
-import com.example.isdfarmersmarket.business.mapper.DaoMapper;
 import com.example.isdfarmersmarket.dao.repositories.ProductRepository;
-import com.example.isdfarmersmarket.web.dto.CategoryDTO;
 import com.example.isdfarmersmarket.web.commands.CreateCategoryCommand;
 import com.example.isdfarmersmarket.web.commands.UpdateCategoryCommand;
+import com.example.isdfarmersmarket.web.dto.CategoryDTO;
 import com.example.isdfarmersmarket.web.dto.CategoryWithNrDTO;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -57,6 +57,10 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.getCategoryById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category with the specified id not found")
                 );
+        boolean hasProducts = productRepository.existsByCategoryId(id);
+        if (hasProducts) {
+            throw new IllegalStateException("Cannot delete category as it has associated products.");
+        }
         categoryRepository.delete(category);
         return daoMapper.map(category);
     }

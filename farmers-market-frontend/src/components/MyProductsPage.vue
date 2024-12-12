@@ -1,10 +1,9 @@
 <template>
   <div class="home">
     <Header class="navbar"></Header>
+    <div class="content">
     <div
       style="
-        width: calc(100% - 40px);
-        max-width: 80%;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
@@ -17,8 +16,7 @@
         >Create new product</Button
       >
     </div>
-    <div style="overflow-x: auto; width: 80%">
-      <div class="content">
+    <div style="overflow-x: auto;">
         <table class="products-table">
           <thead>
             <tr>
@@ -96,7 +94,7 @@
         </table>
       </div>
       <h3
-        style="margin-top: 50px; margin-bottom: 50px; text-align: center; width: 1200px"
+        style="margin-top: 50px; margin-bottom: 50px; text-align: center; width: 100%"
         v-if="products.length === 0"
       >
         Looks like you have no products yet
@@ -357,7 +355,13 @@ body {
   align-items: center;
 }
 .content{
-  min-height: 45vh;
+  min-height: 60vh;
+  width: 80%;
+}
+@media (max-width: 380px) {
+  .content{
+    width: 90%;
+  }
 }
 .products-table {
   width: 100%;

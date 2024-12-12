@@ -58,17 +58,19 @@
             <ul>
                 <li><strong>Order Number:</strong> [[${orderId}]]</li>
                 <li><strong>Order Date:</strong> [[${orderDate}]]</li>
-                <li><strong>Total Price:</strong> $[[${totalPrice}]]</li>
+                <li><strong>Products Price:</strong> [[${totalPrice}]] MDL</li>
+                <li><strong>Delivery Price:</strong> [[${deliveryPrice}]] MDL</li>
+                <li><strong>Total Price:</strong> [[${orderPrice}]] MDL</li>
             </ul>
 
-            <h3>Products in this Order:</h3>
+            <h4>Products in this Order:</h4>
             <ul>
                 <th:block th:each="item : ${productItems}">
-                    <li>
-                        <span th:text="${item.title}"></span> -
+                    <li><strong>
+                        <span th:text="${item.title}"></span></strong> -
                         Quantity: <span th:text="${item.quantity}"></span> -
-                        Price per unit: $<span th:text="${item.pricePerUnit}"></span>
-                        Total price: $<span th:text="${item.totalPrice}"></span>
+                        Price per unit: <span th:text="${item.pricePerUnit}"></span> MDL -
+                        Total price: <span th:text="${item.totalPrice}"></span> MDL
                     </li>
                 </th:block>
             </ul>
