@@ -6,10 +6,10 @@ import com.example.isdfarmersmarket.web.commands.UpdateCategoryCommand;
 import com.example.isdfarmersmarket.web.dto.CategoryDTO;
 import com.example.isdfarmersmarket.web.dto.CategoryWithNrDTO;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +17,7 @@ import java.util.List;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
+@PreAuthorize("hasRole('ADMIN')")
 @RestController
 @RequestMapping("/category")
 @RequiredArgsConstructor
