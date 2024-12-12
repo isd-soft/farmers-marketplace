@@ -28,7 +28,6 @@
     </div>
 
     <div class="reviews-section">
-      <h3>Customer Reviews</h3>
       <div v-if="reviews.length > 0">
         <ul class="review-list">
           <li v-for="review in reviews" :key="review.id" class="review-item">
