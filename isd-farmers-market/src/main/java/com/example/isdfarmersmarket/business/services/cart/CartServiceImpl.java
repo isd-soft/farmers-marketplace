@@ -87,7 +87,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CartDTO getAllCartItems(DeliveryTypes deliveryTypes) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
         User authenticatedUser = userRepository
