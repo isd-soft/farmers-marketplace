@@ -375,6 +375,7 @@ export default {
 }
 .orders-container {
   width: 80%;
+  min-height: 50vh;
 }
 .order-staus-icons {
   display: flex;
@@ -390,6 +391,7 @@ export default {
   height: 12vh;
   border-radius: 10px;
   min-width: 100px;
+  object-fit: cover;
 }
 .product-quantity-type {
   font-size: 0.9rem;
@@ -489,6 +491,7 @@ export default {
   color: #179739;
   font-weight: bold;
 }
+
 .footer {
   margin: 0;
   padding-top: 20px;
@@ -535,6 +538,7 @@ export default {
   .product-image {
     width: 62vw;
     height: 15vh;
+    object-fit: cover;
   }
   .product-image-title-container {
     width: 100%;
