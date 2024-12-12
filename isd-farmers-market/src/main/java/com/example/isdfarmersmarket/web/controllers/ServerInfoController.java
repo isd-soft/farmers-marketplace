@@ -22,6 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/server-info")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ServerInfoController {
     HealthEndpoint healthEndpoint;
