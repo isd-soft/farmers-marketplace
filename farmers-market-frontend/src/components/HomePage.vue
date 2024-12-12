@@ -6,7 +6,7 @@
       <div class="carousel-container">
         <Carousel :value="images" :numVisible="1" :numScroll="1" circular :autoplayInterval="6000">
           <template #item="slotProps">
-            <img :src="slotProps.data" alt="Banner Image" class="carousel-image" />
+              <img :src="slotProps.data" alt="Banner Image" class="carousel-image" />
           </template>
         </Carousel>
       </div>
@@ -24,7 +24,7 @@
         <div class="guide-card" data-aos="fade-left">
           <div class="card-margin"></div>
           <div class="card-content">
-            <img class="guide-img" src="@/assets/home_page_resources/guide-img1.png" alt="" />
+            <img class="guide-img" src="https://isdfarmersmarketplacebucket.s3.eu-north-1.amazonaws.com/guide-img1.png" alt="" />
             <div>
               <h4 class="card-title">Farming and Production</h4>
               <p class="card-description">
@@ -44,7 +44,7 @@
                 potential buyers.
               </p>
             </div>
-            <img class="guide-img" src="@/assets/home_page_resources/guide-img2.png" alt="" />
+            <img class="guide-img" src="https://isdfarmersmarketplacebucket.s3.eu-north-1.amazonaws.com/guide-img2.png" alt="" />
           </div>
           <div class="card-margin card2-margin-color"></div>
         </div>
@@ -52,7 +52,7 @@
         <div class="guide-card" data-aos="fade-left">
           <div class="card-margin card3-margin-color"></div>
           <div class="card-content card3-content">
-            <img class="guide-img" src="@/assets/home_page_resources/guide-img3.png" alt="" />
+            <img class="guide-img" src="https://isdfarmersmarketplacebucket.s3.eu-north-1.amazonaws.com/guide-img3.png" alt="" />
             <div>
               <h4 class="card-title">Customer Search and Match</h4>
               <p class="card-description">
@@ -72,7 +72,7 @@
                 the delivery of the product.
               </p>
             </div>
-            <img class="guide-img" src="@/assets/home_page_resources/guide-img4-2.png" alt="" />
+            <img class="guide-img" src="https://isdfarmersmarketplacebucket.s3.eu-north-1.amazonaws.com/guide-img4-2.png" alt="" />
           </div>
           <div class="card-margin card4-margin-color"></div>
         </div>
@@ -80,7 +80,7 @@
         <div class="guide-card" data-aos="fade-left">
           <div class="card-margin card5-margin-color"></div>
           <div class="card-content card5-content">
-            <img class="guide-img" src="@/assets/home_page_resources/guide-img5-2.png" alt="" />
+            <img class="guide-img" src="https://isdfarmersmarketplacebucket.s3.eu-north-1.amazonaws.com/guide-img5-2.png" alt="" />
             <div>
               <h4 class="card-title">Completion and Satisfaction</h4>
               <p class="card-description">
@@ -142,14 +142,15 @@ import Header from './Header.vue'
 import Footer from '../components/Footer.vue'
 import Carousel from 'primevue/carousel'
 import axiosInstance from '@/utils/axiosInstance'
-import banner1 from '@/assets/home_page_resources/banner1.png'
-import banner2 from '@/assets/home_page_resources/banner2.png'
-import banner3 from '@/assets/home_page_resources/banner3.png'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
 
 const autoplayInterval = ref(4000)
-const images = ref([banner1, banner2, banner3])
+const images = ref([
+  'https://isdfarmersmarketplacebucket.s3.eu-north-1.amazonaws.com/banner1.png',
+  'https://isdfarmersmarketplacebucket.s3.eu-north-1.amazonaws.com/banner2.png',
+  'https://isdfarmersmarketplacebucket.s3.eu-north-1.amazonaws.com/banner3.png'
+])
 const productsByCategory = ref({})
 const categories = ref([])
 const aosOffset = ref(300)
@@ -164,6 +165,7 @@ const responsiveOptions = ref([
 function getBase64Image(base64String, imageType = 'jpeg') {
   return `data:image/${imageType};base64,${base64String}`
 }
+
 const toggleWishlist = async (product) => {
   if (!product.id) return
   try {
@@ -184,12 +186,8 @@ const toggleWishlist = async (product) => {
 const fetchProductsByCategory = async (categoryId) => {
   try {
     const response = await axiosInstance.get(`/product/getByCategory?categoryId=${categoryId}`)
-    //   params: { categoryId: categoryId }
     productsByCategory.value[categoryId] = response.data
-    console.log(
-      `Fetched products for category ${categoryId}:`,
-      productsByCategory.value[categoryId],
-    )
+    console.log(`Fetched products for category ${categoryId}:`, productsByCategory.value[categoryId])
   } catch (error) {
     console.error(`Failed to fetch products for category ${categoryId}:`, error)
   }
@@ -220,8 +218,6 @@ onMounted(async () => {
   try {
     const categoryResponse = await axiosInstance.get(`/category`)
     categories.value = categoryResponse.data
-    console.log('Fetched categories:', categoryResponse.data)
-
     categories.value.forEach(async (category) => {
       fetchProductsByCategory(category.id)
     })
@@ -238,6 +234,7 @@ router.afterEach(() => {
   AOS.refresh()
 })
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Funnel+Display:wght@300..800&family=Lavishly+Yours&family=League+Script&family=Lexend:wght@100..900&family=Onest:wght@100..900&family=Oswald:wght@200..700&family=Quicksand:wght@300..700&family=Rouge+Script&display=swap');
