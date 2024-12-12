@@ -1,9 +1,8 @@
 package com.example.isdfarmersmarket.business.exception;
 
-import com.example.isdfarmersmarket.dao.enums.AuthError;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.*;
+import com.example.isdfarmersmarket.dao.enums.AuthError;
 import io.jsonwebtoken.MalformedJwtException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,7 +20,7 @@ public class AuthenticationExceptionHandler {
             PasswordsDoNotMatchException.class, InvalidCredentialsException.class,
             MalformedJwtException.class, AccessDeniedException.class,
             BadCredentialsException.class, AuthenticationException.class,
-            AccountNotActivatedException.class})
+            AccountNotActivatedException.class, IllegalStateException.class})
     public ProblemDetail handleException(Exception ex) {
         AuthError authError = switch (ex) {
             case EmailAlreadyExistsException e -> AuthError.EMAIL_ALREADY_EXISTS;
@@ -35,6 +34,7 @@ public class AuthenticationExceptionHandler {
             case BadCredentialsException e -> AuthError.BAD_CREDENTIALS;
             case AuthenticationException e -> AuthError.AUTHENTICATION_FAILED;
             case AccountNotActivatedException e -> AuthError.ACCOUNT_NOT_ACTIVATED;
+            case IllegalStateException e -> AuthError.INVALID_APPLICATION_STATE;
             default -> AuthError.UNEXPECTED_JWT_ERROR;
         };
 
