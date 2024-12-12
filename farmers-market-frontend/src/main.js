@@ -11,7 +11,6 @@ import FloatLabel from 'primevue/floatlabel';
 import ToastService from 'primevue/toastservice'
 import Toast from 'primevue/toast'
 import ConfirmationService from 'primevue/confirmationservice';
-import DialogService from 'primevue/dialogservice'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
 

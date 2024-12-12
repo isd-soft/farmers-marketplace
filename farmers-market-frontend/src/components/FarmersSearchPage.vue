@@ -55,7 +55,7 @@
         </div>
         </div>
         <div v-else>
-          <h1>No farmers found with this name.</h1>
+          <h1 style="text-align: center; margin-top: 50px; margin-bottom: 50px">No farmers found for your search.</h1>
         </div>
       </div>
 
@@ -165,24 +165,32 @@ export default {
 </script>
 
 <style scoped>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body{
+  display: block !important;
+}
 .farmers-search-page{
   display: flex;
-  margin-top: 10em;
   flex-direction: column;
-  min-height: 100vh;
-  overflow-x: hidden;
   width: 100%;
-  height: max-content;
+  padding-top: 120px;
+  align-items: center;
 }
 .main-container-farmers {
   position: relative;
   display: flex;
   flex-direction: column;
-  max-width: 80%;
-  width: calc(100% - 40px);
-  margin-left: 20px;
-  margin-right: 20px;
+  width: 80%;
   min-height: 100vh;
+}
+@media (max-width: 380px) {
+  .main-container-farmers{
+    width: 90%;
+  }
 }
 .search-farmers-input{
   flex-grow: 1 !important;

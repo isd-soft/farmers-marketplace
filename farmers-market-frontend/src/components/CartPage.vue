@@ -407,6 +407,7 @@ const addProductsToOrder = async () => {
     })
     cartProducts.value = []
     buttonBuyFor.value = 'Buy for '
+    cart.value.totalPriceOfDelivery = 0;
 
     toastAdd('success', 'Order Created', 'Your order has been successfully created!')
     console.log('Order Response', response.data)
