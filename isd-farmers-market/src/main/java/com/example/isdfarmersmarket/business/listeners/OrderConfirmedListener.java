@@ -39,6 +39,9 @@ public class OrderConfirmedListener {
         context.setVariable("orderId", order.getId());
         context.setVariable("orderDate", formattedDate);
         context.setVariable("totalPrice", order.getTotalItemsPrice());
+        context.setVariable("deliveryPrice", order.getTotalDeliveryPrice());
+        context.setVariable("orderPrice", order.getTotalPrice());
+
         List<ProductInfoDTO> productInfoList = new ArrayList<>();
         for (ItemInOrder item : items) {
 
