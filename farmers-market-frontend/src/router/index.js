@@ -30,6 +30,11 @@ import AdminUsers from '@/components/Admin/AdminUsers.vue';
 import AdminCategories from '@/components/Admin/AdminCategories.vue';
 import AdminProductReviews from '@/components/Admin/AdminProductReviews.vue';
 import AdminFarmerReviews from '@/components/Admin/AdminFarmerReviews.vue';
+import ErrorPage from '@/components/ErrorPage.vue';
+
+const isAdmin = () => {
+  return localStorage.getItem('userRole') === 'ADMIN';
+};
 
 const routes = [
   {
@@ -171,37 +176,61 @@ const routes = [
     path: '/admin/products',
     name: 'Product Administration',
     component: AdminProducts,
+    meta: { requiresAdmin: true },
   },
   {
     path: '/admin/orders',
     name: 'Order Administration',
     component: AdminOrders,
+    meta: { requiresAdmin: true },
   },
   {
     path: '/admin/users',
     name: 'Users Administration',
     component: AdminUsers,
+    meta: { requiresAdmin: true },
   },
   {
     path: '/admin/categories',
     name: 'Category Administration',
     component: AdminCategories,
+    meta: { requiresAdmin: true },
   },
   {
     path: '/admin/productreviews',
     name: 'Product Review Administration',
     component: AdminProductReviews,
+    meta: { requiresAdmin: true },
   },
   {
     path: '/admin/farmerreviews',
     name: 'Farmer Reiew Administration',
     component: AdminFarmerReviews,
+    meta: { requiresAdmin: true },
+  },
+  {
+    path: '/404',
+    name: 'Error',
+    component: ErrorPage,
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    redirect: '/404',
   },
 ];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAdmin && !isAdmin()) {
+    next({ name: 'Error' });
+  } else {
+    next();
+  }
 });
 
 router.beforeEach((to, from, next) => {
