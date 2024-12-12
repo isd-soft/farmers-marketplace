@@ -39,14 +39,12 @@
                 <div class="farmer-profile">
                   <img :src="farmerPFP" alt="Profile Picture" class="farmer-avatar" />
                   <div class="farmer-details">
-                    <p><b style="font-size: 1.2em">{{ farmer.firstName }} {{ farmer.lastName }}</b> </p>
+                    <p ><b class="name">{{ farmer.firstName }} {{ farmer.lastName }}</b> </p>
                     <Rating
                       v-model="farmer.rating"
                       readonly
                       :stars="5"
-                      :style="{
-          '--p-rating-icon-size': '1.2rem'
-          }"/>
+                      class="rating"/>
                   </div>
                 </div>
               </router-link>
@@ -191,6 +189,13 @@ body{
   .main-container-farmers{
     width: 90%;
   }
+  .farmer-avatar {
+    width: 50px!important;
+    height: auto;
+  }
+  .name{
+    font-size: 1.0rem!important;
+  }
 }
 .search-farmers-input{
   flex-grow: 1 !important;
@@ -211,16 +216,17 @@ body{
   column-gap: 2em;
   align-content: space-between;
 }
-
+.name{
+  font-size: 1.2rem;
+}
 .farmers-list {
   display: block;
   gap: 20px;
 }
 
 .farmer-card {
-  padding: 15px;
   border-radius: 8px;
-  width: 70em;
+  width: 100%;
   margin-bottom: 20px;
 }
 
@@ -231,12 +237,11 @@ body{
 }
 
 .farmer-avatar {
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: auto;
   border-radius: 50%;
   object-fit: cover;
 }
-
 .profile-link {
   text-decoration: none;
   color: #007bff;
