@@ -297,6 +297,7 @@ const logout = () => {
   console.log('Logging out...');
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
+  localStorage.removeItem('userRole');
   window.location.href = '/login';
 };
 
