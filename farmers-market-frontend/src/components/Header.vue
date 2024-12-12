@@ -13,16 +13,6 @@
               <i class="pi pi-search"></i>
             </Button>
           </div>
-          <Button
-            @click="goToFarmersSearch"
-            class="farmers-search-button"
-            label="Farmers Search"
-            severity="secondary"
-            variant="text"
-          >
-            <p>Farmers  </p>
-            <i class="pi pi-users"></i>
-          </Button>
           <Menubar v-if="isLoggedIn" :model="accountMenu" class="menubar-item"></Menubar>
           <Button
             v-if="!isLoggedIn"
@@ -61,10 +51,9 @@ import { nextTick } from 'vue';
 const hiddenItems = ref([]);
 const searchQ = ref('');
 let currentUser = null;
-const items = ref([{ label: 'Deals' }, { label: "What's New" }]);
+const items = ref([{ label: 'Deals' }, { label: "What's New" }, {icon: 'pi pi-users', label: "Farmers", command: () => goToFarmersSearch()}]);
 const updateItems = () => {
   const windowWidth = window.innerWidth;
-
   if (windowWidth < 965) {
     moveToAccountMenu('Categories');
   } else {
@@ -81,6 +70,11 @@ const updateItems = () => {
     moveToAccountMenu("What's New");
   } else {
     moveToItems("What's New");
+  }
+  if (windowWidth < 1250) {
+    moveToAccountMenu("Farmers");
+  } else {
+    moveToItems("Farmers");
   }
 };
 
@@ -297,6 +291,7 @@ const logout = () => {
   console.log('Logging out...');
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
+  localStorage.removeItem('userRole');
   window.location.href = '/login';
 };
 
@@ -365,7 +360,7 @@ onUnmounted(() => {
   width: 60px;
   height: auto;
   cursor: pointer;
-  margin-right: 50px;
+  margin-right: 10px;
 }
 
 .search-bar {
@@ -430,6 +425,25 @@ onUnmounted(() => {
 .login.button:hover {
   color: #334155 !important;
 }
+
+.farmer.button {
+  display: inline-flex;
+  align-items: center;
+}
+
+.farmer.button:hover .farmer-icon,
+.farmer.button:hover .farmer-text
+ {
+  color: #179739 !important;
+  background-color: transparent !important;
+}
+
+.farmer.button .farmer-icon,
+.farmer.button .farmer-text
+ {
+  color: #334155 !important;
+}
+
 @media (max-width: 740px) {
   .input-search {
     display: none;

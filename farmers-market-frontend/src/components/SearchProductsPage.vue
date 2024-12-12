@@ -37,6 +37,7 @@
         <label for="product-sort">Sort by</label>
       </FloatLabel>
     </div>
+      <div v-if="products.length > 0">
     <div class="products-grid">
       <ProductCard
         v-for="product in products"
@@ -44,6 +45,10 @@
         :product="product"
       />
     </div>
+      </div>
+      <div v-else>
+        <h1 style="text-align: center; margin-top: 50px; margin-bottom: 50px">No products found for your search.</h1>
+      </div>
     <Paginator
       style="margin-top: 30px"
       :rows="pageSize"
@@ -199,6 +204,7 @@ body{
   display: flex;
   flex-direction: column;
   width: 80%;
+  min-height: 100vh;
 }
 .products-grid {
   display: grid;

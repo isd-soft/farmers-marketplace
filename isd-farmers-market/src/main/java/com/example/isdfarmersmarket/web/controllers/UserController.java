@@ -1,5 +1,6 @@
 package com.example.isdfarmersmarket.web.controllers;
 
+import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.interfaces.UserService;
 import com.example.isdfarmersmarket.dao.enums.SearchUserByRoleParams;
 import com.example.isdfarmersmarket.web.commands.CustomerUpgradeCommand;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -62,8 +64,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(upgradedUser);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<UserProfileDTO> deleteUser(@PathVariable Long id) {
+        JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal.getId().equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }
