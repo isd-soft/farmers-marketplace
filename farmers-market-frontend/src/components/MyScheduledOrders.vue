@@ -1,10 +1,17 @@
 <template>
   <div class="home">
     <Header class="navbar"></Header>
-    <div style="width: calc(100% - 40px); max-width: 80%;display: flex; flex-direction: row; justify-content: space-between; gap: 20px">
+    <div class="content">
+    <div       style="
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+      ">
       <h1>My scheduled orders</h1>
     </div>
-    <div style="overflow-x:auto; width: 80%;">
+    <div style="overflow-x:auto;">
     <table class="products-table">
       <thead>
       <tr>
@@ -54,7 +61,9 @@
       </tbody>
     </table>
     </div>
-    <h3 style="margin-top: 50px; margin-bottom: 50px; text-align: center; width: 1200px" v-if="plannedOrders.length===0">Looks like you have no scheduled orders yet</h3>
+    <h3 style="margin-top: 50px; margin-bottom: 50px; text-align: center; width: 100%"
+        v-if="plannedOrders.length===0">
+      Looks like you have no scheduled orders yet</h3>
 
     <Dialog style="flex-grow: 1; max-width: 500px" v-model:visible="showConfirmation" modal header="Delete scheduled order" :position="'top'">
       <div class="popup-content">
@@ -67,6 +76,7 @@
         </div>
       </div>
     </Dialog>
+    </div>
     <Footer class="footer"></Footer>
   </div>
 </template>
@@ -175,7 +185,7 @@ export default {
   methods: {
     getTotalPrice(product, quantity){
       return (((product.pricePerUnit *((100 - (product.discountPercents || 0)) / 100))
-          .toFixed(2))* quantity.toFixed(2));
+          .toFixed(2))* quantity.toFixed(2)).toFixed(2);
     },
       getFirstImage(images) {
         if (Array.isArray(images) && images.length > 0 && images[0]?.bytes) {
@@ -203,7 +213,15 @@ body{
   padding-top: 120px;
   align-items: center;
 }
-
+.content{
+  min-height: 60vh;
+  width: 80%;
+}
+@media (max-width: 380px) {
+  .content{
+    width: 90%;
+  }
+}
 .products-table {
   width: 100%;
   border-collapse: collapse;

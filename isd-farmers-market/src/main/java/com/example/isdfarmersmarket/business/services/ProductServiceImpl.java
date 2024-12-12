@@ -1,7 +1,6 @@
 package com.example.isdfarmersmarket.business.services;
 import com.example.isdfarmersmarket.business.exception.custom_exceptions.EntityNotFoundException;
 import com.example.isdfarmersmarket.business.mapper.ProductMapper;
-import com.example.isdfarmersmarket.business.mapper.ReviewMapper;
 import com.example.isdfarmersmarket.business.security.JwtPrincipal;
 import com.example.isdfarmersmarket.business.services.interfaces.CreateReviewsService;
 import com.example.isdfarmersmarket.business.services.interfaces.ProductService;
@@ -25,7 +24,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,21 +36,18 @@ public class ProductServiceImpl implements ProductService {
     ProductMapper productMapper;
     CategoryRepository categoryRepository;
     ImageRepository imageRepository;
-    ProductReviewRepository productReviewRepository;
-    ReviewMapper reviewMapper;
-    static String PRODUCT_FIND_FAILED_BY_ID = "Product with the specified id not found";
-    static String CATEGORY_FIND_FAILED_BY_ID = "Category with the specified id not found";
     UserRepository userRepository;
     OrderRepository orderRepository;
     ItemInCartRepository itemInCartRepository;
     CreateReviewsService createReviewsService;
-    private final PlannedOrderRepository plannedOrderRepository;
+    PlannedOrderRepository plannedOrderRepository;
+    String notProductOwnerMessage = "You are not the owner of this product";
 
     @Override
     @Transactional
     public ProductDTO createProduct(CreateProductCommand createProductCommand) {
         JwtPrincipal principal = (JwtPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User creator = userRepository.findById(principal.getId()).orElse(null);
+        User creator = userRepository.findById(principal.getId()).orElseThrow(() -> new EntityNotFoundException(principal.getId(), User.class));
 
         Set<DeliveryTypes> allDeliveryTypes = EnumSet.allOf(DeliveryTypes.class);
         Set<DeliveryTypes> userDeliveryTypes = creator.getDeliveryTypes().stream()
@@ -65,12 +60,7 @@ public class ProductServiceImpl implements ProductService {
         List<Image> images = new ArrayList<>();
         if (createProductCommand.getImagesBase64() != null && !createProductCommand.getImagesBase64().isEmpty()) {
             createProductCommand.getImagesBase64().forEach(file -> {
-                Image image = null;
-                try {
-                    image = toImageEntity(file);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                Image image = toImageEntity(file);
                 images.add(image);
             });
         }
@@ -88,24 +78,20 @@ public class ProductServiceImpl implements ProductService {
                 .visible(true)
                 .images(new HashSet<>(images)).build();
         productRepository.save(product);
-        if (creator != null) {
             creator.getMyProducts().add(product);
             userRepository.save(creator);
-        }
-        images.forEach(image -> {
-            image.setProduct(product);
-        });
+        images.forEach(image -> image.setProduct(product));
         return productMapper.map(product);
     }
 
     @Override
     @Transactional
-    public ProductDTO updateProduct(Long id, UpdateProductCommand updateProductCommand) {
-        if (!isProductOwner(id)) {
-            throw new AccessDeniedException("You are not the owner of this product");
+    public ProductDTO updateProduct(Long productId, UpdateProductCommand updateProductCommand) {
+        if (isNotProductOwner(productId)) {
+            throw new AccessDeniedException(notProductOwnerMessage);
         }
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(id, Product.class));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException(productId, Product.class));
         product.setDescription(updateProductCommand.getDescription());
         product.setUnitType(updateProductCommand.getUnitType());
         product.setPricePerUnit(updateProductCommand.getPricePerUnit());
@@ -115,28 +101,21 @@ public class ProductServiceImpl implements ProductService {
         List<Image> images = new ArrayList<>();
         if (updateProductCommand.getImagesBase64() != null && !updateProductCommand.getImagesBase64().isEmpty()) {
             updateProductCommand.getImagesBase64().forEach(file -> {
-                Image image = null;
-                try {
-                    image = toImageEntity(file);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                Image image = toImageEntity(file);
                 image.setProduct(product);
                 images.add(image);
             });
         }
         imageRepository.saveAll(images);
-        images.forEach(image -> {
-            product.getImages().add(image);
-        });
-        return productMapper.map(product);
+        images.forEach(image -> product.getImages().add(image));
+        return productMapper.map(productRepository.save(product));
     }
 
     @Override
     @Transactional
     public ProductDTO setDiscountProduct(Long id, int discount) {
-        if (!isProductOwner(id)) {
-            throw new AccessDeniedException("You are not the owner of this product");
+        if (isNotProductOwner(id)) {
+            throw new AccessDeniedException(notProductOwnerMessage);
         }
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(id, Product.class));
@@ -147,8 +126,8 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @Override
     public ProductDTO changeVisible(Long id, boolean visible) {
-        if (!isProductOwner(id) && !isAppAdmin()) {
-            throw new AccessDeniedException("You are not the owner of this product");
+        if (isNotProductOwner(id) && isNotAppAdmin()) {
+            throw new AccessDeniedException(notProductOwnerMessage);
         }
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(id, Product.class));
@@ -162,14 +141,15 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductDTO deleteProduct(Long id) {
-        if (!isProductOwner(id) && !isAppAdmin()) {
-            throw new AccessDeniedException("You are not the owner of this product");
+        if (isNotProductOwner(id) && isNotAppAdmin()) {
+            throw new AccessDeniedException(notProductOwnerMessage);
         }
         if(orderRepository.countOrdersByProductId(id) > 0) {
             throw new AccessDeniedException("You can not delete product with orders");
         }
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(id, Product.class));
+
         itemInCartRepository.deleteAllByProduct(product);
         plannedOrderRepository.deleteAllByProduct(product);
         productRepository.delete(product);
@@ -215,11 +195,12 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public Page<CompactProductDTO> getCurrentUserProducts(Pageable pageable) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
+        assert principal != null;
         Long creator = principal.getId();
         Specification<Product> filters = Specification.
                 where((creator == null || creator == 0L) ? null : ProductSpecification.creatorIs(creator));
         Page<CompactProductDTO> productDTOS = productMapper.mapToCompactProductsDTO(productRepository.findAll(filters, pageable));
-        productDTOS.forEach(product -> {product.setOrders(orderRepository.countOrdersByProductId(product.getId()));});
+        productDTOS.forEach(product -> product.setOrders(orderRepository.countOrdersByProductId(product.getId())));
         return productDTOS;
     }
 
@@ -228,8 +209,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductDTO getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(id, Product.class));
-        ProductDTO productDTO = productMapper.map(product);
-        return productDTO;
+        return productMapper.map(product);
     }
 
     @Transactional
@@ -248,8 +228,8 @@ public class ProductServiceImpl implements ProductService {
         var product = productRepository
                 .findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException(productId, Product.class));
-        if(!product.isVisible() && !isProductOwner(product.getId())) {
-            throw new AccessDeniedException("This product is unavaliable");
+        if(!product.isVisible() && isNotProductOwner(product.getId())) {
+            throw new AccessDeniedException("This product is unavailable");
         }
         ProductPageDTO productPageDTO = productMapper.mapToProductPage(product);
         if (principal != null) {
@@ -303,7 +283,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-    private Image toImageEntity(String base64Image) throws IOException {
+    private Image toImageEntity(String base64Image) {
         if (base64Image.contains(",")) {
             base64Image = base64Image.split(",")[1];
         }
@@ -314,20 +294,22 @@ public class ProductServiceImpl implements ProductService {
         return image;
     }
 
-    private boolean isProductOwner(Long productId) {
+    private boolean isNotProductOwner(Long productId) {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
+        assert principal != null;
         User currentUser = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException(principal.getId(), User.class));
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new EntityNotFoundException(productId, Product.class));
-            return product.getFarmer().equals(currentUser);
+            return !product.getFarmer().equals(currentUser);
         }
-    private boolean isAppAdmin() {
+    private boolean isNotAppAdmin() {
         JwtPrincipal principal = SecurityUtils.getPrincipal();
+        assert principal != null;
         User currentUser = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new EntityNotFoundException(principal.getId(), User.class));
         Set<Role> roles = currentUser.getRoles();
         return roles.stream()
-                .anyMatch(role -> role.getRole() == ERole.ADMIN);
+                .noneMatch(role -> role.getRole() == ERole.ADMIN);
     }
 }

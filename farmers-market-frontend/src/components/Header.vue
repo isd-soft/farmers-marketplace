@@ -13,16 +13,6 @@
               <i class="pi pi-search"></i>
             </Button>
           </div>
-          <Button
-            @click="goToFarmersSearch"
-            class="farmer button"
-            label="Farmer"
-            severity="secondary"
-            variant="text"
-          >
-            <i class="pi pi-users farmer-icon"></i>
-            <span class="farmer-text">Farmers</span>
-          </Button>
           <Menubar v-if="isLoggedIn" :model="accountMenu" class="menubar-item"></Menubar>
           <Button
             v-if="!isLoggedIn"
@@ -61,10 +51,9 @@ import { nextTick } from 'vue';
 const hiddenItems = ref([]);
 const searchQ = ref('');
 let currentUser = null;
-const items = ref([{ label: 'Deals' }, { label: "What's New" }]);
+const items = ref([{ label: 'Deals' }, { label: "What's New" }, {icon: 'pi pi-users', label: "Farmers", command: () => goToFarmersSearch()}]);
 const updateItems = () => {
   const windowWidth = window.innerWidth;
-
   if (windowWidth < 965) {
     moveToAccountMenu('Categories');
   } else {
@@ -81,6 +70,11 @@ const updateItems = () => {
     moveToAccountMenu("What's New");
   } else {
     moveToItems("What's New");
+  }
+  if (windowWidth < 1250) {
+    moveToAccountMenu("Farmers");
+  } else {
+    moveToItems("Farmers");
   }
 };
 
@@ -366,7 +360,7 @@ onUnmounted(() => {
   width: 60px;
   height: auto;
   cursor: pointer;
-  margin-right: 50px;
+  margin-right: 10px;
 }
 
 .search-bar {

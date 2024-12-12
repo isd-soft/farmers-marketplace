@@ -39,14 +39,12 @@
                 <div class="farmer-profile">
                   <img :src="farmerPFP" alt="Profile Picture" class="farmer-avatar" />
                   <div class="farmer-details">
-                    <p><b style="font-size: 1.2em">{{ farmer.firstName }} {{ farmer.lastName }}</b> </p>
+                    <p ><b class="name">{{ farmer.firstName }} {{ farmer.lastName }}</b> </p>
                     <Rating
                       v-model="farmer.rating"
                       readonly
                       :stars="5"
-                      :style="{
-          '--p-rating-icon-size': '1.2rem'
-          }"/>
+                      class="rating"/>
                   </div>
                 </div>
               </router-link>
@@ -55,7 +53,7 @@
         </div>
         </div>
         <div v-else>
-          <h1>No farmers found with this name.</h1>
+          <h1 style="text-align: center; margin-top: 50px; margin-bottom: 50px">No farmers found for your search.</h1>
         </div>
       </div>
 
@@ -165,24 +163,39 @@ export default {
 </script>
 
 <style scoped>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body{
+  display: block !important;
+}
 .farmers-search-page{
   display: flex;
-  margin-top: 10em;
   flex-direction: column;
-  min-height: 100vh;
-  overflow-x: hidden;
   width: 100%;
-  height: max-content;
+  padding-top: 120px;
+  align-items: center;
 }
 .main-container-farmers {
   position: relative;
   display: flex;
   flex-direction: column;
-  max-width: 80%;
-  width: calc(100% - 40px);
-  margin-left: 20px;
-  margin-right: 20px;
+  width: 80%;
   min-height: 100vh;
+}
+@media (max-width: 380px) {
+  .main-container-farmers{
+    width: 90%;
+  }
+  .farmer-avatar {
+    width: 50px!important;
+    height: auto;
+  }
+  .name{
+    font-size: 1.0rem!important;
+  }
 }
 .search-farmers-input{
   flex-grow: 1 !important;
@@ -203,16 +216,17 @@ export default {
   column-gap: 2em;
   align-content: space-between;
 }
-
+.name{
+  font-size: 1.2rem;
+}
 .farmers-list {
   display: block;
   gap: 20px;
 }
 
 .farmer-card {
-  padding: 15px;
   border-radius: 8px;
-  width: 70em;
+  width: 100%;
   margin-bottom: 20px;
 }
 
@@ -223,12 +237,11 @@ export default {
 }
 
 .farmer-avatar {
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: auto;
   border-radius: 50%;
   object-fit: cover;
 }
-
 .profile-link {
   text-decoration: none;
   color: #007bff;
