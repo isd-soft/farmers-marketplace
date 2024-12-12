@@ -1,5 +1,6 @@
 # Farmers Marketplace
-<img src="https://github.com/user-attachments/assets/387defaf-eb11-4c2a-a275-c047322d408c" width="150" />
+<img src="https://github.com/user-attachments/assets/f647bfb0-89de-447c-bb79-debcc0df5adc" width="150" />
+
 
 ## Intro
 **Farmers Marketplace** is a web-based application designed to connect local farmers and consumers, allowing them to interact efficiently and directly. The platform facilitates the buying and selling of fresh farm produce, while ensuring reliable order management and smooth communication.
