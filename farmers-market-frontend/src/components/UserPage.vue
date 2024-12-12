@@ -86,7 +86,7 @@
 
     <div v-if="user.isFarmer">
       <TabView class="user-tabs">
-        <TabPanel header="Farmer Reviews">
+        <TabPanel header="Customer Reviews">
           <CustomerReviews :id="id" :review-type="'farmer'" :canReview="user.canReview" />
         </TabPanel>
 
