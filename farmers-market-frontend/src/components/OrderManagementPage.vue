@@ -321,6 +321,7 @@ body{
   gap: 20px;
   margin-top: 20px;
   width: 80%;
+  min-height: 80vh;
 }
 @media (max-width: 380px) {
   .main-orders-container{
@@ -337,7 +338,6 @@ body{
   box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
 }
 .order-status-fitering-container {
-  width: 10%;
   min-width: 100px;
   position: relative;
   display: flex;

@@ -1,6 +1,7 @@
 <template>
   <div class="home">
     <Header class="navbar"></Header>
+    <div class="content">
     <h1 class="main-texts">Update scheduled order</h1>
     <p class="main-texts" style=" margin-top: 20px;">When you schedule an order, it will be fulfilled each week on the day of the week and time of your choice.</p>
     <div class="main-container-schedule">
@@ -132,6 +133,7 @@
         </div>
       </div>
     </div>
+      </div>
     <Footer class="footer"></Footer>
   </div>
 </template>
@@ -345,8 +347,12 @@ body{
   padding: 0;
   box-sizing: border-box;
 }
-.main-texts{
+.content{
+  min-height: 80vh;
   width: 80%;
+}
+.main-texts{
+  width: 100%;
   text-align: center;
 }
 .price-text-part {
@@ -366,13 +372,10 @@ body{
   flex-wrap: wrap;
   gap: 20px;
   margin-top: 20px;
-  width: 80%;
+  width: 100%;
 }
 @media (max-width: 380px) {
-  .main-container-schedule{
-    width: 90%;
-  }
-  .main-texts{
+  .content{
     width: 90%;
   }
 }

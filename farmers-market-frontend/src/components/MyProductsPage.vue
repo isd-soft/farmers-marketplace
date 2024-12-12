@@ -350,12 +350,13 @@ body {
 .home {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  width: 100%!important;
+  max-width: 100%!important;
   padding-top: 120px;
   align-items: center;
 }
 .content{
-  min-height: 60vh;
+  min-height: 80vh;
   width: 80%;
 }
 @media (max-width: 380px) {

@@ -2,7 +2,6 @@
   <div class="order">
     <Header class="navbar"></Header>
     <div class="main-container">
-      <div class="main-orders-container">
         <div class="order-status-fitering-container">
           <div
             v-for="status in statuses"
@@ -104,7 +103,6 @@
             </DataView>
           </div>
         </div>
-      </div>
     </div>
     <Paginator
       style="margin-top: 30px"
@@ -328,30 +326,21 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0;
-  min-height: 50vh;
   overflow-x: hidden;
   width: 100%;
   height: max-content;
+  align-items: center;
 }
 .main-container {
-  position: relative;
+  width: 80%;
+  min-height: 80vh;
   margin-top: 80px;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 5vh;
-  padding: 6vh;
-  width: 100%;
-  height: max-content;
-}
-.main-orders-container {
-  margin: 0 auto;
-  width: 80%;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 1vw;
-  position: relative;
+  padding: 6vh 0;
+  justify-content: space-between;
 }
 .order-status-fitering-container,
 .orders-container {
@@ -359,13 +348,10 @@ export default {
   background-color: #fff;
   padding: 30px;
   height: max-content;
-  min-width: max-content;
-  width: 55%;
   box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
 }
 .order-status-fitering-container {
-  width: 20%;
-  position: relative;
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
   gap: 2.5vh;
@@ -374,7 +360,7 @@ export default {
   border-radius: 15px;
 }
 .orders-container {
-  width: 80%;
+  flex-grow: 1;
   min-height: 50vh;
 }
 .order-staus-icons {
@@ -504,13 +490,7 @@ export default {
 
 @media (max-width: 620px) {
   .main-container {
-    width: 100%;
-  }
-  .main-orders-container {
-    display: flex;
-    flex-direction: column;
-    gap: 2vh;
-    width: 100%;
+    width: 90%;
   }
   .orders-container {
     width: 100%;
@@ -561,7 +541,7 @@ export default {
     width: 100%;
   }
   .first-product-content-section {
-    width: 100%; 
+    width: 100%;
   }
   .order-status-text-container *{
     width: min-content;
@@ -574,10 +554,10 @@ export default {
 
   .product-description {
     min-width: 200px;
-    font-size: 0.9rem; 
-    height: auto; 
-    overflow: visible; 
-    -webkit-line-clamp: unset; 
+    font-size: 0.9rem;
+    height: auto;
+    overflow: visible;
+    -webkit-line-clamp: unset;
   }
 }
 </style>

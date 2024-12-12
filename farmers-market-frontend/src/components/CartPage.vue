@@ -3,7 +3,6 @@
     <Header class="navbar"></Header>
     <Toast />
     <div class="main-container">
-      <div class="main-orders-container">
         <div class="orders-container">
           <p class="title-text-cart">Cart</p>
 
@@ -161,7 +160,6 @@
             </div>
           </div>
         </div>
-      </div>
     </div>
     <Footer class="footer"></Footer>
   </div>
@@ -432,50 +430,41 @@ const addProductsToOrder = async () => {
   display: flex;
   flex-direction: column;
   gap: 0;
-  min-height: 100vh;
   height: max-content;
   width: 100%;
+  justify-content: center;
+  align-items: center;
 }
 .title-text-cart {
   font-size: 2rem;
 }
 .main-container {
-  margin: 0 auto;
   width: 80%;
-  position: relative;
+  min-height: 80vh;
   margin-top: 80px;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 5vh;
   padding: 6vh 0;
-  height: max-content;
-}
-.main-orders-container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 1vw;
-  position: relative;
+  justify-content: space-between;
 }
 .order-summary-container,
 .orders-container {
   border-radius: 15px;
   padding: 30px;
   height: max-content;
-  min-width: max-content;
   box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
 }
 .orders-container {
-  width: 70%;
+  flex-grow: 1;
 }
 .cart-pay-container {
-  position: relative;
-  width: 50%;
   display: flex;
   flex-direction: column;
   gap: 2.5vh;
   border-radius: 15px;
+  flex-grow: 1;
 }
 .order-summary-container {
   display: flex;
@@ -666,9 +655,8 @@ const addProductsToOrder = async () => {
 }
 
 .footer {
-  /* width: 100%; */
-  margin: 0;
   padding-top: 20px;
+  margin-top: auto;
 }
 @media (max-width: 768px) {
   .main-container {

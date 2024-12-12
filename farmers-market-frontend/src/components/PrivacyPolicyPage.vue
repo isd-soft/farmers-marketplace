@@ -1,6 +1,7 @@
 <template>
   <div class="home">
     <Header class="navbar"></Header>
+    <div class="content">
     <Card title="Privacy Policy" class="privacy-card">
       <template #title>Privacy Policy</template>
       <template #content>
@@ -82,6 +83,7 @@
         </div>
       </template>
     </Card>
+    </div>
     <Footer class="footer"></Footer>
   </div>
 </template>
@@ -107,8 +109,12 @@ body{
   padding-top: 120px;
   align-items: center;
 }
-.privacy-card {
+.content{
+  min-height: 80vh;
   width: 80%;
+}
+.privacy-card {
+  width: 100%;
   background-color: #ffffff;
   background-color: #fff;
   border-radius: 15px;
@@ -117,8 +123,10 @@ body{
 }
 @media (max-width: 380px) {
   .privacy-card {
-    width: 90%;
     padding: 5px;
+  }
+  .content{
+    width: 90%;
   }
 }
 

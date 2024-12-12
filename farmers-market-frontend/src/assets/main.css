@@ -2,7 +2,6 @@
 @import 'primeicons/primeicons.css';
 
 #app {
-  max-width: 2560px;
   margin: 0 auto;
   font-weight: normal;
   display: flex;

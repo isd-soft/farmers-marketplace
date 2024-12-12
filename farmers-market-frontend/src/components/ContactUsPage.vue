@@ -1,6 +1,7 @@
 <template>
   <div class="home">
     <Header class="navbar"></Header>
+    <div class="content">
     <Card title="Contact Us" class="contact-card">
       <template #title>Contact Us</template>
       <template #content>
@@ -26,6 +27,7 @@
         </p>
       </template>
     </Card>
+    </div>
     <Footer class="footer"></Footer>
   </div>
 </template>
@@ -47,8 +49,12 @@ body{
   padding-top: 120px;
   align-items: center;
 }
-.contact-card {
+.content{
+  min-height: 80vh;
   width: 80%;
+}
+.contact-card {
+  width: 100%;
   background-color: #ffffff;
   background-color: #fff;
   border-radius: 15px;
@@ -57,8 +63,10 @@ body{
 }
 @media (max-width: 380px) {
   .contact-card{
-    width: 90%;
     padding: 5px;
+  }
+  .content{
+    width: 90%;
   }
 }
 .contact-card p {

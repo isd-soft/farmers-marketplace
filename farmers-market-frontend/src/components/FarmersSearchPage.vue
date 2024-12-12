@@ -183,7 +183,7 @@ body{
   display: flex;
   flex-direction: column;
   width: 80%;
-  min-height: 100vh;
+  min-height: 80vh;
 }
 @media (max-width: 380px) {
   .main-container-farmers{

@@ -76,7 +76,7 @@
               class="image-preview"
             >
               <img :src="file.preview" :alt="file.name" />
-              <button type="button" @click="removeFile(index)">Remove</button>
+              <button type="button" @click="removeFile(index)"><i class="pi pi-trash action-icon"></i></button>
             </div>
           </div>
         </div>
@@ -278,8 +278,8 @@ body{
   width: 80%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   row-gap: 12px;
+  min-height: 80vh;
 }
 @media (max-width: 380px) {
   .create-product-container{

@@ -23,7 +23,6 @@ import ContactUsPage from '@/components/ContactUsPage.vue';
 import FAQPage from '@/components/FAQPage.vue';
 import PrivacyPolicyPage from '@/components/PrivacyPolicyPage.vue';
 import FarmersSearchPage from '@/components/FarmersSearchPage.vue';
-import DealsPage from '@/components/DealsPage.vue';
 import AdminProducts from '@/components/Admin/AdminProducts.vue';
 import AdminOrders from '@/components/Admin/AdminOrders.vue';
 import AdminUsers from '@/components/Admin/AdminUsers.vue';
@@ -168,11 +167,6 @@ const routes = [
     component: FarmersSearchPage,
   },
   {
-    path: '/deals',
-    name: 'Deals',
-    component: DealsPage,
-  },
-  {
     path: '/admin/products',
     name: 'Product Administration',
     component: AdminProducts,
@@ -219,7 +213,6 @@ const routes = [
     redirect: '/404',
   },
 ];
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,

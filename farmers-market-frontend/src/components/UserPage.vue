@@ -1,6 +1,7 @@
 <template>
+  <div class="home">
   <Header class="navbar"></Header>
-
+    <div class="content">
   <Toast group="bc">
     <template #message="slotProps">
       <div class="custom-toast-container">
@@ -18,8 +19,6 @@
       </div>
     </template>
   </Toast>
-
-  <div class="user-page">
     <div class="user-info">
     <div class="user-header">
       <img
@@ -29,16 +28,17 @@
       />
       <h1 class="user-name">{{ user.firstName + ' ' + user.lastName }}</h1>
 
-      <div v-if="user.isFarmer" style="margin-left: 2em; margin-top: 1.5em" class="user-rating">
+      <div v-if="user.isFarmer" style="margin-left: 0!important;; margin-top: 0!important; ">
         <Rating
+          class="rating"
           v-model="user.rating"
           readonly
           :stars="5"
           :style="{
-        '--p-rating-icon-size': '2rem'
+        '--p-rating-icon-size': '1.5rem'
       }"
         />
-        <p>Based on {{ user.reviewCount }} Reviews</p>
+        <p v-if="user.reviewCount>0">Based on {{ user.reviewCount }} Reviews</p>
       </div>
     </div>
 
@@ -85,23 +85,24 @@
     </Dialog>
 
     <div v-if="user.isFarmer">
-      <TabView class="user-tabs">
-        <TabPanel header="Farmer Reviews">
-          <CustomerReviews :id="id" :review-type="'farmer'" :canReview="user.canReview" />
+      <TabView class="tabview-panels">
+        <TabPanel header="Farmer Reviews" class="tabview-panels">
+          <CustomerReviews :id="id" :review-type="'farmer'" :canReview="user.canReview " />
         </TabPanel>
 
-        <TabPanel header="Products">
+        <TabPanel header="Products" class="tabview-panels">
           <h2 class="header">Farmer Products</h2>
-          <div class="products-panel">
+          <div >
             <div v-if="farmerProducts.length === 0">
               <p>No farmer products available.</p>
             </div>
-            <ProductCard
-              v-for="product in farmerProducts"
-              :key="product.id"
-              :product="product"
-              class="product-card"
-            />
+            <div class="products-grid">
+              <ProductCard
+                v-for="product in farmerProducts"
+                :key="product.id"
+                :product="product"
+              />
+            </div>
             <Button
               v-if="!isAllProductsLoaded"
               label="Load More Products"
@@ -114,6 +115,7 @@
     </div>
     <div v-else>
       <ReviewsSection :userId="id" />
+    </div>
     </div>
     </div>
     <Footer class="footer"></Footer>
@@ -249,28 +251,70 @@ export default {
 </script>
 
 <style scoped>
-.user-page {
+body {
+  display: block !important;
+}
+.home {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  overflow-x: hidden;
-  width: 100%;
-  padding-top: 80px;
+  width: 100%!important;
+  max-width: 100%!important;
+  padding-top: 120px;
+  align-items: center;
 }
-
+.content{
+  min-height: 80vh;
+  width: 80%;
+}
+@media (max-width: 380px) {
+  .content{
+    width: 90%;
+  }
+  .products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))!important;
+  }
+}
+@media (max-width: 600px) {
+  .user-header-avatar {
+    width: 5rem!important;
+  }
+  .user-name {
+    font-size: 1.3rem!important;
+    font-weight: 500!important;
+  }
+   .rating{
+  --p-rating-icon-size: '1.3rem'!important;
+  }
+}
+@media (max-width: 1000px) {
+  .products-grid {
+    gap: 20px !important;
+  }
+}
 .user-info {
-  margin: 0 2rem;
+  width: 100%;
 }
-
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+  width:100%;
+  justify-content: center;
+  align-content: start;
+}
 .user-header {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  gap: 2rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  text-align: left;
   padding: 1.5rem;
   background-color: #f8f9fa;
   border-radius: 8px;
   margin-bottom: 2rem;
-  text-align: center;
+  align-items: center;
+  justify-content: end;
 }
 .custom-toast-container {
   display: flex;
@@ -282,7 +326,9 @@ export default {
   color: #333;
   position: relative;
 }
-
+.tabview-panels {
+  padding: 0!important;
+}
 .custom-toast-summary {
   font-weight: bold;
   font-size: 1.1rem;
@@ -311,84 +357,26 @@ export default {
 }
 
 .user-header-avatar {
-  width: 100px;
-  height: 100px;
+  width: 6rem;
+  height: auto;
   border-radius: 50%;
-  margin-bottom: 1rem;
 }
 
 .user-name {
   font-size: 1.8rem;
   font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-.user-rating {
-  margin-top: 0.5rem;
-}
-
-.products-panel {
-  padding: 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.5rem;
-}
-
-.product-card {
-  width: 100%;
-  max-width: 16em;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border: 1px solid #e1e1e1;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-grow: 1;
 }
 
 .load-more-button {
   margin-top: 2rem;
   width: 100%;
 }
-
-@media (min-width: 768px) {
-  .user-info {
-    margin: 0 6rem;
-  }
-
-  .user-header {
-    flex-direction: row;
-    text-align: left;
-  }
-
-  .user-header-avatar {
-    width: 120px;
-    height: 120px;
-    margin-right: 2rem;
-    margin-bottom: 0;
-  }
-
-  .user-name {
-    font-size: 2.5rem;
-  }
-
-  .user-rating {
-    margin-top: 1.5rem;
-    margin-left: 2em;
-  }
-
-  .products-panel {
-    justify-content: flex-start;
-    gap: 2rem;
-  }
+.footer{
+  text-align: center;
+  padding: 10px;
+  margin-top: 50px;
+  bottom: 0;
 }
-
-@media (min-width: 1024px) {
-  .user-info {
-    margin: 0 12rem;
-  }
-}
-
 
 </style>
