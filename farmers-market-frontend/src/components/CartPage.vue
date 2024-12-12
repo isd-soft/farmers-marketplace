@@ -57,7 +57,6 @@
                         </InputNumber>
 
                         <p class="unit-type-text">{{ product.unitType }}</p>
-
                         <i class="pi pi-trash" @click="removeItemFromCart(product.id)"></i>
                       </div>
                     </div>
@@ -105,6 +104,7 @@
                 @change="onDeliveryTypeChange"
               />
             </div>
+            <h3 class="payment-details-text">Payment Details</h3>
             <div class="payment-input-container">
               <InputGroup class="input-group">
                 <label for="text" class="font-bold block mb-2">First Name</label>
@@ -117,10 +117,10 @@
               </InputGroup>
 
               <InputGroup class="input-group">
-                <label for="text" class="font-bold block mb-2"> Card Number </label>
+                <label for="number" class="font-bold block mb-2"> Card Number </label>
                 <InputNumber
-                  class="input"
-                  inputId="withoutgrouping" 
+                  class="card-input"
+                  inputId="withoutgrouping"
                   :useGrouping="false"
                   v-model="cardNumber"
                   placeholder="5574-6698-8877-7699"
@@ -130,12 +130,12 @@
 
               <InputGroup class="input-group">
                 <label for="text" class="font-bold block mb-2"> CVV </label>
-                <InputNumber class="input" v-model="cvv" placeholder="***" required />
+                <InputNumber class="card-input" v-model="cvv" placeholder="***" required />
               </InputGroup>
 
               <InputGroup class="input-group">
                 <label for="text" class="font-bold block mb-2"> Valid Until </label>
-                <DatePicker class="input" v-model="validUntil" placeholder="10/05" required />
+                <DatePicker v-model="validUntil" placeholder="10/05" required />
               </InputGroup>
             </div>
 
@@ -199,14 +199,15 @@ const validUntil = ref(null)
 const totalCartPrice = computed(() => {
   const productTotal = cartProducts.value.reduce((total, product) => {
     if (!isOutOfStock(product)) {
-      total += (product.pricePerUnit * product.quantity * (1 - product.discountPercents / 100));
+      total += product.pricePerUnit * product.quantity * (1 - product.discountPercents / 100)
     }
-    return total;
-  }, 0);
-  const totalWithDelivery = (productTotal + cart.value.totalPriceOfDelivery).toFixed(2);
-  return totalWithDelivery;
-});
+    return total
+  }, 0)
 
+  const totalWithDelivery = (productTotal + cart.value.totalPriceOfDelivery).toFixed(2)
+  buttonBuyFor.value = `Buy for ${totalWithDelivery} MDL`
+  return totalWithDelivery
+})
 
 function toastAdd(severity, summary, detail, life = 2000) {
   toast.add({
@@ -380,7 +381,7 @@ const addProductsToOrder = async () => {
     for (let inputGroup of inputGroups) {
       let input = inputGroup.querySelector('.input')
       if (input && (input.value === '' || input.value == null)) {
-        input.classList.add('highlight-error') 
+        input.classList.add('highlight-error')
       }
     }
     return
@@ -405,7 +406,7 @@ const addProductsToOrder = async () => {
       deliveryTypeFarmer: cart.value.deliveryTypeFarmer,
     })
     cartProducts.value = []
-    buttonBuyFor.value = 'Buy for'
+    buttonBuyFor.value = 'Buy for '
 
     toastAdd('success', 'Order Created', 'Your order has been successfully created!')
     console.log('Order Response', response.data)
@@ -418,7 +419,6 @@ const addProductsToOrder = async () => {
     )
   }
 }
-
 </script>
 
 <style scoped>
@@ -492,7 +492,6 @@ const addProductsToOrder = async () => {
 }
 .delivery-type-select {
   width: 12vw;
-  min-width: 7vw;
 }
 .total-price-text {
   font-size: 1.2rem;
@@ -507,10 +506,14 @@ const addProductsToOrder = async () => {
   column-gap: 1vw;
   row-gap: 2vh;
 }
+.payment-details-text {
+  font-weight: 500;
+}
 .input-group {
   display: flex;
   flex-direction: column;
 }
+
 /* PAYMENT */
 .payment-methods-container {
   padding: 0 30px;
@@ -544,11 +547,9 @@ const addProductsToOrder = async () => {
   width: min-content;
 }
 .product-image {
-  min-width: 100px;
   width: 7vw;
   height: 11vh;
   object-fit: cover;
-  max-width: 10vw;
   border-radius: 10px;
 }
 .overflow-image {
@@ -668,30 +669,94 @@ const addProductsToOrder = async () => {
   margin: 0;
   padding-top: 20px;
 }
-@media (max-width: 425px) {
+@media (max-width: 768px) {
   .main-container {
-    padding: 0;
-    /* display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; */
+    width: 90%;
   }
   .main-orders-container {
     display: flex;
     flex-direction: column;
+    gap: 5vh;
+    width: 100%;
+  }
+  .orders-container {
+    width: 100%;
+    padding: 7vw;
+  }
+  .order-container {
+    width: 100%;
+  }
+  .product-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .product-image-title-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .product-description {
+    font-size: 0.7rem;
+    max-width: 58vw;
+  }
+  .product-image {
+    width: 100%;
+    height: 15vh;
+  }
+
+  .product-price-quantity-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    min-width: 100%;
+  }
+
+  .quantity-trash-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1vh;
+  }
+  .stock-availability {
+    padding: 0.5vh 2.6vw;
+  }
+  .order-summary-container {
+    width: 100%;
+  }
+  .payment-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    padding: 0;
+    margin: 0;
+    justify-content: flex-start;
+    width: 100%;
+  }
+  .delivery-type-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .delivery-type-select {
+    min-width: 50vw;
+  }
+  .input-group {
+    width: 72vw;
+    margin: 0 auto;
   }
   .title-text-cart {
     font-size: 1.3rem;
   }
-  .product-image-title-container {
+  .payment-images {
     display: flex;
-    flex-direction: column;
+    gap: 1vh;
   }
-  .product-title-text {
-    font-size: 10px;
-  }
-  .home-text {
-    left: 2vw;
+  .payment-images img {
+    width: 15vw;
+    height: auto;
   }
 }
 </style>

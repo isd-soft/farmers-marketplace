@@ -147,9 +147,9 @@
 				<artifactId>flyway-maven-plugin</artifactId>
 				<version>10.10.0</version>
 				<configuration>
-					<url>jdbc:postgresql://localhost:5433/farmer_market_database</url>
+					<url>jdbc:postgresql://localhost:5432/isdFarmersMarketplace</url>
 					<user>postgres</user>
-					<password>postgres</password>
+					<password>admin</password>
 					<cleanDisabled>false</cleanDisabled>
 				</configuration>
 			</plugin>

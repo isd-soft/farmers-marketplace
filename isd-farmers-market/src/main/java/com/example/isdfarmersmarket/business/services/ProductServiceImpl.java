@@ -259,8 +259,25 @@ public class ProductServiceImpl implements ProductService {
                     !principal.getRoles().contains(ERole.FARMER) &&
                     createReviewsService.canReviewProduct(authenticatedUser, product));
         }
-
         return productPageDTO;
+    }
+
+    @Transactional
+    @Override
+    public List<CompactProductDTO> getAllProductsByCategory(Long categoryId) {
+        Specification<Product> filters = Specification
+                .where((categoryId == null || categoryId == 0L) ? null : ProductSpecification.categoryIs(categoryId))
+                .and(ProductSpecification.isVisible());
+        List<Product> products = productRepository.findAll(filters);
+        JwtPrincipal principal = SecurityUtils.getPrincipal();
+        Set<Product> wishlist = new HashSet<>();
+        if (principal != null) {
+            User user = userRepository.findById(principal.getId()).orElse(null);
+            if(user!=null) {
+                wishlist = user.getWishlist();
+            }
+        }
+        return productMapper.mapToCompactProductsDTO(products, wishlist);
     }
 
     @Override

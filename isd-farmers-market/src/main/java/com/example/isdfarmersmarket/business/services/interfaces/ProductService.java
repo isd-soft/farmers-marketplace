@@ -16,7 +16,6 @@ public interface ProductService {
     ProductDTO updateProduct(Long id, UpdateProductCommand updateProductCommand);
     ProductDTO setDiscountProduct(Long id, int discount);
 
-    @Transactional
     ProductDTO changeVisible(Long id, boolean visible);
 
     ProductDTO deleteProduct(Long id);
@@ -27,4 +26,6 @@ public interface ProductService {
     Page<CompactProductDTO> getFarmersProducts(Long farmerId, Pageable pageable);
     ProductPageDTO getProductPageById(Long id);
     ProductDealsDTO getProductDeals();
+
+    List<CompactProductDTO> getAllProductsByCategory(Long categoryId);
 }
