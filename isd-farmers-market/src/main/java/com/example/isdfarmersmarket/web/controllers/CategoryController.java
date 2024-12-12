@@ -17,7 +17,7 @@ import java.util.List;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
-@PreAuthorize("hasRole('ADMIN')")
+
 @RestController
 @RequestMapping("/category")
 @RequiredArgsConstructor
@@ -27,6 +27,7 @@ public class CategoryController {
     @Operation(
             description = "This endpoint is used to create a category"
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping()
     public ResponseEntity<CategoryDTO> createCategory(@RequestBody @Valid CreateCategoryCommand createCategoryCommand) {
         return ResponseEntity.status(CREATED).body(categoryServiceImpl.createCategory(createCategoryCommand));
@@ -35,6 +36,7 @@ public class CategoryController {
     @Operation(
             description = "This endpoint is used to update a category"
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<CategoryDTO> updateCategory(@PathVariable Long id, @RequestBody @Valid UpdateCategoryCommand updateCategoryCommand) {
         return ResponseEntity.status(OK).body(categoryServiceImpl.updateCategory(id, updateCategoryCommand));
@@ -43,6 +45,7 @@ public class CategoryController {
     @Operation(
             description = "This endpoint is used to delete a category"
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<CategoryDTO> deleteCategory(@PathVariable Long id) {
         return ResponseEntity.status(OK).body(categoryServiceImpl.deleteCategory(id));
