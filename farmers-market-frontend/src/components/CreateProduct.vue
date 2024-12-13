@@ -86,8 +86,8 @@
             @change="handleFileChange"
             :disabled="selectedFiles.length >= 5"
           />
-          <span v-if="selectedFiles.length < 5">Upload Images (max 5)</span>
-          <span v-else>Maximum images reached</span>
+          <span class="p-button" v-if="selectedFiles.length < 5">Upload Images (max 5)</span>
+          <span class="p-button" style="opacity: 60%" v-else>Maximum images reached</span>
         </label>
 
         <div class="image-preview-container">
@@ -125,6 +125,7 @@
           Go to Settings
         </Button>
     </Dialog>
+    <Toast />
   </div>
   <Footer class = "footer"></Footer>
   </div>
@@ -145,6 +146,9 @@ import Select from "primevue/select";
 import router from "@/router/index.js";
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
+import ToastService from "primevue/toastservice";
+import { useToast } from "primevue/usetoast";
+import imageCompression from "browser-image-compression";
 
 export default {
   name: "CreateProduct",
@@ -157,6 +161,7 @@ export default {
     Footer,
     Dialog,
     Button,
+    ToastService,
   },
   setup() {
     const product = reactive({
@@ -167,6 +172,7 @@ export default {
       quantity: null,
       categoryId: null,
     });
+    const toast = useToast();
     const selectedFiles = ref([]);
     const unitTypes = ref([]);
     const categories = ref([]);
@@ -195,17 +201,28 @@ export default {
       }
 
       for (const file of filesArray) {
+        if (file.size > 10 * 1024 * 1024) {
+          toast.add({
+            severity: "error",
+            summary: "File too large",
+            detail: "Image must be less than 10 MB",
+            life: 3000,
+          });
+          continue;
+        }
         try {
-          const base64 = await convertFileToBase64(file);
+          const compressedFile = await compressImage(file);
+          const base64 = await convertFileToBase64(compressedFile);
+
           selectedFiles.value.push({
-            file,
-            name: file.name,
+            file: compressedFile,
+            name: compressedFile.name,
             preview: base64,
             base64,
           });
-          console.log(`File ${file.name} converted to Base64 successfully.`);
+          console.log(`File ${compressedFile.name} processed successfully.`);
         } catch (error) {
-          console.error(`Error converting file ${file.name} to Base64:`, error);
+          console.error(`Error processing file ${file.name}:`, error);
         }
       }
     };
@@ -213,6 +230,15 @@ export default {
     const removeFile = (index) => {
       console.log(`Removing file at index ${index}`);
       selectedFiles.value.splice(index, 1);
+    };
+
+    const compressImage = async (file) => {
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+      return await imageCompression(file, options);
     };
 
     const convertFileToBase64 = (file) => {

@@ -51,7 +51,7 @@ import { nextTick } from 'vue';
 const hiddenItems = ref([]);
 const searchQ = ref('');
 let currentUser = null;
-const items = ref([ {icon: 'pi pi-tags', label: "Products", command: () => search()}, {icon: 'pi pi-users', label: "Farmers", command: () => goToFarmersSearch()}]);
+const items = ref([]);
 const updateItems = () => {
   const windowWidth = window.innerWidth;
   if (windowWidth < 965) {
@@ -59,12 +59,12 @@ const updateItems = () => {
   } else {
     moveToItems('Categories');
   }
-  if (windowWidth < 1035) {
-    moveToAccountMenu("Products");
+  if (windowWidth < 1070) {
+    moveToAccountMenu("All Products");
   } else {
-    moveToItems("Products");
+    moveToItems("All Products");
   }
-  if (windowWidth < 1170) {
+  if (windowWidth < 1200) {
     moveToAccountMenu("Farmers");
   } else {
     moveToItems("Farmers");
@@ -145,6 +145,7 @@ const accountMenu = ref([
 const route = useRoute();
 const router = useRouter();
 const isSearchPage = computed(() => route.name === 'SearchProducts');
+const isFarmersPage = computed(() => route.name === 'Farmers Search');
 const search = () => {
   router.push({ name: 'SearchProducts', query: { search: searchQ.value } });
 };
@@ -169,7 +170,7 @@ const fetchCategories = async () => {
     updateItems();
     updateAccountMenu();
   } catch (error) {
-    console.error('Ошибка при загрузке категорий:', error);
+    console.error( error);
   }
 };
 const fetchUserData = async () => {
@@ -298,9 +299,20 @@ const handleResize = () => {
 onMounted(async () => {
   try {
     await fetchUserData();
-
-    if (!isSearchPage.value) {
+    if(!isSearchPage.value) {
       await fetchCategories();
+    }
+    if(!isFarmersPage.value) {
+      items.value = [
+        {icon: 'pi pi-users', label: "Farmers", command: () => goToFarmersSearch()},
+        ...items.value,
+      ];
+    }
+    if(!isSearchPage.value) {
+      items.value = [
+        {icon: 'pi pi-tags', label: "All Products", command: () => search()},
+        ...items.value,
+      ];
     }
 
     updateItems();
