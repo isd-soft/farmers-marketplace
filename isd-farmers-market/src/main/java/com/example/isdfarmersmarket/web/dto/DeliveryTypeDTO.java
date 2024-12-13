@@ -13,6 +13,6 @@ public class DeliveryTypeDTO {
     private Long id;
     private BigDecimal price;
     private DeliveryTypes type;
-    private UserDTO farmer;
+    private CompactUserDTO farmer;
     private Boolean existsForUser;
 }
