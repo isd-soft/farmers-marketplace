@@ -1,22 +1,33 @@
 <template>
   <div class="home">
     <Header class="navbar"></Header>
-    <div class="content">
     <div
-      style="
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        gap: 20px;
-        flex-wrap: wrap;
-      "
+      v-if="loading"
+      style="display: flex; justify-content: center; align-items: center; height: 100vh"
     >
-      <h1>My products</h1>
-      <Button style="max-width: 200px; flex-grow: 1" @click="goToCreateProduct"
-        >Create new product</Button
       >
+      <ProgressSpinner
+        style="width: 12rem; height: 12rem"
+        strokeWidth="0.2rem"
+        animationDuration="0.8s"
+      />
     </div>
-    <div style="overflow-x: auto;">
+    <div v-else class="content">
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          gap: 20px;
+          flex-wrap: wrap;
+        "
+      >
+        <h1>My products</h1>
+        <Button style="max-width: 200px; flex-grow: 1" @click="goToCreateProduct"
+          >Create new product</Button
+        >
+      </div>
+      <div style="overflow-x: auto">
         <table class="products-table">
           <thead>
             <tr>
@@ -172,6 +183,8 @@ import useVuelidate from '@vuelidate/core';
 import { required, minValue, maxValue } from '@vuelidate/validators';
 import router from '@/router/index.js';
 import ToggleButton from 'primevue/togglebutton';
+import ProgressSpinner from 'primevue/progressspinner';
+
 export default {
   name: 'SearchProducts',
   components: {
@@ -185,9 +198,11 @@ export default {
     Dialog,
     Button,
     InputText,
+    ProgressSpinner,
   },
   setup() {
     const products = ref([]);
+    const loading = ref(true);
     const route = useRoute();
     const currentPage = ref(0);
     const pageSize = ref(6);
@@ -273,13 +288,17 @@ export default {
     };
 
     const fetchProducts = async () => {
+      loading.value = true;
       try {
         let url = `/product/management?page=${currentPage.value}&size=${pageSize.value}`;
         const response = await axiosInstance.get(url);
         console.log(response);
         products.value = response.data.content;
         totalRecords.value = response.data.totalElements;
-      } catch (error) {}
+      } catch (error) {
+      } finally {
+        loading.value = false;
+      }
     };
     const onPageChange = (event) => {
       currentPage.value = event.page;
@@ -301,6 +320,7 @@ export default {
       fetchProducts();
     });
     return {
+      loading,
       products,
       fetchProducts,
       onPageChange,
@@ -350,17 +370,17 @@ body {
 .home {
   display: flex;
   flex-direction: column;
-  width: 100%!important;
-  max-width: 100%!important;
+  width: 100% !important;
+  max-width: 100% !important;
   padding-top: 120px;
   align-items: center;
 }
-.content{
+.content {
   min-height: 80vh;
   width: 80%;
 }
 @media (max-width: 380px) {
-  .content{
+  .content {
     width: 90%;
   }
 }

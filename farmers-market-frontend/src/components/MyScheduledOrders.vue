@@ -1,101 +1,136 @@
 <template>
   <div class="home">
     <Header class="navbar"></Header>
-    <div class="content">
-    <div       style="
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        gap: 20px;
-        flex-wrap: wrap;
-      ">
-      <h1>My scheduled orders</h1>
+    <div
+      v-if="loading"
+      style="display: flex; justify-content: center; align-items: center; height: 100vh"
+    >
+      >
+      <ProgressSpinner
+        style="width: 12rem; height: 12rem"
+        strokeWidth="0.2rem"
+        animationDuration="0.8s"
+      />
     </div>
-    <div style="overflow-x:auto;">
-    <table class="products-table">
-      <thead>
-      <tr>
-        <th>Product</th>
-        <th>Scheduled time</th>
-        <th>Total price</th>
-        <th>Quantity</th>
-        <th>Active</th>
-        <th class="actions">Actions</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr v-for="plannedOrder in plannedOrders" :key="plannedOrder.id">
-        <td>
-          <div  style="cursor: pointer" class="title-image" @click="goToProductPage(plannedOrder.product)">
-            <div class="image-container">
-              <img
-                v-if="getFirstImage(plannedOrder.product.images)"
-                :src="getFirstImage(plannedOrder.product.images)"
-                alt="Product image"
-                class="product-image"
-              />
-              <div v-else class="no-image">
-                No Image
-              </div>
-            </div>
-            {{ plannedOrder.product.title }}
-          </div>
-        </td>
-        <td>{{plannedOrder.dayOfWeek.toLocaleLowerCase()}} {{plannedOrder.time}}</td>
-        <td>{{ getTotalPrice(plannedOrder.product, plannedOrder.quantity)+plannedOrder.deliveryPrice }}</td>
-        <td>{{ plannedOrder.quantity }}</td>
-        <td>
-          <ToggleButton
-            v-model="plannedOrder.active"
-            :onLabel="'On'"
-            :offLabel="'Off'"
-            @change="toggleActivity(plannedOrder, plannedOrder.active)"
-          />
-        </td>
-        <td class="actions">
-          <div class="actions-container">
-            <i @click="editPlannedOrder(plannedOrder)" class="pi pi-pencil action-icon"></i>
-            <i @click="confirmDelete(plannedOrder)" class="pi pi-trash action-icon"></i>
-          </div></td>
-      </tr>
-      </tbody>
-    </table>
-    </div>
-    <h3 style="margin-top: 50px; margin-bottom: 50px; text-align: center; width: 100%"
-        v-if="plannedOrders.length===0">
-      Looks like you have no scheduled orders yet</h3>
-
-    <Dialog style="flex-grow: 1; max-width: 500px" v-model:visible="showConfirmation" modal header="Delete scheduled order" :position="'top'">
-      <div class="popup-content">
-        <p>Are you sure you want to delete
-          the scheduled order for product "{{plannedOrderToDelete.product.title}}"
-          for {{plannedOrderToDelete.dayOfWeek.toLocaleLowerCase()}} {{plannedOrderToDelete.time}}?</p>
-        <div class="popup-actions">
-          <Button @click="cancelDelete" class="popup-actions-button">Cancel</Button>
-          <Button @click="deletePlannedOrder" class="popup-actions-button">Yes, Delete</Button>
-        </div>
+    <div v-else class="content">
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          gap: 20px;
+          flex-wrap: wrap;
+        "
+      >
+        <h1>My scheduled orders</h1>
       </div>
-    </Dialog>
+      <div style="overflow-x: auto">
+        <table class="products-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Scheduled time</th>
+              <th>Total price</th>
+              <th>Quantity</th>
+              <th>Active</th>
+              <th class="actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="plannedOrder in plannedOrders" :key="plannedOrder.id">
+              <td>
+                <div
+                  style="cursor: pointer"
+                  class="title-image"
+                  @click="goToProductPage(plannedOrder.product)"
+                >
+                  <div class="image-container">
+                    <img
+                      v-if="getFirstImage(plannedOrder.product.images)"
+                      :src="getFirstImage(plannedOrder.product.images)"
+                      alt="Product image"
+                      class="product-image"
+                    />
+                    <div v-else class="no-image">No Image</div>
+                  </div>
+                  {{ plannedOrder.product.title }}
+                </div>
+              </td>
+              <td>{{ plannedOrder.dayOfWeek.toLocaleLowerCase() }} {{ plannedOrder.time }}</td>
+              <td>
+                {{
+                  getTotalPrice(plannedOrder.product, plannedOrder.quantity) +
+                  plannedOrder.deliveryPrice
+                }}
+              </td>
+              <td>{{ plannedOrder.quantity }}</td>
+              <td>
+                <ToggleButton
+                  v-model="plannedOrder.active"
+                  :onLabel="'On'"
+                  :offLabel="'Off'"
+                  @change="toggleActivity(plannedOrder, plannedOrder.active)"
+                />
+              </td>
+              <td class="actions">
+                <div class="actions-container">
+                  <i @click="editPlannedOrder(plannedOrder)" class="pi pi-pencil action-icon"></i>
+                  <i @click="confirmDelete(plannedOrder)" class="pi pi-trash action-icon"></i>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3
+        style="margin-top: 50px; margin-bottom: 50px; text-align: center; width: 100%"
+        v-if="plannedOrders.length === 0"
+      >
+        Looks like you have no scheduled orders yet
+      </h3>
+
+      <Dialog
+        style="flex-grow: 1; max-width: 500px"
+        v-model:visible="showConfirmation"
+        modal
+        header="Delete scheduled order"
+        :position="'top'"
+      >
+        <div class="popup-content">
+          <p>
+            Are you sure you want to delete the scheduled order for product "{{
+              plannedOrderToDelete.product.title
+            }}" for {{ plannedOrderToDelete.dayOfWeek.toLocaleLowerCase() }}
+            {{ plannedOrderToDelete.time }}?
+          </p>
+          <div class="popup-actions">
+            <Button @click="cancelDelete" class="popup-actions-button">Cancel</Button>
+            <Button @click="deletePlannedOrder" class="popup-actions-button">Yes, Delete</Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
     <Footer class="footer"></Footer>
   </div>
 </template>
 
 <script>
-import {ref, onMounted, watch, computed, reactive} from "vue";
-import axiosInstance from "@/utils/axiosInstance.js";
-import Header from "@/components/Header.vue";
-import Footer from "@/components/Footer.vue";
-import Select from "primevue/select";
-import ProductCard from "@/components/ProductCard.vue";
+import { ref, onMounted, watch, computed, reactive } from 'vue';
+import axiosInstance from '@/utils/axiosInstance.js';
+import Header from '@/components/Header.vue';
+import Footer from '@/components/Footer.vue';
+import Select from 'primevue/select';
+import ProductCard from '@/components/ProductCard.vue';
 import Paginator from 'primevue/paginator';
 import { PrimeIcons } from '@primevue/core/api';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
-import InputText from "primevue/inputtext";
-import useVuelidate from "@vuelidate/core";
-import {required, minValue, maxValue} from "@vuelidate/validators"
+import InputText from 'primevue/inputtext';
+import useVuelidate from '@vuelidate/core';
+import { required, minValue, maxValue } from '@vuelidate/validators';
 import ToggleButton from 'primevue/togglebutton';
+import ProgressSpinner from 'primevue/progressspinner';
+
 export default {
   name: 'MyPlannedOrders',
   components: {
@@ -109,13 +144,15 @@ export default {
     Button,
     InputText,
     ToggleButton,
+    ProgressSpinner,
   },
   setup() {
     const plannedOrders = ref([]);
+    const loading = ref(true);
 
     const showConfirmation = ref(false);
     const plannedOrderToDelete = ref(null);
-    const newDiscount = reactive({discountPercents : null});
+    const newDiscount = reactive({ discountPercents: null });
     const rules = computed(() => ({
       discountPercents: { required, minValue: minValue(1), maxValue: maxValue(99) },
     }));
@@ -126,12 +163,11 @@ export default {
     };
 
     const toggleActivity = async (plannedOrder, active) => {
-      console.log(active)
+      console.log(active);
       try {
-        const response = await axiosInstance.put(
-          `/planned-order/active/${plannedOrder.id}`,
-          { active: active }
-        );
+        const response = await axiosInstance.put(`/planned-order/active/${plannedOrder.id}`, {
+          active: active,
+        });
         plannedOrder.active = response.data.active;
       } catch (error) {
         console.error('Failed to update activity state:', error.message);
@@ -143,7 +179,7 @@ export default {
         try {
           await axiosInstance.delete(`/planned-order/${plannedOrderToDelete.value.id}`);
           plannedOrders.value = plannedOrders.value.filter(
-            (p) => p.id !== plannedOrderToDelete.value.id
+            (p) => p.id !== plannedOrderToDelete.value.id,
           );
           plannedOrderToDelete.value = null;
           showConfirmation.value = false;
@@ -159,18 +195,22 @@ export default {
     };
 
     const fetchPlannedOrders = async () => {
+      loading.value = true;
       try {
         let url = `/planned-order/management`;
         const response = await axiosInstance.get(url);
-        console.log(response)
+        console.log(response);
         plannedOrders.value = response.data;
       } catch (error) {
+      } finally {
+        loading.value = false;
       }
-    }
+    };
     onMounted(() => {
-      fetchPlannedOrders()
+      fetchPlannedOrders();
     });
     return {
+      loading,
       plannedOrders,
       fetchPlannedOrders,
       confirmDelete,
@@ -180,19 +220,21 @@ export default {
       plannedOrderToDelete,
       toggleActivity,
       v$,
-    }
+    };
   },
   methods: {
-    getTotalPrice(product, quantity){
-      return (((product.pricePerUnit *((100 - (product.discountPercents || 0)) / 100))
-          .toFixed(2))* quantity.toFixed(2)).toFixed(2);
+    getTotalPrice(product, quantity) {
+      return (
+        (product.pricePerUnit * ((100 - (product.discountPercents || 0)) / 100)).toFixed(2) *
+        quantity.toFixed(2)
+      ).toFixed(2);
     },
-      getFirstImage(images) {
-        if (Array.isArray(images) && images.length > 0 && images[0]?.bytes) {
-          return `data:image/jpeg;base64,${images[0].bytes}`;
-        }
-        return "";
-      },
+    getFirstImage(images) {
+      if (Array.isArray(images) && images.length > 0 && images[0]?.bytes) {
+        return `data:image/jpeg;base64,${images[0].bytes}`;
+      }
+      return '';
+    },
     editPlannedOrder(plannedOrder) {
       this.$router.push(`/schedule-order/update/${plannedOrder.id}`);
     },
@@ -200,26 +242,25 @@ export default {
       this.$router.push(`/product/${product.id}`);
     },
   },
-}
-
+};
 </script>
 <style scoped>
-body{
+body {
   display: block !important;
 }
-.home{
+.home {
   display: flex;
   flex-direction: column;
   width: 100%;
   padding-top: 120px;
   align-items: center;
 }
-.content{
+.content {
   min-height: 60vh;
   width: 80%;
 }
 @media (max-width: 380px) {
-  .content{
+  .content {
     width: 90%;
   }
 }
@@ -229,19 +270,20 @@ body{
   margin-top: 40px;
 }
 
-.products-table th, .products-table td {
+.products-table th,
+.products-table td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
 }
-.action-icon{
+.action-icon {
   cursor: pointer;
 }
 .products-table th {
   background-color: #f4f4f4;
   font-weight: bold;
 }
-.actions{
+.actions {
   text-align: center !important;
 }
 .actions-container {
@@ -257,7 +299,7 @@ body{
   align-items: center;
   gap: 20px;
 }
-.footer{
+.footer {
   text-align: center;
   padding: 10px;
   margin-top: 50px;
@@ -294,7 +336,7 @@ body{
   text-align: center;
   border-radius: 5px;
 }
-.title-image{
+.title-image {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -306,14 +348,14 @@ body{
   flex-direction: column;
   text-align: center;
 }
-.popup-actions{
+.popup-actions {
   display: flex;
   flex-direction: row;
   gap: 20px;
   margin-top: 20px;
   justify-content: center;
 }
-.popup-actions-button{
+.popup-actions-button {
   max-width: 150px;
   flex-grow: 1;
 }

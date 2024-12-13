@@ -162,10 +162,21 @@ import ColumnGroup from 'primevue/columngroup';
 import Row from 'primevue/row';
 import { ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
 
 export default {
   name: 'AdminCategories',
   setup() {
+    const toast = useToast();
+    function toastAdd(severity, summary, detail, life = 2000) {
+      toast.add({
+        severity: severity,
+        summary: summary,
+        detail: detail,
+        life: life,
+      });
+    }
     const dt = ref();
     const loading = ref(true);
     const saving = ref(false);
@@ -243,6 +254,11 @@ export default {
     };
 
     const confirmDeleteSelected = () => {
+      const allAreEmpty = selectedCategories.value?.every((category) => category.nrOfItems === 0);
+      if (!allAreEmpty) {
+        toastAdd('error', 'Deletion failed', 'Not all selected categories are empty.');
+        return;
+      }
       deleteCategoriesDialog.value = true;
     };
 
