@@ -105,7 +105,12 @@
     </div>
     <template #footer>
       <Button label="No" icon="pi pi-times" text @click="deleteProductReviewDialog = false" />
-      <Button label="Yes" icon="pi pi-check" text @click="deleteSelectedProductReviews" />
+      <Button
+        :label="deleting ? 'Deleting...' : 'Yes'"
+        :icon="deleting ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
+        :disabled="deleting"
+        @click="deleteSelectedProductReviews"
+      />
     </template>
   </Dialog>
 </template>
@@ -137,6 +142,8 @@ export default {
     const router = useRouter();
 
     const dt = ref();
+
+    const deleting = ref(false);
 
     const loading = ref(true);
 
@@ -178,6 +185,7 @@ export default {
     };
 
     const deleteSelectedProductReviews = async () => {
+      deleting.value = true;
       try {
         await Promise.all(
           selectedProductReviews.value.map((productReview) =>
@@ -192,6 +200,8 @@ export default {
         selectedProductReviews.value = null;
       } catch (error) {
         console.error(error);
+      } finally {
+        deleting.value = false;
       }
     };
 
@@ -199,6 +209,7 @@ export default {
     fetchProductReviews();
 
     return {
+      deleting,
       dt,
       exportCSV,
       confirmDeleteSelected,

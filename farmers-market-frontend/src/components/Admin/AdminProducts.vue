@@ -122,7 +122,12 @@
       </div>
       <template #footer>
         <Button label="No" icon="pi pi-times" text @click="deleteProductsDialog = false" />
-        <Button label="Yes" icon="pi pi-check" text @click="deleteSelectedProducts" />
+        <Button
+          :label="deleting ? 'Deleting...' : 'Yes'"
+          :icon="deleting ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
+          :disabled="deleting"
+          @click="deleteSelectedProducts"
+        />
       </template>
     </Dialog>
     <Dialog
@@ -137,7 +142,12 @@
       </div>
       <template #footer>
         <Button label="No" icon="pi pi-times" text @click="restoreProductsDialog = false" />
-        <Button label="Yes" icon="pi pi-check" text @click="restoreSelectedProducts" />
+        <Button
+          :label="restoring ? 'Restoring...' : 'Yes'"
+          :icon="restoring ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
+          :disabled="restoring"
+          @click="restoreSelectedProducts"
+        />
       </template>
     </Dialog>
     <Footer class="footer"></Footer>
@@ -171,6 +181,9 @@ import Multiselect from 'primevue/multiselect';
 export default {
   name: 'AdminProducts',
   setup() {
+    const deleting = ref(false);
+    const restoring = ref(false);
+
     const toast = useToast();
 
     function toastAdd(severity, summary, detail, life = 2000) {
@@ -245,6 +258,7 @@ export default {
     };
 
     const deleteSelectedProducts = async () => {
+      deleting.value = true;
       try {
         await Promise.all(
           selectedProducts.value.map((product) =>
@@ -263,10 +277,13 @@ export default {
         selectedProducts.value = null;
       } catch (error) {
         console.error(error);
+      } finally {
+        deleting.value = false;
       }
     };
 
     const restoreSelectedProducts = async () => {
+      restoring.value = true;
       try {
         await Promise.all(
           selectedProducts.value.map((product) =>
@@ -284,6 +301,8 @@ export default {
         selectedProducts.value = null;
       } catch (error) {
         console.error(error);
+      } finally {
+        restoring.value = false;
       }
     };
 
@@ -306,6 +325,8 @@ export default {
     fetchProducts();
 
     return {
+      deleting,
+      restoring,
       confirmRestoreSelected,
       restoreProductsDialog,
       restoreSelectedProducts,

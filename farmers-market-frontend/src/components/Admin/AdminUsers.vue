@@ -197,7 +197,12 @@
       </div>
       <template #footer>
         <Button label="No" icon="pi pi-times" text @click="deleteUsersDialog = false" />
-        <Button label="Yes" icon="pi pi-check" text @click="deleteSelectedUsers" />
+        <Button
+          :label="deleting ? 'Deleting...' : 'Yes'"
+          :icon="deleting ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
+          :disabled="deleting"
+          @click="deleteSelectedUsers"
+        />
       </template>
     </Dialog>
     <Dialog
@@ -212,7 +217,12 @@
       </div>
       <template #footer>
         <Button label="No" icon="pi pi-times" text @click="upgradeUsersDialog = false" />
-        <Button label="Yes" icon="pi pi-check" text @click="upgradeSelectedUsers" />
+        <Button
+          :label="promoting ? 'Promoting...' : 'Yes'"
+          :icon="promoting ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
+          :disabled="promoting"
+          @click="upgradeSelectedUsers"
+        />
       </template>
     </Dialog>
     <Footer class="footer"></Footer>
@@ -260,6 +270,9 @@ export default {
 
     const dt = ref();
     const loading = ref(true);
+    const deleting = ref(false);
+    const promoting = ref(false);
+
     const user = ref({});
     const users = ref([]);
     const selectedUsers = ref();
@@ -319,6 +332,7 @@ export default {
     };
 
     const deleteSelectedUsers = async () => {
+      deleting.value = true;
       try {
         const currentUserResponse = await axiosInstance.get(`/current-user/`);
         const currentUserEmail = currentUserResponse.data.email;
@@ -340,10 +354,13 @@ export default {
         selectedUsers.value = null;
       } catch (error) {
         console.error(error);
+      } finally {
+        deleting.value = false;
       }
     };
 
     const upgradeSelectedUsers = async () => {
+      promoting.value = true;
       try {
         await Promise.all(
           selectedUsers.value.map((user) =>
@@ -360,6 +377,8 @@ export default {
         selectedUsers.value = null;
       } catch (error) {
         console.error(error);
+      } finally {
+        promoting.value = false;
       }
     };
 
@@ -413,6 +432,8 @@ export default {
       enabled: { value: null, matchMode: FilterMatchMode.IN },
     });
     return {
+      promoting,
+      deleting,
       dt,
       getSeverity,
       getRoleColor,

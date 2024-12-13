@@ -116,7 +116,12 @@
       </div>
       <template #footer>
         <Button label="Cancel" icon="pi pi-times" text @click="hideDialog" />
-        <Button label="Save" icon="pi pi-check" @click="saveCategory" />
+        <Button
+          :label="saving ? 'Saving...' : 'Save'"
+          :icon="saving ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
+          :disabled="saving"
+          @click="saveCategory"
+        />
       </template>
     </Dialog>
 
@@ -163,6 +168,7 @@ export default {
   setup() {
     const dt = ref();
     const loading = ref(true);
+    const saving = ref(false);
     const filters = ref({
       global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -201,6 +207,12 @@ export default {
       }
     };
     const saveCategory = async () => {
+      if (!category.value.title) {
+        submitted.value = true;
+        return;
+      }
+      saving.value = true;
+
       try {
         const response = await axiosInstance.post('/category', {
           title: category.value.title,
@@ -212,6 +224,8 @@ export default {
         category.value = {};
       } catch (error) {
         console.error(error);
+      } finally {
+        saving.value = false;
       }
     };
     const refreshCategories = async () => {
@@ -253,6 +267,7 @@ export default {
     fetchCategories();
 
     return {
+      saving,
       dt,
       exportCSV,
       onRowEditSave,

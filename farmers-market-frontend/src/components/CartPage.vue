@@ -2,211 +2,235 @@
   <div class="order">
     <Header class="navbar"></Header>
     <Toast />
-    <div class="main-container">
-        <div class="orders-container">
-          <p class="title-text-cart">Cart</p>
+    <div
+      v-if="loading"
+      style="display: flex; justify-content: center; align-items: center; height: 100vh"
+    >
+      <ProgressSpinner
+        style="width: 12rem; height: 12rem"
+        strokeWidth="0.2rem"
+        animationDuration="0.8s"
+      />
+    </div>
+    <div v-else class="main-container">
+      <div class="orders-container">
+        <p class="title-text-cart">Cart</p>
 
-          <DataView :value="cartProducts">
-            <template #header> </template>
-            <template #list="slotProps">
-              <div
-                class="flex flex-col order-container"
-                v-for="product in cartProducts"
-                :key="product.productId"
-                :class="{ 'out-of-stock-product': isOutOfStock(product) }"
-              >
-                <div class="md:w-40 relative product-container">
-                  <div class="product-image-title-container">
-                    <img
-                      class="block xl:block mx-auto rounded w-full product-image"
-                      :class="{ 'overflow-image': getSeverity(product) === 'OUTOFSTOCK' }"
-                      :src="getBase64Image(product.imageBase64, product.imageType)"
-                      :alt="product.productTitle"
-                    />
+        <DataView :value="cartProducts">
+          <template #header> </template>
+          <template #list="slotProps">
+            <div
+              class="flex flex-col order-container"
+              v-for="product in cartProducts"
+              :key="product.productId"
+              :class="{ 'out-of-stock-product': isOutOfStock(product) }"
+            >
+              <div class="md:w-40 relative product-container">
+                <div class="product-image-title-container">
+                  <img
+                    class="block xl:block mx-auto rounded w-full product-image"
+                    :class="{ 'overflow-image': getSeverity(product) === 'OUTOFSTOCK' }"
+                    :src="getBase64Image(product.imageBase64, product.imageType)"
+                    :alt="product.productTitle"
+                  />
 
-                    <div
-                      class="absolute bg-black/70 rounded-border title-description-quantity-container"
-                      style="left: 4px; top: 4px"
-                    >
-                      <div>
-                        <h3 class="product-title-text">{{ product.productTitle }}</h3>
-                        <p class="product-description">{{ product.productDescription }}</p>
-                      </div>
-
-                      <div class="card flex flex-wrap gap-4 quantity-trash-container">
-                        <InputNumber
-                          class="quantity-selector"
-                          v-model="product.quantity"
-                          inputId="horizontal-buttons"
-                          showButtons
-                          buttonLayout="horizontal"
-                          :step="1"
-                          mode="decimal"
-                          fluid
-                          :disabled="isOutOfStock(product)"
-                          :min="1"
-                          @input="updateCart(product)"
-                        >
-                          <template #incrementbuttonicon>
-                            <span class="pi pi-plus"></span>
-                          </template>
-                          <template #decrementbuttonicon>
-                            <span class="pi pi-minus"></span>
-                          </template>
-                        </InputNumber>
-
-                        <p class="unit-type-text">{{ product.unitType }}</p>
-                        <i class="pi pi-trash" @click="removeItemFromCart(product.id)"></i>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="product-price-quantity-container">
-                    <div class="product-prices-container">
-                      <span v-html="displayDiscountedPrice(product)"></span>
-                      <span class="text-xl font-semibold price-text">
-                        {{
-                          isOutOfStock(product)
-                            ? 'Unavailable'
-                            : (
-                                product.pricePerUnit *
-                                product.quantity *
-                                (1 - product.discountPercents / 100)
-                              ).toFixed(2)
-                        }}
-                        MDL
-                      </span>
+                  <div
+                    class="absolute bg-black/70 rounded-border title-description-quantity-container"
+                    style="left: 4px; top: 4px"
+                  >
+                    <div>
+                      <h3 class="product-title-text">{{ product.productTitle }}</h3>
+                      <p class="product-description">{{ product.productDescription }}</p>
                     </div>
 
-                    <div :class="severityClass(product)" class="stock-availability">
-                      <i :class="iconClass(product)" class="icon"></i>
-                      <span>{{ getSeverity(product) }}</span>
+                    <div class="card flex flex-wrap gap-4 quantity-trash-container">
+                      <InputNumber
+                        class="quantity-selector"
+                        v-model="product.quantity"
+                        inputId="horizontal-buttons"
+                        showButtons
+                        buttonLayout="horizontal"
+                        :step="1"
+                        mode="decimal"
+                        fluid
+                        :disabled="isOutOfStock(product)"
+                        :min="1"
+                        @input="updateCart(product)"
+                      >
+                        <template #incrementbuttonicon>
+                          <span class="pi pi-plus"></span>
+                        </template>
+                        <template #decrementbuttonicon>
+                          <span class="pi pi-minus"></span>
+                        </template>
+                      </InputNumber>
+
+                      <p class="unit-type-text">{{ product.unitType }}</p>
+                      <i class="pi pi-trash" @click="removeItemFromCart(product.id)"></i>
                     </div>
                   </div>
                 </div>
+
+                <div class="product-price-quantity-container">
+                  <div class="product-prices-container">
+                    <span v-html="displayDiscountedPrice(product)"></span>
+                    <span class="text-xl font-semibold price-text">
+                      {{
+                        isOutOfStock(product)
+                          ? 'Unavailable'
+                          : (
+                              product.pricePerUnit *
+                              product.quantity *
+                              (1 - product.discountPercents / 100)
+                            ).toFixed(2)
+                      }}
+                      MDL
+                    </span>
+                  </div>
+
+                  <div :class="severityClass(product)" class="stock-availability">
+                    <i :class="iconClass(product)" class="icon"></i>
+                    <span>{{ getSeverity(product) }}</span>
+                  </div>
+                </div>
               </div>
-            </template>
-          </DataView>
-        </div>
-        <div class="cart-pay-container">
-          <div class="order-summary-container">
-            <h3 class="order-summary-price-text">Order Summary</h3>
+            </div>
+          </template>
+        </DataView>
+      </div>
+      <div class="cart-pay-container">
+        <div class="order-summary-container">
+          <h3 class="order-summary-price-text">Order Summary</h3>
 
-            <div class="card flex justify-center delivery-type-container">
-              <h3>Delivery Type</h3>
-              <Select
-                v-model="selectedDeliveryType"
-                :options="deliveryTypeValues"
-                optionLabel="name"
-                placeholder="Select a Delivery Type"
-                class="w-full md:w-56 delivery-type-select"
-                @change="onDeliveryTypeChange"
+          <div class="card flex justify-center delivery-type-container">
+            <h3>Delivery Type</h3>
+            <Select
+              v-model="selectedDeliveryType"
+              :options="deliveryTypeValues"
+              optionLabel="name"
+              placeholder="Select a Delivery Type"
+              class="w-full md:w-56 delivery-type-select"
+              @change="onDeliveryTypeChange"
+            />
+          </div>
+          <h3 class="payment-details-text">Payment Details</h3>
+          <div class="payment-input-container">
+            <InputGroup class="input-group">
+              <label for="text" class="font-bold block mb-2">First Name</label>
+              <InputText v-model="payment.firstName" placeholder="John" />
+              <span v-if="v$.firstName.$error" class="error-message">
+                First name is required (1-50 characters).</span
+              >
+            </InputGroup>
+
+            <InputGroup class="input-group">
+              <label for="text" class="font-bold block mb-2"> Last Name </label>
+              <InputText v-model="payment.lastName" placeholder="Doe" />
+              <span v-if="v$.lastName.$error" class="error-message">
+                Last name is required (1-50 characters).</span
+              >
+            </InputGroup>
+
+            <InputGroup class="input-group">
+              <label for="number" class="font-bold block mb-2"> Card Number </label>
+              <InputNumber
+                class="card-input"
+                inputId="withoutgrouping"
+                :useGrouping="false"
+                v-model="payment.cardNumber"
+                placeholder="5574-6698-8877-7699"
+                require
+                @keydown="restrictCardInput"
               />
-            </div>
-            <h3 class="payment-details-text">Payment Details</h3>
-            <div class="payment-input-container">
-              <InputGroup class="input-group">
-                <label for="text" class="font-bold block mb-2">First Name</label>
-                <InputText v-model="payment.firstName" placeholder="John" />
-                <span v-if="v$.firstName.$error" class="error-message"> First name is required (1-50 characters).</span>
-              </InputGroup>
+              <span v-if="v$.cardNumber.$error" class="error-message"
+                >Card number is required (16 digits).</span
+              >
+            </InputGroup>
 
-              <InputGroup class="input-group">
-                <label for="text" class="font-bold block mb-2"> Last Name </label>
-                <InputText v-model="payment.lastName" placeholder="Doe" />
-                <span v-if="v$.lastName.$error" class="error-message"> Last name is required (1-50 characters).</span>
-              </InputGroup>
+            <InputGroup class="input-group">
+              <label for="text" class="font-bold block mb-2"> CVV </label>
+              <InputNumber
+                class="card-input"
+                v-model="payment.cvv"
+                placeholder="***"
+                required
+                @keydown="restrictCVVInput"
+              />
+              <span v-if="v$.cvv.$error" class="error-message">CVV is required (3 digits).</span>
+            </InputGroup>
 
-              <InputGroup class="input-group">
-                <label for="number" class="font-bold block mb-2"> Card Number </label>
-                <InputNumber
-                  class="card-input"
-                  inputId="withoutgrouping"
-                  :useGrouping="false"
-                  v-model="payment.cardNumber"
-                  placeholder="5574-6698-8877-7699"
-                  require
-                   @keydown="restrictCardInput"
-                />
-                <span v-if="v$.cardNumber.$error" class="error-message">Card number is required (16 digits).</span>
-              </InputGroup>
-
-              <InputGroup class="input-group">
-                <label for="text" class="font-bold block mb-2"> CVV </label>
-                <InputNumber class="card-input" v-model="payment.cvv" placeholder="***" required @keydown="restrictCVVInput"/>
-                <span v-if="v$.cvv.$error" class="error-message">CVV is required (3 digits).</span>
-              </InputGroup>
-
-              <InputGroup class="input-group">
-                <label for="text" class="font-bold block mb-2"> Valid Until </label>
-                <DatePicker v-model="payment.validUntil" placeholder="10/05" required />
-                <span v-if="v$.validUntil.$error" class="error-message">Valid Until is required.</span>
-              </InputGroup>
-            </div>
-
-            <div class="all-cart-price-container">
-              <h3 class="total-price-text">Total</h3>
-              <p class="total-price-value">{{ totalCartPrice }} MDL</p>
-            </div>
-
-            <div class="card flex justify-center">
-              <Button class="button-buy-for" @click="addProductsToOrder()">{{
-                buttonBuyFor
-              }}</Button>
-            </div>
+            <InputGroup class="input-group">
+              <label for="text" class="font-bold block mb-2"> Valid Until </label>
+              <DatePicker v-model="payment.validUntil" placeholder="10/05" required />
+              <span v-if="v$.validUntil.$error" class="error-message"
+                >Valid Until is required.</span
+              >
+            </InputGroup>
           </div>
 
-          <div class="payment-methods-container">
-            <p>Payment Methods</p>
-            <div class="payment-images">
-              <img src="@/assets/cart_page_resources/visa.png" alt="visa" />
-              <img src="@/assets/cart_page_resources/mastercard.png" alt="mastercard" />
-              <img src="@/assets/cart_page_resources/paypal.png" alt="paypal" />
-              <img src="@/assets/cart_page_resources/apple pay.png" alt="paypal" />
-            </div>
+          <div class="all-cart-price-container">
+            <h3 class="total-price-text">Total</h3>
+            <p class="total-price-value">{{ totalCartPrice }} MDL</p>
+          </div>
+
+          <div class="card flex justify-center">
+            <Button class="button-buy-for" @click="addProductsToOrder()">{{ buttonBuyFor }}</Button>
           </div>
         </div>
+
+        <div class="payment-methods-container">
+          <p>Payment Methods</p>
+          <div class="payment-images">
+            <img src="@/assets/cart_page_resources/visa.png" alt="visa" />
+            <img src="@/assets/cart_page_resources/mastercard.png" alt="mastercard" />
+            <img src="@/assets/cart_page_resources/paypal.png" alt="paypal" />
+            <img src="@/assets/cart_page_resources/apple pay.png" alt="paypal" />
+          </div>
+        </div>
+      </div>
     </div>
     <Footer class="footer"></Footer>
   </div>
 </template>
 <script setup>
-import Header from '@/components/Header.vue'
-import Footer from './Footer.vue'
-import { ref, onMounted, computed, watch, reactive } from 'vue'
-import axiosInstance from '@/utils/axiosInstance'
-import DataView from 'primevue/dataview'
-import Button from 'primevue/button'
-import 'primeicons/primeicons.css'
-import 'primeicons/primeicons.css'
-import InputNumber from 'primevue/inputnumber'
-import { isLoggedIn } from '@/shared/authState.js'
-import Toast from 'primevue/toast'
-import { useToast } from 'primevue/usetoast'
-import Select from 'primevue/select'
-import DatePicker from 'primevue/datepicker'
-import { required, minLength, maxLength, numeric} from '@vuelidate/validators';
+import Header from '@/components/Header.vue';
+import Footer from './Footer.vue';
+import { ref, onMounted, computed, watch, reactive } from 'vue';
+import axiosInstance from '@/utils/axiosInstance';
+import DataView from 'primevue/dataview';
+import Button from 'primevue/button';
+import 'primeicons/primeicons.css';
+import 'primeicons/primeicons.css';
+import InputNumber from 'primevue/inputnumber';
+import { isLoggedIn } from '@/shared/authState.js';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
+import Select from 'primevue/select';
+import DatePicker from 'primevue/datepicker';
+import { required, minLength, maxLength, numeric } from '@vuelidate/validators';
 import { useVuelidate } from '@vuelidate/core';
+import ProgressSpinner from 'primevue/progressspinner';
 
-const cart = ref([])
-const cartProducts = ref([])
-const deliveryTypes = ref([])
-const toast = useToast()
-let totalPrice = ref(0)
-let buttonBuyFor = ref('Buy for')
-const selectedDeliveryType = ref(null)
-const deliveryTypeValues = ref([])
+const cart = ref([]);
+const cartProducts = ref([]);
+const loading = ref(true);
+const deliveryTypes = ref([]);
+const toast = useToast();
+let totalPrice = ref(0);
+let buttonBuyFor = ref('Buy for');
+const selectedDeliveryType = ref(null);
+const deliveryTypeValues = ref([]);
 
 const payment = reactive({
-      firstName: "",
-      lastName: "",
-      cardNumber: "",
-      cvv: "",
-      validUntil: "",
-    });
+  firstName: '',
+  lastName: '',
+  cardNumber: '',
+  cvv: '',
+  validUntil: '',
+});
 
-  const rules = computed(() => ({
-    firstName: {
+const rules = computed(() => ({
+  firstName: {
     required,
     minLength: minLength(1),
     maxLength: maxLength(50),
@@ -229,7 +253,7 @@ const payment = reactive({
     maxLength: maxLength(3),
   },
   validUntil: {
-    required
+    required,
   },
 }));
 
@@ -238,50 +262,49 @@ const v$ = useVuelidate(rules, payment);
 const totalCartPrice = computed(() => {
   const productTotal = cartProducts.value.reduce((total, product) => {
     if (!isOutOfStock(product)) {
-      total += product.pricePerUnit * product.quantity * (1 - product.discountPercents / 100)
+      total += product.pricePerUnit * product.quantity * (1 - product.discountPercents / 100);
     }
-    return total
-  }, 0)
+    return total;
+  }, 0);
 
-  const totalWithDelivery = (productTotal + cart.value.totalPriceOfDelivery).toFixed(2)
-  buttonBuyFor.value = `Buy for ${totalWithDelivery} MDL`
-  return totalWithDelivery
-})
+  const totalWithDelivery = (productTotal + cart.value.totalPriceOfDelivery).toFixed(2);
+  buttonBuyFor.value = `Buy for ${totalWithDelivery} MDL`;
+  return totalWithDelivery;
+});
 
-  function restrictCardInput(event) {
-    const input = event.target.value;
+function restrictCardInput(event) {
+  const input = event.target.value;
 
-    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
-    if (allowedKeys.includes(event.key)) {
-      return;
-    }
-
-    if (input.length >= 16 && /^\d$/.test(event.key)) {
-      event.preventDefault();
-    }
-
-    if (!/^\d$/.test(event.key)) {
-      event.preventDefault();
-    }
+  const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+  if (allowedKeys.includes(event.key)) {
+    return;
   }
 
-
-  function restrictCVVInput(event) {
-    const input = event.target.value;
-
-    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
-    if (allowedKeys.includes(event.key)) {
-      return;
-    }
-
-    if ((input.length >= 4 || (input.length >= 3 && /^\d$/.test(event.key)))) {
-      event.preventDefault();
-    }
-
-    if (!/^\d$/.test(event.key)) {
-      event.preventDefault();
-    }
+  if (input.length >= 16 && /^\d$/.test(event.key)) {
+    event.preventDefault();
   }
+
+  if (!/^\d$/.test(event.key)) {
+    event.preventDefault();
+  }
+}
+
+function restrictCVVInput(event) {
+  const input = event.target.value;
+
+  const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+  if (allowedKeys.includes(event.key)) {
+    return;
+  }
+
+  if (input.length >= 4 || (input.length >= 3 && /^\d$/.test(event.key))) {
+    event.preventDefault();
+  }
+
+  if (!/^\d$/.test(event.key)) {
+    event.preventDefault();
+  }
+}
 
 function toastAdd(severity, summary, detail, life = 2000) {
   toast.add({
@@ -289,152 +312,155 @@ function toastAdd(severity, summary, detail, life = 2000) {
     summary: summary,
     detail: detail,
     life: life,
-  })
+  });
 }
 function isOutOfStock(product) {
-  return product.totalProductQuantity === 0
+  return product.totalProductQuantity === 0;
 }
 
 function displayDiscountedPrice(product) {
-  const { pricePerUnit, quantity, discountPercents } = product
-  const originalPrice = (pricePerUnit * quantity).toFixed(2)
+  const { pricePerUnit, quantity, discountPercents } = product;
+  const originalPrice = (pricePerUnit * quantity).toFixed(2);
 
   if (discountPercents > 0) {
     return `
       <span>
         <span style="text-decoration: line-through">${originalPrice} MDL</span>
-      </span>`
+      </span>`;
   }
-  return ``
+  return ``;
 }
 
 function getSeverity(product) {
-  const quantity = product.totalProductQuantity
+  const quantity = product.totalProductQuantity;
   if (quantity > 50) {
-    return 'INSTOCK'
+    return 'INSTOCK';
   } else if (quantity > 0 && quantity <= 50) {
-    return 'LOWSTOCK'
+    return 'LOWSTOCK';
   } else if (quantity === 0) {
-    return 'OUTOFSTOCK'
+    return 'OUTOFSTOCK';
   } else {
-    return null
+    return null;
   }
 }
 
 function iconClass(product) {
-  const severity = getSeverity(product)
+  const severity = getSeverity(product);
   switch (severity) {
     case 'INSTOCK':
-      return 'pi pi-check-circle'
+      return 'pi pi-check-circle';
     case 'LOWSTOCK':
-      return 'pi pi-exclamation-circle'
+      return 'pi pi-exclamation-circle';
     case 'OUTOFSTOCK':
-      return 'pi pi-times-circle'
+      return 'pi pi-times-circle';
     default:
-      return ''
+      return '';
   }
 }
 function severityClass(product) {
-  const severity = getSeverity(product)
+  const severity = getSeverity(product);
   switch (severity) {
     case 'INSTOCK':
-      return 'in-stock'
+      return 'in-stock';
     case 'LOWSTOCK':
-      return 'low-stock'
+      return 'low-stock';
     case 'OUTOFSTOCK':
-      return 'out-of-stock'
+      return 'out-of-stock';
     default:
-      return 'unknown'
+      return 'unknown';
   }
 }
 
 function getBase64Image(base64String, imageType = 'jpeg') {
-  return `data:image/${imageType};base64,${base64String}`
+  return `data:image/${imageType};base64,${base64String}`;
 }
 
 function loginValidation() {
   if (!isLoggedIn.value) {
-    window.location.href = '/login'
-    return
+    window.location.href = '/login';
+    return;
   }
 }
 
 // ON MOUNTED DELIVERY TYPES
 onMounted(async () => {
   try {
-    const deliveryResponse = await axiosInstance.get('/deliverytypes')
-    deliveryTypes.value = deliveryResponse.data
+    const deliveryResponse = await axiosInstance.get('/deliverytypes');
+    deliveryTypes.value = deliveryResponse.data;
 
     if (deliveryTypes.value.length > 0) {
       deliveryTypeValues.value = deliveryTypes.value.map((type) => ({
         name: type.type,
         value: type.type,
-      }))
+      }));
 
-      selectedDeliveryType.value = deliveryTypeValues.value[0]
-      await fetchCartItems(deliveryTypeValues.value[0].value)
+      selectedDeliveryType.value = deliveryTypeValues.value[0];
+      await fetchCartItems(deliveryTypeValues.value[0].value);
     }
   } catch (err) {
-    console.error('Failed to fetch Delivery Types or Cart Products', err)
+    console.error('Failed to fetch Delivery Types or Cart Products', err);
   }
-})
+});
 
 const fetchCartItems = async (deliveryType) => {
   try {
+    loading.value = true;
     const response = await axiosInstance.get('/cart', {
       params: { deliveryTypes: deliveryType },
-    })
+    });
 
-    cart.value = response.data
-    cartProducts.value = response.data.itemInCartDTOS || []
-    console.log('Cart Response:', cart.value)
+    cart.value = response.data;
+    cartProducts.value = response.data.itemInCartDTOS || [];
+    console.log('Cart Response:', cart.value);
   } catch (error) {
-    console.error('Failed to fetch Cart Products', error)
+    console.error('Failed to fetch Cart Products', error);
+  } finally {
+    loading.value = false;
   }
-}
+};
 
 const onDeliveryTypeChange = async () => {
   if (selectedDeliveryType.value) {
-    await fetchCartItems(selectedDeliveryType.value.name)
+    await fetchCartItems(selectedDeliveryType.value.name);
   }
-}
+};
 
 const updateCart = async (product) => {
   if (!product.id) {
-    console.error('Invalid product for updateCart')
-    return
+    console.error('Invalid product for updateCart');
+    return;
   }
   try {
     const response = await axiosInstance.put(`/cart/${product.id}`, {
       quantity: product.quantity,
-    })
-    console.log('Cart updated:', response.data)
+    });
+    console.log('Cart updated:', response.data);
   } catch (error) {
-    console.error('Error updating cart:', error)
+    console.error('Error updating cart:', error);
   }
-}
+};
 
 const removeItemFromCart = async (id) => {
   if (!id) {
-    alert('Invalid product')
-    return
+    alert('Invalid product');
+    return;
   }
-  loginValidation()
+  loginValidation();
   try {
-    const response = await axiosInstance.delete(`/cart/${id}`)
-    cartProducts.value = cartProducts.value.filter((p) => p.id !== id)
+    const response = await axiosInstance.delete(`/cart/${id}`);
+    cartProducts.value = cartProducts.value.filter((p) => p.id !== id);
   } catch (error) {
-    toastAdd('error', 'Removing Item Failed', 'Failed to remove item from cart. Please try again')
+    toastAdd('error', 'Removing Item Failed', 'Failed to remove item from cart. Please try again');
   }
-}
+};
 
 const addProductsToOrder = async () => {
   await v$.value.$validate();
-  const outOfStockProducts = cartProducts.value.filter((product) => isOutOfStock(product))
+  const outOfStockProducts = cartProducts.value.filter((product) => isOutOfStock(product));
 
   if (cartProducts.value.length === 0) {
-    toastAdd('error', 'Empty Cart', 'Your cart is empty. Add items before proceeding.')
-    return
+    toastAdd('error', 'Empty Cart', 'Your cart is empty. Add items before proceeding.');
+    return;
   }
 
   if (outOfStockProducts.length > 0) {
@@ -442,55 +468,59 @@ const addProductsToOrder = async () => {
       'error',
       'Order Creation Failed',
       'Remove the product(s) that are out of stock before proceeding.',
-    )
-    return
+    );
+    return;
   }
 
   if (v$.value.$error) {
-    toastAdd('error', 'Incomplete Information', 'Please fill in all the required payment details before proceeding.');
+    toastAdd(
+      'error',
+      'Incomplete Information',
+      'Please fill in all the required payment details before proceeding.',
+    );
     return;
   }
   v$.value.$reset();
 
-  let inputGroups = document.getElementsByClassName('input-group')
+  let inputGroups = document.getElementsByClassName('input-group');
   for (let inputGroup of inputGroups) {
-    let input = inputGroup.querySelector('.input')
+    let input = inputGroup.querySelector('.input');
     if (input && input.value) {
-      input.classList.remove('highlight-error')
+      input.classList.remove('highlight-error');
     }
   }
 
-  loginValidation()
+  loginValidation();
 
   try {
-    console.log(cart.value.totalPriceOfProducts)
+    console.log(cart.value.totalPriceOfProducts);
     const response = await axiosInstance.post(`/order`, {
       totalPriceOfProducts: cart.value.totalPriceOfProducts,
       totalPriceOfDelivery: cart.value.totalPriceOfDelivery,
       totalPrice: cart.value.totalPrice,
       deliveryTypeFarmer: cart.value.deliveryTypeFarmer,
-    })
-    cartProducts.value = []
-    buttonBuyFor.value = 'Buy for '
+    });
+    cartProducts.value = [];
+    buttonBuyFor.value = 'Buy for ';
     cart.value.totalPriceOfDelivery = 0;
 
-    payment.firstName = "";
-    payment.lastName = "";
-    payment.cardNumber = "";
-    payment.cvv = "";
-    payment.validUntil = "";
+    payment.firstName = '';
+    payment.lastName = '';
+    payment.cardNumber = '';
+    payment.cvv = '';
+    payment.validUntil = '';
 
-    toastAdd('success', 'Order Created', 'Your order has been successfully created!')
-    console.log('Order Response', response.data)
+    toastAdd('success', 'Order Created', 'Your order has been successfully created!');
+    console.log('Order Response', response.data);
   } catch (error) {
-    console.error('Order Creation Failed', error)
+    console.error('Order Creation Failed', error);
     toastAdd(
       'error',
       'Order Creation Failed',
       'An error occurred while creating your order. Please try again.',
-    )
+    );
   }
-}
+};
 </script>
 
 <style scoped>
@@ -499,7 +529,7 @@ const addProductsToOrder = async () => {
   padding: 0;
   box-sizing: border-box;
 }
- .error-message {
+.error-message {
   color: red;
   font-size: 0.9rem;
 }
