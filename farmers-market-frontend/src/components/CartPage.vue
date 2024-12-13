@@ -107,12 +107,14 @@
             <div class="payment-input-container">
               <InputGroup class="input-group">
                 <label for="text" class="font-bold block mb-2">First Name</label>
-                <InputText v-model="firstName" placeholder="John" />
+                <InputText v-model="payment.firstName" placeholder="John" />
+                <span v-if="v$.firstName.$error" class="error-message"> First name is required (1-50 characters).</span>
               </InputGroup>
 
               <InputGroup class="input-group">
                 <label for="text" class="font-bold block mb-2"> Last Name </label>
-                <InputText v-model="lastName" placeholder="Doe" />
+                <InputText v-model="payment.lastName" placeholder="Doe" />
+                <span v-if="v$.lastName.$error" class="error-message"> Last name is required (1-50 characters).</span>
               </InputGroup>
 
               <InputGroup class="input-group">
@@ -121,20 +123,24 @@
                   class="card-input"
                   inputId="withoutgrouping"
                   :useGrouping="false"
-                  v-model="cardNumber"
+                  v-model="payment.cardNumber"
                   placeholder="5574-6698-8877-7699"
-                  required
+                  require
+                   @keydown="restrictCardInput"
                 />
+                <span v-if="v$.cardNumber.$error" class="error-message">Card number is required (16 digits).</span>
               </InputGroup>
 
               <InputGroup class="input-group">
                 <label for="text" class="font-bold block mb-2"> CVV </label>
-                <InputNumber class="card-input" v-model="cvv" placeholder="***" required />
+                <InputNumber class="card-input" v-model="payment.cvv" placeholder="***" required @keydown="restrictCVVInput"/>
+                <span v-if="v$.cvv.$error" class="error-message">CVV is required (3 digits).</span>
               </InputGroup>
 
               <InputGroup class="input-group">
                 <label for="text" class="font-bold block mb-2"> Valid Until </label>
-                <DatePicker v-model="validUntil" placeholder="10/05" required />
+                <DatePicker v-model="payment.validUntil" placeholder="10/05" required />
+                <span v-if="v$.validUntil.$error" class="error-message">Valid Until is required.</span>
               </InputGroup>
             </div>
 
@@ -167,7 +173,7 @@
 <script setup>
 import Header from '@/components/Header.vue'
 import Footer from './Footer.vue'
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, reactive } from 'vue'
 import axiosInstance from '@/utils/axiosInstance'
 import DataView from 'primevue/dataview'
 import Button from 'primevue/button'
@@ -179,6 +185,8 @@ import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
 import Select from 'primevue/select'
 import DatePicker from 'primevue/datepicker'
+import { required, minLength, maxLength, numeric} from '@vuelidate/validators';
+import { useVuelidate } from '@vuelidate/core';
 
 const cart = ref([])
 const cartProducts = ref([])
@@ -188,11 +196,44 @@ let totalPrice = ref(0)
 let buttonBuyFor = ref('Buy for')
 const selectedDeliveryType = ref(null)
 const deliveryTypeValues = ref([])
-const firstName = ref('')
-const lastName = ref('')
-const cardNumber = ref(null)
-const cvv = ref(null)
-const validUntil = ref(null)
+
+const payment = reactive({
+      firstName: "",
+      lastName: "",
+      cardNumber: "",
+      cvv: "",
+      validUntil: "",
+    });
+
+  const rules = computed(() => ({
+    firstName: {
+    required,
+    minLength: minLength(1),
+    maxLength: maxLength(50),
+  },
+  lastName: {
+    required,
+    minLength: minLength(1),
+    maxLength: maxLength(50),
+  },
+  cardNumber: {
+    required,
+    numeric,
+    minLength: minLength(16), 
+    maxLength: maxLength(16),
+  },
+  cvv: {
+    required,
+    numeric,
+    minLength: minLength(3), 
+    maxLength: maxLength(3), 
+  },
+  validUntil: {
+    required
+  },
+}));
+
+const v$ = useVuelidate(rules, payment);
 
 const totalCartPrice = computed(() => {
   const productTotal = cartProducts.value.reduce((total, product) => {
@@ -206,6 +247,41 @@ const totalCartPrice = computed(() => {
   buttonBuyFor.value = `Buy for ${totalWithDelivery} MDL`
   return totalWithDelivery
 })
+
+  function restrictCardInput(event) {
+    const input = event.target.value;
+
+    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+    if (allowedKeys.includes(event.key)) {
+      return;
+    }
+
+    if (input.length >= 16 && /^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
+
+    if (!/^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  
+  function restrictCVVInput(event) {
+    const input = event.target.value;
+
+    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+    if (allowedKeys.includes(event.key)) {
+      return;
+    }
+
+    if ((input.length >= 4 || (input.length >= 3 && /^\d$/.test(event.key)))) {
+      event.preventDefault();
+    }
+
+    if (!/^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
 
 function toastAdd(severity, summary, detail, life = 2000) {
   toast.add({
@@ -353,6 +429,7 @@ const removeItemFromCart = async (id) => {
 }
 
 const addProductsToOrder = async () => {
+  await v$.value.$validate();
   const outOfStockProducts = cartProducts.value.filter((product) => isOutOfStock(product))
 
   if (cartProducts.value.length === 0) {
@@ -369,21 +446,11 @@ const addProductsToOrder = async () => {
     return
   }
 
-  if (!cardNumber.value || !cvv.value || !validUntil.value) {
-    toastAdd(
-      'error',
-      'Incomplete Information',
-      'Please fill in all the required payment details before proceeding.',
-    )
-    let inputGroups = document.getElementsByClassName('input-group')
-    for (let inputGroup of inputGroups) {
-      let input = inputGroup.querySelector('.input')
-      if (input && (input.value === '' || input.value == null)) {
-        input.classList.add('highlight-error')
-      }
-    }
-    return
+  if (v$.value.$error) {
+    toastAdd('error', 'Incomplete Information', 'Please fill in all the required payment details before proceeding.');
+    return; 
   }
+  v$.value.$reset();
 
   let inputGroups = document.getElementsByClassName('input-group')
   for (let inputGroup of inputGroups) {
@@ -407,6 +474,12 @@ const addProductsToOrder = async () => {
     buttonBuyFor.value = 'Buy for '
     cart.value.totalPriceOfDelivery = 0;
 
+    payment.firstName = "";
+    payment.lastName = "";
+    payment.cardNumber = "";
+    payment.cvv = "";
+    payment.validUntil = "";
+
     toastAdd('success', 'Order Created', 'Your order has been successfully created!')
     console.log('Order Response', response.data)
   } catch (error) {
@@ -425,6 +498,10 @@ const addProductsToOrder = async () => {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+ .error-message {
+  color: red;
+  font-size: 0.9rem;
 }
 .order {
   display: flex;
