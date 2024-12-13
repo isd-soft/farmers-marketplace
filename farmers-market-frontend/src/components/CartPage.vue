@@ -219,14 +219,14 @@ const payment = reactive({
   cardNumber: {
     required,
     numeric,
-    minLength: minLength(16), 
+    minLength: minLength(16),
     maxLength: maxLength(16),
   },
   cvv: {
     required,
     numeric,
-    minLength: minLength(3), 
-    maxLength: maxLength(3), 
+    minLength: minLength(3),
+    maxLength: maxLength(3),
   },
   validUntil: {
     required
@@ -265,7 +265,7 @@ const totalCartPrice = computed(() => {
     }
   }
 
-  
+
   function restrictCVVInput(event) {
     const input = event.target.value;
 
@@ -448,7 +448,7 @@ const addProductsToOrder = async () => {
 
   if (v$.value.$error) {
     toastAdd('error', 'Incomplete Information', 'Please fill in all the required payment details before proceeding.');
-    return; 
+    return;
   }
   v$.value.$reset();
 
@@ -537,6 +537,7 @@ const addProductsToOrder = async () => {
   flex-grow: 1;
 }
 .cart-pay-container {
+  max-width: fit-content;
   display: flex;
   flex-direction: column;
   gap: 2.5vh;

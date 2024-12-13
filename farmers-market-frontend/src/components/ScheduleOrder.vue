@@ -78,7 +78,59 @@
       </div>
         <div class="product-container-schedule" style="min-width: 120px;">
           <div class="day-time-container">
-          <p>Choose day and time for scheduled order.</p>
+            <h3 class="payment-details-text">Payment Details</h3>
+            <div class="time-container">
+            <div class="input-error">
+            <FloatLabel variant="on" class="schedule-input-labels">
+                <InputText class="schedule-input" id="first-name" v-model="payment.firstName" />
+              <label for="first-name">First name</label>
+            </FloatLabel>
+              <span v-if="vv$.firstName.$error" class="error-message"> First name is required (1-50 characters).</span>
+            </div>
+
+            <div class="input-error">
+            <FloatLabel variant="on" class="schedule-input-labels">
+                <InputText class="schedule-input" id="last-name" v-model="payment.lastName" />
+              <label for="last-name">Last name</label>
+            </FloatLabel>
+              <span v-if="vv$.lastName.$error" class="error-message"> Last name is required (1-50 characters).</span>
+            </div>
+            </div>
+            <div class="time-container">
+            <div class="input-error">
+            <FloatLabel variant="on" class="schedule-input-labels">
+                <InputNumber
+                  id="card number"
+                  class="schedule-input"
+                  inputId="withoutgrouping"
+                  :useGrouping="false"
+                  v-model="payment.cardNumber"
+                  require
+                  @keydown="restrictCardInput"
+                />
+              <label for="card number">Card number</label>
+            </FloatLabel>
+              <span v-if="vv$.cardNumber.$error" class="error-message">Card number is required (16 digits).</span>
+            </div>
+
+            <div class="input-error">
+            <FloatLabel variant="on" class="schedule-input-labels">
+                <InputNumber class="schedule-input" id="cvv"  v-model="payment.cvv" required @keydown="restrictCVVInput"/>
+              <label for="cvv">Cvv</label>
+            </FloatLabel>
+              <span v-if="vv$.cvv.$error" class="error-message">CVV is required (3 digits).</span>
+            </div>
+            </div>
+
+            <div class="input-error">
+            <FloatLabel variant="on" class="schedule-input-labels">
+                <DatePicker class="schedule-input" id="valid-util" v-model="payment.validUntil" required />
+              <label for="valid-util">Valid until</label>
+            </FloatLabel>
+                <span v-if="vv$.validUntil.$error" class="error-message">Valid Until is required.</span>
+            </div>
+
+          <p class="payment-details-text">Choose day and time for scheduled order.</p>
               <FloatLabel variant="on" class="schedule-input-labels">
               <Select
                 class="schedule-input"
@@ -150,7 +202,7 @@
 <script>
 import {computed, onMounted, reactive, ref} from "vue";
 import useVuelidate from "@vuelidate/core";
-import {required, minValue, maxValue, minLength, maxLength} from "@vuelidate/validators"
+import {required, minValue, maxValue, minLength, maxLength, numeric} from "@vuelidate/validators"
 import { useRouter } from "vue-router";
 import Select from "primevue/select";
 import InputNumber from "primevue/inputnumber";
@@ -161,10 +213,11 @@ import Footer from "../components/Footer.vue";
 import Checkbox from "primevue/checkbox";
 import axiosInstance from "@/utils/axiosInstance.js";
 import 'primeicons/primeicons.css'
+import DatePicker from "primevue/datepicker";
 
 export default {
   name: "Planner",
-  components: {Checkbox, FloatLabel, Select, InputNumber, Button, Header, Footer },
+  components: {DatePicker, Checkbox, FloatLabel, Select, InputNumber, Button, Header, Footer },
   props: ['id'],
   setup(props) {
     const order = reactive({
@@ -217,6 +270,76 @@ export default {
       });
       deliveryPrice.value = resp.data;
     });
+    const payment = reactive({
+      firstName: "",
+      lastName: "",
+      cardNumber: null,
+      cvv: null,
+      validUntil: null,
+    });
+
+    const ruless = computed(() => ({
+      firstName: {
+        required,
+        minLength: minLength(1),
+        maxLength: maxLength(50),
+      },
+      lastName: {
+        required,
+        minLength: minLength(1),
+        maxLength: maxLength(50),
+      },
+      cardNumber: {
+        required,
+        numeric,
+        minLength: minLength(16),
+        maxLength: maxLength(16),
+      },
+      cvv: {
+        required,
+        numeric,
+        minLength: minLength(3),
+        maxLength: maxLength(3),
+      },
+      validUntil: {
+        required
+      },
+    }));
+    function restrictCardInput(event) {
+      const input = event.target.value;
+
+      const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+      if (allowedKeys.includes(event.key)) {
+        return;
+      }
+
+      if (input.length >= 16 && /^\d$/.test(event.key)) {
+        event.preventDefault();
+      }
+
+      if (!/^\d$/.test(event.key)) {
+        event.preventDefault();
+      }
+    }
+
+
+    function restrictCVVInput(event) {
+      const input = event.target.value;
+
+      const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+      if (allowedKeys.includes(event.key)) {
+        return;
+      }
+
+      if ((input.length >= 4 || (input.length >= 3 && /^\d$/.test(event.key)))) {
+        event.preventDefault();
+      }
+
+      if (!/^\d$/.test(event.key)) {
+        event.preventDefault();
+      }
+    }
+    const vv$ = useVuelidate(ruless, payment);
     const totalPrice = computed(() => {
       return (Number(totalItemsPrice.value) + Number(deliveryPrice.value)).toFixed(2);
     });
@@ -258,6 +381,7 @@ export default {
     const saveSchedule = async (event) => {
       event.preventDefault();
       await v$.value.$validate();
+      await vv$.value.$validate();
       if (!v$.value.$error) {
 
         try {
@@ -314,6 +438,11 @@ export default {
       totalPrice,
       totalDeliveryPrice,
       deliveryPrice,
+      vv$,
+      ruless,
+      restrictCardInput,
+      restrictCVVInput,
+      payment,
     };
 },
   methods: {
@@ -468,6 +597,23 @@ body{
   flex-direction: column;
   flex-grow: 1 !important;
   gap: 5px;
+}
+.payment-input-container {
+  display: flex;
+  flex-direction: column;
+  column-gap: 1vw;
+  row-gap: 2vh;
+}
+.payment-details-text {
+  font-weight: 500;
+}
+.input-group {
+  width: 72vw;
+  margin: 0 auto;
+}
+.error-message {
+  color: red;
+  font-size: 0.9rem;
 }
 .footer{
   text-align: center;
