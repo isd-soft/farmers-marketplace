@@ -132,8 +132,14 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(id, Product.class));
         product.setVisible(visible);
-        itemInCartRepository.deleteAllByProduct(product);
-        plannedOrderRepository.deleteAllByProduct(product);
+        if(!visible) {
+            itemInCartRepository.deleteAllByProduct(product);
+            plannedOrderRepository.deleteAllByProduct(product);
+            for (User user : new HashSet<>(product.getInWishlists())) {
+                user.getWishlist().remove(product);
+                product.getInWishlists().remove(user);
+            }
+        }
         productRepository.save(product);
         return productMapper.map(product);
     }
@@ -149,6 +155,10 @@ public class ProductServiceImpl implements ProductService {
         }
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(id, Product.class));
+        for (User user : new HashSet<>(product.getInWishlists())) {
+            user.getWishlist().remove(product);
+            product.getInWishlists().remove(user);
+        }
 
         itemInCartRepository.deleteAllByProduct(product);
         plannedOrderRepository.deleteAllByProduct(product);
