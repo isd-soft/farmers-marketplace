@@ -66,7 +66,7 @@
               :disabled="selectedFiles.length >= 5"
             />
             <span class="p-button" v-if="selectedFiles.length < 5">Upload Images (max 5)</span>
-            <span class="p-button" style="opacity: 60%">Maximum images reached</span>
+            <span class="p-button" v-if="selectedFiles.length >= 5" style="opacity: 60%">Maximum images reached</span>
           </label>
 
           <div class="image-preview-container">
