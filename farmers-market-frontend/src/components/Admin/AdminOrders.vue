@@ -4,17 +4,6 @@
     <div class="admin-content">
       <AdminMenu></AdminMenu>
       <Toolbar class="mb-6">
-        <template #start>
-          <Button
-            class="toolbar-buttons"
-            label="Delete"
-            icon="pi pi-trash"
-            severity="danger"
-            outlined
-            @click="confirmDeleteSelected"
-            :disabled="!selectedProducts || !selectedProducts.length"
-          />
-        </template>
         <template #center>
           <IconField>
             <InputIcon>
@@ -44,7 +33,6 @@
         :loading="loading"
         dataKey="id"
         v-model:expandedRows="expandedRows"
-        v-model:selection="selectedProducts"
         v-model:editingRows="editingRows"
         v-model:filters="filters"
         :globalFilterFields="['id', 'title', 'description']"
@@ -57,7 +45,6 @@
           Loading orders' data. Please wait.
         </template>
         <Column expander style="width: 5rem" />
-        <Column selectionMode="multiple" style="width: 3rem"></Column>
         <Column field="id" header="ID" sortable></Column>
         <Column header="Customer">
           <template #body="slotProps">
@@ -116,21 +103,6 @@
         </template>
       </DataTable>
     </div>
-    <Dialog
-      v-model:visible="deleteProductsDialog"
-      :style="{ width: '450px' }"
-      header="Confirm"
-      :modal="true"
-    >
-      <div class="flex items-center gap-4">
-        <i class="pi pi-exclamation-triangle !text-3xl" />
-        <span v-if="product">Are you sure you want to delete the selected orders?</span>
-      </div>
-      <template #footer>
-        <Button label="No" icon="pi pi-times" text @click="deleteProductsDialog = false" />
-        <Button label="Yes" icon="pi pi-check" text @click="deleteSelectedProducts" />
-      </template>
-    </Dialog>
     <Footer class="footer"></Footer>
   </div>
 </template>
@@ -169,9 +141,6 @@ export default {
     const product = ref({});
 
     const orders = ref([]);
-
-    const selectedProducts = ref();
-    const deleteProductsDialog = ref(false);
 
     const expandedRows = ref({});
 
@@ -226,26 +195,6 @@ export default {
       }
     };
 
-    const confirmDeleteSelected = () => {
-      deleteProductsDialog.value = true;
-    };
-
-    const deleteSelectedProducts = async () => {
-      try {
-        await Promise.all(
-          selectedProducts.value.map((product) =>
-            axiosInstance.put(`/product/visible/${product.id}`, { visible: false }),
-          ),
-        );
-
-        orders.value = orders.value.filter((val) => !selectedProducts.value.includes(val));
-        deleteProductsDialog.value = false;
-        selectedProducts.value = null;
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
     fetchOrders();
 
     return {
@@ -254,13 +203,9 @@ export default {
       editingRows,
       expandedRows,
       product,
-      deleteProductsDialog,
       fetchOrders,
-      confirmDeleteSelected,
-      deleteSelectedProducts,
       orders,
       loading,
-      selectedProducts,
       filters,
       refreshOrders,
       goToProductPage,

@@ -26,34 +26,42 @@
         </FloatLabel>
       </div>
 
-      <div class="farmers-list">
-        <div v-if="farmers.length > 0">
-        <div
-          v-for="farmer in farmers"
-          :key="farmer.id"
-          class="farmer-card"
+      <div
+        v-if="loading"
+        style="display: flex; justify-content: center; align-items: center; height: 100vh"
+      >
         >
-          <Card>
-            <template #content>
-              <router-link :to="`/id${farmer.id}`" class="profile-link">
-                <div class="farmer-profile">
-                  <img :src="farmerPFP" alt="Profile Picture" class="farmer-avatar" />
-                  <div class="farmer-details">
-                    <p ><b class="name">{{ farmer.firstName }} {{ farmer.lastName }}</b> </p>
-                    <Rating
-                      v-model="farmer.rating"
-                      readonly
-                      :stars="5"
-                      class="rating"/>
+        <ProgressSpinner
+          style="width: 12rem; height: 12rem"
+          strokeWidth="0.2rem"
+          animationDuration="0.8s"
+        />
+      </div>
+
+      <div v-else class="farmers-list">
+        <div v-if="farmers.length > 0">
+          <div v-for="farmer in farmers" :key="farmer.id" class="farmer-card">
+            <Card>
+              <template #content>
+                <router-link :to="`/id${farmer.id}`" class="profile-link">
+                  <div class="farmer-profile">
+                    <img :src="farmerPFP" alt="Profile Picture" class="farmer-avatar" />
+                    <div class="farmer-details">
+                      <p>
+                        <b class="name">{{ farmer.firstName }} {{ farmer.lastName }}</b>
+                      </p>
+                      <Rating v-model="farmer.rating" readonly :stars="5" class="rating" />
+                    </div>
                   </div>
-                </div>
-              </router-link>
-            </template>
-          </Card>
-        </div>
+                </router-link>
+              </template>
+            </Card>
+          </div>
         </div>
         <div v-else>
-          <h1 style="text-align: center; margin-top: 50px; margin-bottom: 50px">No farmers found for your search.</h1>
+          <h1 style="text-align: center; margin-top: 50px; margin-bottom: 50px">
+            No farmers found for your search.
+          </h1>
         </div>
       </div>
 
@@ -70,19 +78,20 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from "vue";
-import axiosInstance from "@/utils/axiosInstance.js";
-import Header from "@/components/Header.vue";
-import Footer from "@/components/Footer.vue";
-import Select from "primevue/select";
-import Paginator from "primevue/paginator";
-import { useRouter } from "vue-router";
+import { ref, onMounted, watch } from 'vue';
+import axiosInstance from '@/utils/axiosInstance.js';
+import Header from '@/components/Header.vue';
+import Footer from '@/components/Footer.vue';
+import Select from 'primevue/select';
+import Paginator from 'primevue/paginator';
+import { useRouter } from 'vue-router';
 import farmerPFP from '@/assets/farmer.png';
-import Card from 'primevue/card'
-import Rating from 'primevue/rating'
+import Card from 'primevue/card';
+import Rating from 'primevue/rating';
+import ProgressSpinner from 'primevue/progressspinner';
 
 export default {
-  name: "SearchFarmers",
+  name: 'SearchFarmers',
   components: {
     Rating,
     Header,
@@ -90,48 +99,52 @@ export default {
     Select,
     Card,
     Paginator,
+    ProgressSpinner,
   },
 
   setup() {
     const farmers = ref([]);
-    const searchQ = ref("");
+    const loading = ref(true);
+    const searchQ = ref('');
     const currentPage = ref(0);
     const pageSize = ref(6);
     const totalRecords = ref(0);
     const sortOptions = ref([
-      { label: "Sort by", value: null },
-      { label: "Rating", value: "rating_desc" },
-      { label: "Name", value: "name_asc" },
-      { label: "Registration Date", value: "register_date" },
-
+      { label: 'Sort by', value: null },
+      { label: 'Rating', value: 'rating_desc' },
+      { label: 'Name', value: 'name_asc' },
+      { label: 'Registration Date', value: 'register_date' },
     ]);
     const sortBy = ref();
     const router = useRouter();
 
     const fetchFarmers = async () => {
-      let sort = "";
-      let dir = "";
+      loading.value = true;
+      let sort = '';
+      let dir = '';
       switch (sortBy.value) {
-        case "rating_desc":
-          sort = "rating";
-          dir = "DESC";
+        case 'rating_desc':
+          sort = 'rating';
+          dir = 'DESC';
           break;
-        case "name_asc":
-          sort = "firstName";
-          dir = "ASC";
+        case 'name_asc':
+          sort = 'firstName';
+          dir = 'ASC';
           break;
-        case "register_date":
-          sort = "createdDate";
-          dir = "DESC";
+        case 'register_date':
+          sort = 'createdDate';
+          dir = 'DESC';
           break;
-        }
+      }
       try {
         const url = `/users?search=${searchQ.value}&page=${currentPage.value}&size=${pageSize.value}&sort=${sort},${dir}&roleParams=FARMERS`;
         const response = await axiosInstance.get(url);
         farmers.value = response.data.content;
         totalRecords.value = response.data.totalElements;
       } catch (error) {
-        console.error("Error fetching farmers:", error);
+        console.error('Error fetching farmers:', error);
+      } finally {
+        loading.value = false;
       }
     };
 
@@ -147,6 +160,7 @@ export default {
     watch(searchQ, () => fetchFarmers());
 
     return {
+      loading,
       farmers,
       fetchFarmers,
       searchQ,
@@ -156,7 +170,7 @@ export default {
       currentPage,
       sortOptions,
       sortBy,
-      farmerPFP
+      farmerPFP,
     };
   },
 };
@@ -168,10 +182,10 @@ export default {
   padding: 0;
   box-sizing: border-box;
 }
-body{
+body {
   display: block !important;
 }
-.farmers-search-page{
+.farmers-search-page {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -186,28 +200,28 @@ body{
   min-height: 80vh;
 }
 @media (max-width: 380px) {
-  .main-container-farmers{
+  .main-container-farmers {
     width: 90%;
   }
   .farmer-avatar {
-    width: 50px!important;
+    width: 50px !important;
     height: auto;
   }
-  .name{
-    font-size: 1.0rem!important;
+  .name {
+    font-size: 1rem !important;
   }
 }
-.search-farmers-input{
+.search-farmers-input {
   flex-grow: 1 !important;
 }
-.search-farmers-input-inner{
+.search-farmers-input-inner {
   min-width: 12em;
   max-width: none;
   width: 100%;
   height: 2.5em;
 }
 .search-filters {
-  width:100%;
+  width: 100%;
   padding-bottom: 2em;
   display: flex;
   flex-direction: row;
@@ -216,7 +230,7 @@ body{
   column-gap: 2em;
   align-content: space-between;
 }
-.name{
+.name {
   font-size: 1.2rem;
 }
 .farmers-list {
