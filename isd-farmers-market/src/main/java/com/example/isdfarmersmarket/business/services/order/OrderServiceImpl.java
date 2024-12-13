@@ -75,7 +75,9 @@ public class OrderServiceImpl implements OrderService {
 
             orderRepository.save(order);
 
-            items.forEach(item -> item.setOrder(order));
+            items.forEach(item -> item.getProduct().setQuantity(item.getProduct().getQuantity() - item.getQuantity()));
+
+                items.forEach(item -> item.setOrder(order));
             itemInOrderRepository.saveAll(items);
 
             OrderPlacedEvent event = new OrderPlacedEvent(this, order, items);
