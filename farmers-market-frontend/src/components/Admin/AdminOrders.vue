@@ -18,6 +18,13 @@
         </template>
         <template #end>
           <Button
+            icon="pi pi-external-link"
+            label="Export"
+            text
+            severity="secondary"
+            @click="exportCSV($event)"
+          />
+          <Button
             class="refresh-button"
             icon="pi pi-refresh"
             text
@@ -27,6 +34,7 @@
         </template>
       </Toolbar>
       <DataTable
+        ref="dt"
         editMode="row"
         :value="orders"
         removableSort
@@ -35,7 +43,7 @@
         v-model:expandedRows="expandedRows"
         v-model:editingRows="editingRows"
         v-model:filters="filters"
-        :globalFilterFields="['id', 'title', 'description']"
+        :globalFilterFields="['id', 'title', 'description', 'customer.email']"
         tableStyle="min-width: 60rem"
         @row-edit-save="onRowEditSave"
       >
@@ -46,7 +54,7 @@
         </template>
         <Column expander style="width: 5rem" />
         <Column field="id" header="ID" sortable></Column>
-        <Column header="Customer">
+        <Column field="customer.email" header="Customer">
           <template #body="slotProps">
             <Button
               variant="text"
@@ -134,17 +142,81 @@ import { useRouter } from 'vue-router';
 export default {
   name: 'AdminProducts',
   setup() {
+    const dt = ref();
     const router = useRouter();
-
     const loading = ref(true);
-
     const product = ref({});
-
     const orders = ref([]);
-
     const expandedRows = ref({});
-
     const editingRows = ref([]);
+    const exportCSV = () => {
+      const flattenedData = [];
+
+      orders.value.forEach((order) => {
+        const parentRow = {
+          ID: order.id,
+          Customer: order.customer.email,
+          DeliveryType: order.deliveryTypeFarmer?.type,
+          TotalDeliveryPrice: order.totalDeliveryPrice,
+          TotalItemsPrice: order.totalItemsPrice,
+          TotalPrice: order.totalPrice,
+          OrderStatus: order.orderStatus,
+        };
+        flattenedData.push(parentRow);
+
+        if (order.itemsInOrder && order.itemsInOrder.length > 0) {
+          order.itemsInOrder.forEach((item) => {
+            const nestedRow = {
+              ID: '',
+              Customer: '',
+              DeliveryType: '',
+              TotalDeliveryPrice: '',
+              TotalItemsPrice: '',
+              TotalPrice: '',
+              OrderStatus: '',
+              ProductID: item.productId,
+              ProductTitle: item.productTitle,
+              Rating: item.rating,
+              PricePerUnit: item.pricePerUnit,
+              Quantity: item.quantity,
+              Total: (item.quantity * item.pricePerUnit).toFixed(2),
+            };
+            flattenedData.push(nestedRow);
+          });
+        }
+      });
+
+      const csvHeaders = [
+        'ID',
+        'Customer',
+        'DeliveryType',
+        'TotalDeliveryPrice',
+        'TotalItemsPrice',
+        'TotalPrice',
+        'OrderStatus',
+        'ProductID',
+        'ProductTitle',
+        'Rating',
+        'PricePerUnit',
+        'Quantity',
+        'Total',
+      ];
+
+      const csvRows = [
+        csvHeaders.join(','),
+        ...flattenedData.map((row) => Object.values(row).join(',')),
+      ];
+
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'exported-orders.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
 
     const filters = ref({
       global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -198,6 +270,8 @@ export default {
     fetchOrders();
 
     return {
+      dt,
+      exportCSV,
       goToUserPage,
       onRowEditSave,
       editingRows,

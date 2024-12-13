@@ -564,6 +564,7 @@ const addProductsToOrder = async () => {
   box-shadow: 0 1px 10px rgba(51, 65, 85, 0.3);
 }
 .orders-container {
+  flex: 1;
   flex-grow: 1;
 }
 .cart-pay-container {
@@ -779,6 +780,7 @@ const addProductsToOrder = async () => {
   .orders-container {
     width: 100%;
     padding: 7vw;
+    max-width: fit-content;
   }
   .order-container {
     width: 100%;
