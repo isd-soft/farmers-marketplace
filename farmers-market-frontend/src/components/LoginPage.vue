@@ -1,6 +1,5 @@
 <template>
   <div class="login-container">
-
     <Tabs v-model:value="activeTab">
       <TabList>
         <Tab value="0">Login</Tab>
@@ -9,24 +8,32 @@
       <TabPanels>
         <TabPanel value="0">
           <!-- Login Form -->
-          <form>
+          <form @keydown.enter="handleEnterKey">
             <div class="form-item">
               <FloatLabel variant="on">
                 <InputText id="email" v-model="data.email" :class="['input-style']" required />
                 <label for="email">Email</label>
               </FloatLabel>
-              <span v-if="v$.email.$error" class="error-message">Email is required and must be in a valid email
-                format</span>
+              <span v-if="v$.email.$error" class="error-message"
+                >Email is required and must be in a valid email format</span
+              >
             </div>
 
             <div class="form-item">
               <FloatLabel variant="on">
-                <Password id="password" v-model="data.password" :feedback="false" :class="['input-style']"
-                  :inputStyle="{ 'width': '100%' }" required />
+                <Password
+                  id="password"
+                  v-model="data.password"
+                  :feedback="false"
+                  :class="['input-style']"
+                  :inputStyle="{ width: '100%' }"
+                  required
+                />
                 <label for="password">Password</label>
               </FloatLabel>
-              <span v-if="v$.password.$error" class="error-message">Password is required and must be at least 8
-                characters long.</span>
+              <span v-if="v$.password.$error" class="error-message"
+                >Password is required and must be at least 8 characters long.</span
+              >
               <span v-if="loginError" class="error-message">{{ loginError }}</span>
             </div>
 
@@ -35,65 +42,109 @@
         </TabPanel>
         <TabPanel value="1">
           <!-- Register Form -->
-          <form>
-            <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-              <SelectButton v-model="data.roleType" :options="roleOptions" optionLabel="label" optionValue="roleType" />
+          <form @keydown.enter="handleEnterKey">
+            <div style="display: flex; justify-content: center; align-items: center; height: 100%">
+              <SelectButton
+                v-model="data.roleType"
+                :options="roleOptions"
+                optionLabel="label"
+                optionValue="roleType"
+              />
             </div>
 
             <div class="form-item">
               <FloatLabel variant="on">
-                <InputText id="register-email" v-model="data.email" :class="['input-style']" required />
+                <InputText
+                  id="register-email"
+                  v-model="data.email"
+                  :class="['input-style']"
+                  required
+                />
                 <label for="register-email">Email</label>
               </FloatLabel>
-              <span v-if="v$.email.$error" class="error-message">Email is required and must be in a valid email
-                format</span>
+              <span v-if="v$.email.$error" class="error-message"
+                >Email is required and must be in a valid email format</span
+              >
               <span v-if="registerError" class="error-message">{{ registerError }}</span>
             </div>
 
             <div class="form-item">
               <FloatLabel variant="on">
-                <Password id="register-password" v-model="data.password" :class="['input-style']"
-                  :inputStyle="{ 'width': '100%' }" :feedback="false" required />
+                <Password
+                  id="register-password"
+                  v-model="data.password"
+                  :class="['input-style']"
+                  :inputStyle="{ width: '100%' }"
+                  :feedback="false"
+                  required
+                />
                 <label for="register-password">Password</label>
               </FloatLabel>
-              <span v-if="v$.password.$error" class="error-message">Password is required and must be at least 8
-                characters long.</span>
+              <span v-if="v$.password.$error" class="error-message"
+                >Password is required and must be at least 8 characters long.</span
+              >
             </div>
 
             <div class="form-item">
               <FloatLabel variant="on">
-                <Password id="register-confirm-passwordv" v-model="data.confirmPassword" :class="['input-style']"
-                  :inputStyle="{ 'width': '100%' }" :feedback="false" required />
+                <Password
+                  id="register-confirm-passwordv"
+                  v-model="data.confirmPassword"
+                  :class="['input-style']"
+                  :inputStyle="{ width: '100%' }"
+                  :feedback="false"
+                  required
+                />
                 <label for="register-confirm-password">Confirm Password</label>
               </FloatLabel>
-              <span v-if="v$.confirmPassword.$error" class="error-message">Passwords do not match.</span>
+              <span v-if="v$.confirmPassword.$error" class="error-message"
+                >Passwords do not match.</span
+              >
             </div>
 
             <div class="form-item">
               <FloatLabel variant="on">
-                <InputText id="register-firstname" v-model="data.firstName" :class="'input-style'" required />
+                <InputText
+                  id="register-firstname"
+                  v-model="data.firstName"
+                  :class="'input-style'"
+                  required
+                />
                 <label for="register-firstname">First name</label>
               </FloatLabel>
-              <span v-if="v$.firstName.$error" class="error-message"> First name is required and must be between 1
-                and 50 characters</span>
+              <span v-if="v$.firstName.$error" class="error-message">
+                First name is required and must be between 1 and 50 characters</span
+              >
             </div>
 
             <div class="form-item">
               <FloatLabel variant="on">
-                <InputText id="register-lastname" v-model="data.lastName" :class="'input-style'" required />
+                <InputText
+                  id="register-lastname"
+                  v-model="data.lastName"
+                  :class="'input-style'"
+                  required
+                />
                 <label for="register-lastname">Last name</label>
               </FloatLabel>
-              <span v-if="v$.lastName.$error" class="error-message"> Last name is required and must be between 1 and
-                50 characters</span>
+              <span v-if="v$.lastName.$error" class="error-message">
+                Last name is required and must be between 1 and 50 characters</span
+              >
             </div>
 
             <div class="form-item">
               <FloatLabel variant="on">
-                <InputText id="register-phone" v-model="data.phoneNumber" :class="'input-style'" required />
+                <InputText
+                  id="register-phone"
+                  v-model="data.phoneNumber"
+                  :class="'input-style'"
+                  required
+                />
                 <label for="register-phone">Phone nr.</label>
               </FloatLabel>
-              <span v-if="v$.phoneNumber.$error" class="error-message"> Phone number is required and must contain at
-                least 10 digits</span>
+              <span v-if="v$.phoneNumber.$error" class="error-message">
+                Phone number is required and must contain at least 10 digits</span
+              >
             </div>
 
             <!-- Address field visible only if farmer is selected -->
@@ -102,20 +153,27 @@
                 <InputText id="register-address" v-model="data.address" :class="['input-style']" />
                 <label for="register-address">Address</label>
               </FloatLabel>
-              <span v-if="v$.address.$error" class="error-message">Address must be between 5 and 100
-                characters</span>
+              <span v-if="v$.address.$error" class="error-message"
+                >Address must be between 5 and 100 characters</span
+              >
             </div>
 
             <div class="form-item" v-if="data.roleType === 'FARMER'">
               <FloatLabel variant="on">
-                <InputText id="register-description" v-model="data.description" :class="['input-style']" />
+                <InputText
+                  id="register-description"
+                  v-model="data.description"
+                  :class="['input-style']"
+                />
                 <label for="register-description">Description</label>
               </FloatLabel>
-              <span v-if="v$.description.$error && data.roleType === 'FARMER'" class="error-message">
+              <span
+                v-if="v$.description.$error && data.roleType === 'FARMER'"
+                class="error-message"
+              >
                 Description is required for farmers.
               </span>
             </div>
-
             <ThemedButton @click="submitForm" class="login-btn" label="Register" />
           </form>
         </TabPanel>
@@ -123,20 +181,21 @@
     </Tabs>
 
     <ConfirmDialog group="templating">
-        <template #message="slotProps">
-            <div class="flex flex-col items-center w-full gap-4 border-b border-surface-200 dark:border-surface-700">
-                <i :class="slotProps.message.icon" class="!text-6xl text-primary-500" ></i>
-                <p>{{ slotProps.message.message }}</p>
-            </div>
-        </template>
+      <template #message="slotProps">
+        <div
+          class="flex flex-col items-center w-full gap-4 border-b border-surface-200 dark:border-surface-700"
+        >
+          <i :class="slotProps.message.icon" class="!text-6xl text-primary-500"></i>
+          <p>{{ slotProps.message.message }}</p>
+        </div>
+      </template>
     </ConfirmDialog>
-   
   </div>
 </template>
 <script>
-import { computed, reactive, ref } from "vue";
-import { minLength, required, email, numeric, maxLength, sameAs } from "@vuelidate/validators"
-import axiosInstance from "@/utils/axiosInstance";
+import { computed, reactive, ref } from 'vue';
+import { minLength, required, email, numeric, maxLength, sameAs } from '@vuelidate/validators';
+import axiosInstance from '@/utils/axiosInstance';
 // eslint-disable-next-line no-unused-vars
 import { isLoggedIn } from '@/shared/authState';
 
@@ -146,13 +205,13 @@ import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
-import useVuelidate from "@vuelidate/core";
-import { useRouter } from "vue-router";
+import useVuelidate from '@vuelidate/core';
+import { useRouter } from 'vue-router';
 import ConfirmDialog from 'primevue/confirmdialog';
-import { useConfirm } from "primevue/useconfirm";
+import { useConfirm } from 'primevue/useconfirm';
 
 export default {
-  name: "LoginPage",
+  name: 'LoginPage',
   components: {
     Tabs,
     Tab,
@@ -161,7 +220,6 @@ export default {
     TabPanels,
     Password,
     ConfirmDialog,
-   
   },
   data() {
     return {
@@ -171,156 +229,164 @@ export default {
   },
   methods: {
     async submitForm() {
-      if (this.activeTab === "0") {
+      if (this.activeTab === '0') {
         this.loginError = null;
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         await this.v$.email.$validate();
         await this.v$.password.$validate();
         if (!this.v$.email.$error && !this.v$.password.$error) {
           try {
-            const response = await axiosInstance.post("/auth/login", {
+            const response = await axiosInstance.post('/auth/login', {
               email: this.data.email,
               password: this.data.password,
             });
             const { accessToken, refreshToken } = response.data;
-            localStorage.setItem("accessToken", accessToken);
-            localStorage.setItem("refreshToken", refreshToken);
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
             isLoggedIn.value = true;
             this.router.push('/');
           } catch (error) {
             if (error.response) {
               if (error.response.status === 403) {
-                if (error.response.data.detail === "ACCOUNT_NOT_ACTIVATED") {
-                  this.loginError = "Your account is not activated. Please check your email for the activation link.";
+                if (error.response.data.detail === 'ACCOUNT_NOT_ACTIVATED') {
+                  this.loginError =
+                    'Your account is not activated. Please check your email for the activation link.';
                 } else {
-                  this.loginError = "An error occurred, please try again later.";
+                  this.loginError = 'An error occurred, please try again later.';
                 }
               } else if (error.response.status === 401) {
-                this.loginError = "Incorrect Username and Password combination.";
+                this.loginError = 'Incorrect Username and Password combination.';
               } else {
-                this.loginError = "An error occurred, please try again later.";
+                this.loginError = 'An error occurred, please try again later.';
               }
             }
           }
         }
-        } else if (this.activeTab === "1") {
-          const isValid = await this.v$.$validate();
-          if (isValid) {
-            try {
-              const response = await axiosInstance.post("/auth/register", {
-                email: this.data.email,
-                password: this.data.password,
-                firstName: this.data.firstName,
-                lastName: this.data.lastName,
-                phoneNumber: this.data.phoneNumber,
-                address: this.data.roleType === "FARMER" ? this.data.address : null,
-                description: this.data.roleType === "FARMER" ? this.data.description : null,
-                roleType: this.data.roleType,
-              });
+      } else if (this.activeTab === '1') {
+        const isValid = await this.v$.$validate();
+        if (isValid) {
+          try {
+            const response = await axiosInstance.post('/auth/register', {
+              email: this.data.email,
+              password: this.data.password,
+              firstName: this.data.firstName,
+              lastName: this.data.lastName,
+              phoneNumber: this.data.phoneNumber,
+              address: this.data.roleType === 'FARMER' ? this.data.address : null,
+              description: this.data.roleType === 'FARMER' ? this.data.description : null,
+              roleType: this.data.roleType,
+            });
 
-              this.showRegistrationSuccess();
-            } catch (error) {
-              if (error.response && error.response.status === 409) {
-                this.registerError = "Email is already in use";
-              } else {
-                console.error("Registration error:", error.response?.data || error.message);
-              }
+            this.showRegistrationSuccess();
+          } catch (error) {
+            if (error.response && error.response.status === 409) {
+              this.registerError = 'Email is already in use';
+            } else {
+              console.error('Registration error:', error.response?.data || error.message);
             }
           }
-        };
-      },
+        }
+      }
     },
-    setup() {
-      const confirm = useConfirm();
-      const router = useRouter();
-      const roleOptions = [
-        { label: "Customer", roleType: "CUSTOMER" },
-        { label: "Farmer", roleType: "FARMER" },
-      ];
-      const defaultRole = "CUSTOMER";
-      const activeTab = ref("0");
-      
-      const showRegistrationSuccess = () => {
+    handleEnterKey() {
+      if (this.activeTab === '0') {
+        this.submitForm();
+      } else if (this.activeTab === '1') {
+        this.submitForm();
+      }
+    },
+  },
+  setup() {
+    const confirm = useConfirm();
+    const router = useRouter();
+    const roleOptions = [
+      { label: 'Customer', roleType: 'CUSTOMER' },
+      { label: 'Farmer', roleType: 'FARMER' },
+    ];
+    const defaultRole = 'CUSTOMER';
+    const activeTab = ref('0');
+
+    const showRegistrationSuccess = () => {
       confirm.require({
         group: 'templating',
         header: 'Registration Successful',
-        message: 'Your account has been created successfully. Please check your email to activate it.',
+        message:
+          'Your account has been created successfully. Please check your email to activate it.',
         acceptProps: {
-            label: 'Ok',
-            size: 'small'
-            
+          label: 'Ok',
+          size: 'small',
         },
         accept: () => {
-          activeTab.value = "0"; ;
+          activeTab.value = '0';
         },
-    });
-    };
-    
-      const data = reactive({
-        email: "",
-        password: "",
-        confirmPassword: "",
-        roleType: defaultRole,
-        firstName: "",
-        lastName: "",
-        phoneNumber: "",
-        address: "",
-        description: "",
       });
+    };
 
-      const rules = computed(() => ({
-        email: {
-          required,
-          email,
-        },
-        firstName: {
-          required,
-          minLength: minLength(1),
-          maxLength: maxLength(50),
-        },
-        lastName: {
-          required,
-          minLength: minLength(1),
-          maxLength: maxLength(50),
-        },
-        phoneNumber: {
-          required,
-          numeric,
-          minLength: minLength(10),
-        },
-        address: {
-          required: data.roleType === "FARMER" ? required : false,
-          minLength: minLength(5),
-          maxLength: maxLength(100),
-        },
-        description: {
-          required: data.roleType === "FARMER" ? required : false,
-          maxLength: maxLength(255),
-        },
-        password: {
-          required,
-          minLength: minLength(8),
-          maxLength: maxLength(50),
-        },
-        confirmPassword: {
-          required,
-          sameAs: sameAs(data.password)
-        },
-      }));
+    const data = reactive({
+      email: '',
+      password: '',
+      confirmPassword: '',
+      roleType: defaultRole,
+      firstName: '',
+      lastName: '',
+      phoneNumber: '',
+      address: '',
+      description: '',
+    });
 
-      const v$ = useVuelidate(rules, data);
-      return {
-        router,
-        activeTab,
-        defaultRole,
-        roleOptions,
-        data,
-        v$,
-        showRegistrationSuccess,
-      }
-    },
-  }
+    const rules = computed(() => ({
+      email: {
+        required,
+        email,
+      },
+      firstName: {
+        required,
+        minLength: minLength(1),
+        maxLength: maxLength(50),
+      },
+      lastName: {
+        required,
+        minLength: minLength(1),
+        maxLength: maxLength(50),
+      },
+      phoneNumber: {
+        required,
+        numeric,
+        minLength: minLength(10),
+      },
+      address: {
+        required: data.roleType === 'FARMER' ? required : false,
+        minLength: minLength(5),
+        maxLength: maxLength(100),
+      },
+      description: {
+        required: data.roleType === 'FARMER' ? required : false,
+        maxLength: maxLength(255),
+      },
+      password: {
+        required,
+        minLength: minLength(8),
+        maxLength: maxLength(50),
+      },
+      confirmPassword: {
+        required,
+        sameAs: sameAs(data.password),
+      },
+    }));
+
+    const v$ = useVuelidate(rules, data);
+    return {
+      router,
+      activeTab,
+      defaultRole,
+      roleOptions,
+      data,
+      v$,
+      showRegistrationSuccess,
+    };
+  },
+};
 </script>
 
 <style scoped>
