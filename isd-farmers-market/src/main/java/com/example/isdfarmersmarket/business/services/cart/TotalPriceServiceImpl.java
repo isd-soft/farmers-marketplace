@@ -24,7 +24,6 @@ public class TotalPriceServiceImpl implements TotalPriceService {
                 item.getProduct().setPricePerUnit(item.getProduct().getPricePerUnit()
                         .subtract(item.getProduct().getPricePerUnit()
                                 .multiply(BigDecimal.valueOf(item.getProduct().getDiscountPercents() / 100))));
-                item.getProduct().setQuantity(item.getProduct().getQuantity() - item.getQuantity());
             });
 
             for (var item : itemInCarts) {
